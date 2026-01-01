@@ -258,29 +258,7 @@ const Storage = {
         try {
             const stored = localStorage.getItem(this.STORAGE_KEY);
             if (stored) {
-                const parsed = JSON.parse(stored);
-                // Migrate old mediaBar settings to navbar settings
-                if (parsed.mediaBarOverlayColor && !parsed.navbarOverlayColor) {
-                    parsed.navbarOverlayColor = parsed.mediaBarOverlayColor;
-                    delete parsed.mediaBarOverlayColor;
-                }
-                if (parsed.mediaBarOverlayOpacity && !parsed.navbarOverlayOpacity) {
-                    parsed.navbarOverlayOpacity = parsed.mediaBarOverlayOpacity;
-                    delete parsed.mediaBarOverlayOpacity;
-                }
-                // Remove old mediaBar settings
-                delete parsed.mediaBarEnabled;
-                delete parsed.mediaBarContentType;
-                delete parsed.mediaBarItemCount;
-                delete parsed.mediaBarAutoAdvance;
-                delete parsed.mediaBarIntervalMs;
-                
-                // Save migrated settings
-                if (parsed.navbarOverlayColor || parsed.navbarOverlayOpacity) {
-                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(parsed));
-                }
-                
-                return { ...this.defaults, ...parsed };
+                return { ...this.defaults, ...JSON.parse(stored) };
             }
         } catch (e) {
             console.error('[Moonfin] Failed to read settings:', e);
