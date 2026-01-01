@@ -1295,10 +1295,21 @@ const MediaBar = {
         });
 
         window.addEventListener('viewshow', (e) => {
-            const path = window.location.pathname;
-            const shouldShow = path.includes('/home') || path === '/' || path.includes('/index');
-            this.container.classList.toggle('hidden', !shouldShow);
+            this.updateVisibility();
         });
+
+        window.addEventListener('hashchange', () => {
+            this.updateVisibility();
+        });
+    },
+
+    updateVisibility() {
+        if (!this.container) return;
+
+        const hash = window.location.hash || '';
+        const isHomePage = hash === '#/home.html' || hash === '#/home' || hash === '';
+        
+        this.container.style.display = isHomePage ? '' : 'none';
     },
 
     applySettings(settings) {
