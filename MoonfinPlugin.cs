@@ -4,7 +4,6 @@ using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using Moonfin.Server.Services;
 
 namespace Moonfin.Server;
 
@@ -26,13 +25,7 @@ public class MoonfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
-        
-        // Register with File Transformation plugin for auto-injection
-        Task.Run(async () =>
-        {
-            await Task.Delay(5000);
-            FileTransformationIntegration.Register();
-        });
+        // File Transformation registration is handled by MoonfinStartupService (IScheduledTask)
     }
 
     /// <inheritdoc />
