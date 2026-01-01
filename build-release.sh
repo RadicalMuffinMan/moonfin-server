@@ -18,9 +18,14 @@ dotnet build -c Release
 RELEASE_DIR="release"
 rm -rf "$RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
+mkdir -p "$RELEASE_DIR/Web"
 
 # Copy DLL to release folder
 cp "bin/Release/net8.0/Moonfin.Server.dll" "$RELEASE_DIR/"
+
+# Copy Web assets (JS and CSS)
+cp "Web/plugin.js" "$RELEASE_DIR/Web/"
+cp "Web/plugin.css" "$RELEASE_DIR/Web/"
 
 # Create the ZIP file
 ZIP_NAME="Moonfin.Server-${TARGET_ABI}.zip"
