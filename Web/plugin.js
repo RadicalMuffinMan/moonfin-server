@@ -553,8 +553,41 @@ const Navbar = {
 
         this.startClock();
 
+        this.updateVisibility();
+
         this.initialized = true;
         console.log('[Moonfin] Navbar initialized');
+    },
+
+    shouldShowNavbar() {
+        const path = window.location.hash || window.location.pathname;
+        const adminPages = [
+            '/dashboard',
+            '/configurationpage',
+            '/installedplugins',
+            '/availableplugins',
+            '/scheduledtasks',
+            '/devices',
+            '/serveractivity',
+            '/notificationsettings',
+            '/networking',
+            '/dlna',
+            '/livetv',
+            '/encodingsettings',
+            '/playback',
+            '/metadata'
+        ];
+        
+        const lowerPath = path.toLowerCase();
+        return !adminPages.some(page => lowerPath.includes(page));
+    },
+
+    updateVisibility() {
+        if (!this.container) return;
+        
+        const shouldShow = this.shouldShowNavbar();
+        this.container.style.display = shouldShow ? '' : 'none';
+        document.body.classList.toggle('moonfin-navbar-active', shouldShow);
     },
 
     waitForApi() {
@@ -583,13 +616,8 @@ const Navbar = {
         this.container.className = 'moonfin-navbar';
         this.container.innerHTML = `
             <div class="moonfin-navbar-content">
-                <!-- Left section: Logo and User -->
+                <!-- Left section: User -->
                 <div class="moonfin-navbar-left">
-                    <button class="moonfin-home-btn" data-action="home" title="Home">
-                        <svg viewBox="0 0 24 24" class="moonfin-logo-icon">
-                            <path fill="currentColor" d="M21.4 7.5c.8.8.8 2.1 0 2.9l-6.3 6.3-2.5-2.5-2.6 2.6c-.5.5-1.2.5-1.6 0l-.7-.7c-.4-.4-.4-1.1 0-1.5l2.6-2.6-1.8-1.8c-.4-.4-.4-1.1 0-1.5L14.8 3c.8-.8 2.1-.8 2.9 0L21.4 7.5M2 22l.1-3.8 5.9-5.9 2.5 2.5L4.6 20.7 2 22z"/>
-                        </svg>
-                    </button>
                     <button class="moonfin-user-btn" title="Switch User">
                         <div class="moonfin-user-avatar">
                             <svg viewBox="0 0 24 24" class="moonfin-user-icon">
@@ -714,6 +742,11 @@ const Navbar = {
 
         window.addEventListener('viewshow', () => {
             this.updateActiveState();
+            this.updateVisibility();
+        });
+
+        window.addEventListener('hashchange', () => {
+            this.updateVisibility();
         });
 
         window.addEventListener('moonfin-jellyseerr-config', (e) => {
@@ -745,13 +778,13 @@ const Navbar = {
                 await this.handleShuffle();
                 break;
             case 'genres':
-                API.navigateTo('/genres.html');
+                API.navigateTo('/list.html?genreIds=&serverId=' + API.getApiClient()?.serverId());
                 break;
             case 'favorites':
-                API.navigateTo('/favorites.html');
+                API.navigateTo('/list.html?isFavorite=true&serverId=' + API.getApiClient()?.serverId());
                 break;
             case 'settings':
-                API.navigateTo('/dashboard');
+                API.navigateTo('/mypreferencesmenu.html');
                 break;
             case 'jellyseerr':
                 Jellyseerr.toggle();
@@ -760,7 +793,7 @@ const Navbar = {
             case 'library':
                 const libraryId = btn.dataset.libraryId;
                 if (libraryId) {
-                    API.navigateTo(`/list.html?parentId=${libraryId}`);
+                    API.navigateTo(`/list.html?parentId=${libraryId}&serverId=` + API.getApiClient()?.serverId());
                 }
                 break;
         }
@@ -1130,6 +1163,20 @@ const MediaBar = {
         }
     },
 
+    handleSwipe(startX, endX, startY, endY, minDistance) {
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+
+        // Only handle horizontal swipes (ignore vertical scrolling)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minDistance) {
+            if (diffX > 0) {
+                this.prevSlide();
+            } else {
+                this.nextSlide();
+            }
+        }
+    },
+
     togglePause() {
         this.isPaused = !this.isPaused;
         this.container.classList.toggle('paused', this.isPaused);
@@ -1188,6 +1235,24 @@ const MediaBar = {
                 API.navigateToItem(item.Id);
             }
         });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const minSwipeDistance = 50;
+
+        this.container.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        this.container.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            this.handleSwipe(touchStartX, touchEndX, touchStartY, touchEndY, minSwipeDistance);
+        }, { passive: true });
 
         this.container.addEventListener('keydown', (e) => {
             switch (e.key) {

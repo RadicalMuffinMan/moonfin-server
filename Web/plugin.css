@@ -262,8 +262,7 @@ body.moonfin-navbar-active .skinHeader {
     }
 
     .moonfin-clock {
-        font-size: 14px;
-        padding: 6px 12px;
+        display: none !important;
     }
 
     /* Hide some buttons on mobile */
