@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -11,7 +12,7 @@ namespace Moonfin.Server;
 /// Moonfin Server Plugin for Jellyfin.
 /// Provides settings synchronization across Moonfin clients.
 /// </summary>
-public class MoonfinPlugin : BasePlugin<PluginConfiguration>
+public class MoonfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
     /// Gets the plugin instance.
@@ -27,7 +28,11 @@ public class MoonfinPlugin : BasePlugin<PluginConfiguration>
         Instance = this;
         
         // Register with File Transformation plugin for auto-injection
-        Task.Run(() => FileTransformationIntegration.Register());
+        Task.Run(async () =>
+        {
+            await Task.Delay(5000);
+            FileTransformationIntegration.Register();
+        });
     }
 
     /// <inheritdoc />
@@ -43,4 +48,17 @@ public class MoonfinPlugin : BasePlugin<PluginConfiguration>
     /// Gets the data folder path for storing user settings.
     /// </summary>
     public new string DataFolderPath => Path.Combine(ApplicationPaths.PluginConfigurationsPath, "Moonfin");
+
+    /// <inheritdoc />
+    public IEnumerable<PluginPageInfo> GetPages()
+    {
+        return new[]
+        {
+            new PluginPageInfo
+            {
+                Name = Name,
+                EmbeddedResourcePath = GetType().Namespace + ".Pages.configPage.html"
+            }
+        };
+    }
 }

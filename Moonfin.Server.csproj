@@ -20,6 +20,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Web\plugin.js" />
     <EmbeddedResource Include="Web\plugin.css" />
+    <EmbeddedResource Include="Pages\configPage.html" />
   </ItemGroup>
 
 </Project>
