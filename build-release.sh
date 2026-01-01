@@ -37,6 +37,35 @@ else
     CHECKSUM="UNABLE_TO_CALCULATE"
 fi
 
+# Update manifest.json
+MANIFEST_FILE="manifest.json"
+if [ -f "$MANIFEST_FILE" ]; then
+    # Create timestamp in ISO 8601 format
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S")
+    
+    # Use jq if available, otherwise use sed
+    if command -v jq &> /dev/null; then
+        # Update using jq
+        jq --arg ver "$VERSION" \
+           --arg abi "${TARGET_ABI}.0" \
+           --arg sum "$CHECKSUM" \
+           --arg time "$TIMESTAMP" \
+           '.[0].versions[0].version = $ver | 
+            .[0].versions[0].targetAbi = $abi | 
+            .[0].versions[0].checksum = $sum | 
+            .[0].versions[0].timestamp = $time' \
+           "$MANIFEST_FILE" > "${MANIFEST_FILE}.tmp" && mv "${MANIFEST_FILE}.tmp" "$MANIFEST_FILE"
+        echo "Updated $MANIFEST_FILE with new checksum and version"
+    else
+        # Fallback to sed
+        sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" "$MANIFEST_FILE"
+        sed -i.bak -E "s/\"checksum\": \"[^\"]+\"/\"checksum\": \"$CHECKSUM\"/" "$MANIFEST_FILE"
+        sed -i.bak -E "s/\"timestamp\": \"[^\"]+\"/\"timestamp\": \"$TIMESTAMP\"/" "$MANIFEST_FILE"
+        rm -f "${MANIFEST_FILE}.bak"
+        echo "Updated $MANIFEST_FILE with new checksum and version (using sed)"
+    fi
+fi
+
 echo ""
 echo "========================================="
 echo "Build complete!"
@@ -44,16 +73,13 @@ echo "Build Time: ${BUILD_TIMESTAMP}"
 echo "========================================="
 echo "ZIP file: $ZIP_NAME"
 echo "MD5 Checksum: $CHECKSUM"
+echo "Manifest updated: $MANIFEST_FILE"
 echo ""
-echo "Update manifest.json with:"
-echo "  - sourceUrl: URL to your hosted $ZIP_NAME"
-echo "  - checksum: $CHECKSUM"
-echo "  - version: $VERSION"
-echo "  - targetAbi: ${TARGET_ABI}.0"
-echo ""
-echo "To install manually:"
-echo "  1. Upload $ZIP_NAME to your Jellyfin plugins folder"
-echo "  2. Or host manifest.json and add as plugin repository"
+echo "To publish:"
+echo "  1. Upload $ZIP_NAME to GitHub releases"
+echo "  2. Update sourceUrl in manifest.json with the release URL"
+echo "  3. Commit and push manifest.json"
+echo "  4. Users can add repository URL to Jellyfin"
 echo "========================================="
 
 # Cleanup

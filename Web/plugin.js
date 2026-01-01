@@ -657,6 +657,16 @@ const Navbar = {
                             <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35"/>
                         </svg>
                     </button>
+                    <button class="moonfin-nav-btn moonfin-nav-cast" data-action="cast" title="Cast to Device">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2a9 9 0 0 1 9 9h2c0-6.08-4.93-11-11-11zm20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                    </button>
+                    <button class="moonfin-nav-btn moonfin-nav-syncplay" data-action="syncplay" title="SyncPlay">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                        </svg>
+                    </button>
                     <button class="moonfin-nav-btn moonfin-nav-settings" data-action="settings" title="Settings">
                         <svg viewBox="0 0 24 24">
                             <path fill="currentColor" d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66"/>
@@ -795,6 +805,12 @@ const Navbar = {
                 Jellyseerr.toggle();
                 btn.classList.toggle('active', Jellyseerr.isOpen);
                 break;
+            case 'cast':
+                this.handleCast();
+                break;
+            case 'syncplay':
+                this.handleSyncPlay();
+                break;
             case 'library':
                 const libraryId = btn.dataset.libraryId;
                 if (libraryId) {
@@ -814,6 +830,29 @@ const Navbar = {
         if (items.length > 0) {
             API.navigateToItem(items[0].Id);
         }
+    },
+
+    handleCast() {
+        // Try to open the cast menu
+        if (window.require) {
+            try {
+                const castSenderManager = window.require('components/castSenderManager/castSenderManager');
+                if (castSenderManager && castSenderManager.showMenu) {
+                    castSenderManager.showMenu();
+                    return;
+                }
+            } catch (e) {
+                console.log('[Moonfin] Cast menu not available via require');
+            }
+        }
+        
+        // Fallback: navigate to playback settings where cast is available
+        API.navigateTo('/playbackconfiguration.html');
+    },
+
+    handleSyncPlay() {
+        // Navigate to SyncPlay page
+        API.navigateTo('/syncplay.html');
     },
 
     updateActiveState() {

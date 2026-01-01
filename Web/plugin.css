@@ -881,45 +881,8 @@ body.moonfin-navbar-bottom .moonfin-jellyseerr-container {
 /* === styles/animations.css === */
 /**
  * Moonfin Animation Styles
- * Ken Burns effects and seasonal animations
+ * Seasonal animations
  */
-
-/* Ken Burns animations for backdrops */
-@keyframes kenBurns1 {
-    0% {
-        transform: scale(1) translate(0, 0);
-    }
-    100% {
-        transform: scale(1.1) translate(-1%, -1%);
-    }
-}
-
-@keyframes kenBurns2 {
-    0% {
-        transform: scale(1.1) translate(-1%, 0);
-    }
-    100% {
-        transform: scale(1) translate(0, 0);
-    }
-}
-
-@keyframes kenBurns3 {
-    0% {
-        transform: scale(1) translate(0, 0);
-    }
-    100% {
-        transform: scale(1.1) translate(1%, -1%);
-    }
-}
-
-@keyframes kenBurns4 {
-    0% {
-        transform: scale(1.05) translate(0.5%, 0);
-    }
-    100% {
-        transform: scale(1) translate(-0.5%, -0.5%);
-    }
-}
 
 /* Seasonal effects container */
 .moonfin-seasonal-effect {
