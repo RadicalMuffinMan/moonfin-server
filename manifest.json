@@ -6,15 +6,15 @@
     "description": "Moonfin brings a modern TV-style UI to Jellyfin web. Features include: custom navbar, media bar with featured content, Jellyseerr integration, and cross-device settings synchronization. Works with Android TV, Roku, Tizen, webOS, and Web clients.\n\nRequires File Transformation plugin for automatic UI injection.",
     "owner": "RadicalMuffinMan",
     "category": "General",
-    "imageUrl": "",
+    "imageUrl": "https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/main/assets/logo.png",
     "versions": [
       {
         "version": "1.0.0.0",
         "changelog": "Initial release\n- Custom navbar and media bar UI\n- Settings synchronization across Moonfin clients\n- Jellyseerr integration with admin configuration\n- Device-aware configuration (mobile/desktop/TV)",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-10.10.0.zip",
-        "checksum": "2956948FDB4A099D037EE0A95519BCE5",
-        "timestamp": "2025-12-31T23:59:59",
+        "checksum": "2DAD10FC4DC588EDCEC40B0BA61C0C6A",
+        "timestamp": "2026-01-01T00:00:00",
         "dependencies": [
           "5e87cc92-571a-4d8d-8d98-d2d4147f9f90"
         ]
