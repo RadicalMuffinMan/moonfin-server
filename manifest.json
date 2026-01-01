@@ -10,11 +10,11 @@
     "versions": [
       {
         "version": "1.0.0.0",
-        "changelog": "Initial release\n- Custom navbar and media bar UI\n- Settings synchronization across Moonfin clients\n- Jellyseerr integration with admin configuration\n- Device-aware configuration (mobile/desktop/TV)",
+        "changelog": "Bug fixes:\n- Fixed navbar width on desktop\n- Fixed media bar overlapping content\n- Fixed genres and favorites navigation\n- Replaced placeholder logo icon",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-10.10.0.zip",
-        "checksum": "F095C3145411C63906713C0607A5C331",
-        "timestamp": "2026-01-01T21:30:27",
+        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.1/Moonfin.Server.zip",
+        "checksum": "52B3F430FE37FAF5ADF2CA4E78633FBA",
+        "timestamp": "2026-01-01T22:24:32",
         "dependencies": [
           "5e87cc92-571a-4d8d-8d98-d2d4147f9f90"
         ]

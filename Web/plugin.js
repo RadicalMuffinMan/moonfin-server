@@ -208,9 +208,14 @@ const Storage = {
     },
 
     defaults: {
-        // Navbar Settings
-        navbarOverlayOpacity: 50,        // 0-100
-        navbarOverlayColor: 'gray',      // color key
+        // Media Bar Settings
+        mediaBarEnabled: true,
+        mediaBarContentType: 'both',     // 'movies', 'tv', 'both'
+        mediaBarItemCount: 10,
+        mediaBarOverlayOpacity: 50,      // 0-100
+        mediaBarOverlayColor: 'gray',    // color key
+        mediaBarAutoAdvance: true,
+        mediaBarIntervalMs: 7000,
 
         // Toolbar Settings
         showShuffleButton: true,
@@ -409,6 +414,15 @@ const Storage = {
 
     mapServerToLocal(serverSettings) {
         return {
+            // Media Bar
+            mediaBarEnabled: serverSettings.mediaBarEnabled ?? this.defaults.mediaBarEnabled,
+            mediaBarContentType: serverSettings.mediaBarContentType ?? this.defaults.mediaBarContentType,
+            mediaBarItemCount: serverSettings.mediaBarItemCount ?? this.defaults.mediaBarItemCount,
+            mediaBarOverlayOpacity: serverSettings.overlayOpacity ?? this.defaults.mediaBarOverlayOpacity,
+            mediaBarOverlayColor: serverSettings.overlayColor ?? this.defaults.mediaBarOverlayColor,
+            mediaBarAutoAdvance: serverSettings.mediaBarAutoAdvance ?? this.defaults.mediaBarAutoAdvance,
+            mediaBarIntervalMs: serverSettings.mediaBarInterval ?? this.defaults.mediaBarIntervalMs,
+
             // Toolbar
             showShuffleButton: serverSettings.showShuffleButton ?? this.defaults.showShuffleButton,
             showGenresButton: serverSettings.showGenresButton ?? this.defaults.showGenresButton,
@@ -430,9 +444,14 @@ const Storage = {
 
     mapLocalToServer(localSettings) {
         return {
-            // Navbar
-            overlayOpacity: localSettings.navbarOverlayOpacity,
-            overlayColor: localSettings.navbarOverlayColor,
+            // Media Bar
+            mediaBarEnabled: localSettings.mediaBarEnabled,
+            mediaBarContentType: localSettings.mediaBarContentType,
+            mediaBarItemCount: localSettings.mediaBarItemCount,
+            overlayOpacity: localSettings.mediaBarOverlayOpacity,
+            overlayColor: localSettings.mediaBarOverlayColor,
+            mediaBarAutoAdvance: localSettings.mediaBarAutoAdvance,
+            mediaBarInterval: localSettings.mediaBarIntervalMs,
 
             // Toolbar
             showShuffleButton: localSettings.showShuffleButton,
@@ -591,7 +610,7 @@ const Navbar = {
         }
 
         const settings = Storage.getAll();
-        const overlayColor = Storage.getColorRgba(settings.navbarOverlayColor, settings.navbarOverlayOpacity);
+        const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
 
         this.container = document.createElement('div');
         this.container.className = 'moonfin-navbar';
@@ -633,16 +652,6 @@ const Navbar = {
                     <button class="moonfin-nav-btn moonfin-nav-favorites ${!settings.showFavoritesButton ? 'hidden' : ''}" data-action="favorites" title="Favorites">
                         <svg viewBox="0 0 24 24">
                             <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-cast" data-action="cast" title="Cast to Device">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2a9 9 0 0 1 9 9h2c0-6.08-4.93-11-11-11zm20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-syncplay" data-action="syncplay" title="SyncPlay">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
                         </svg>
                     </button>
                     <button class="moonfin-nav-btn moonfin-nav-settings" data-action="settings" title="Settings">
@@ -777,17 +786,11 @@ const Navbar = {
                 API.navigateTo(`/list.html?type=Movie&IsFavorite=true&serverId=${favServerId}`);
                 break;
             case 'settings':
-                Settings.show();
+                API.navigateTo('/mypreferencesmenu.html');
                 break;
             case 'jellyseerr':
                 Jellyseerr.toggle();
                 btn.classList.toggle('active', Jellyseerr.isOpen);
-                break;
-            case 'cast':
-                this.handleCast();
-                break;
-            case 'syncplay':
-                this.handleSyncPlay();
                 break;
             case 'library':
                 const libraryId = btn.dataset.libraryId;
@@ -808,29 +811,6 @@ const Navbar = {
         if (items.length > 0) {
             API.navigateToItem(items[0].Id);
         }
-    },
-
-    handleCast() {
-        // Try to open the cast menu
-        if (window.require) {
-            try {
-                const castSenderManager = window.require('components/castSenderManager/castSenderManager');
-                if (castSenderManager && castSenderManager.showMenu) {
-                    castSenderManager.showMenu();
-                    return;
-                }
-            } catch (e) {
-                console.log('[Moonfin] Cast menu not available via require');
-            }
-        }
-        
-        // Fallback: navigate to playback settings where cast is available
-        API.navigateTo('/playbackconfiguration.html');
-    },
-
-    handleSyncPlay() {
-        // Navigate to SyncPlay page
-        API.navigateTo('/syncplay.html');
     },
 
     updateActiveState() {
@@ -883,7 +863,7 @@ const Navbar = {
     applySettings(settings) {
         if (!this.container) return;
 
-        const overlayColor = Storage.getColorRgba(settings.navbarOverlayColor, settings.navbarOverlayOpacity);
+        const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
         
         const center = this.container.querySelector('.moonfin-navbar-center');
         if (center) {
@@ -905,6 +885,494 @@ const Navbar = {
         }
         document.body.classList.remove('moonfin-navbar-active');
         this.initialized = false;
+    }
+};
+
+
+// === components/mediabar.js ===
+const MediaBar = {
+    container: null,
+    initialized: false,
+    items: [],
+    currentIndex: 0,
+    isPaused: false,
+    autoAdvanceTimer: null,
+    isVisible: true,
+
+    async init() {
+        const settings = Storage.getAll();
+        if (!settings.mediaBarEnabled) {
+            console.log('[Moonfin] Media bar is disabled');
+            return;
+        }
+
+        if (this.initialized) return;
+
+        console.log('[Moonfin] Initializing media bar...');
+
+        await this.waitForApi();
+
+        this.createMediaBar();
+
+        await this.loadContent();
+
+        this.setupEventListeners();
+
+        if (settings.mediaBarAutoAdvance) {
+            this.startAutoAdvance();
+        }
+
+        this.initialized = true;
+        console.log('[Moonfin] Media bar initialized with', this.items.length, 'items');
+    },
+
+    waitForApi() {
+        return new Promise((resolve) => {
+            const check = () => {
+                if (API.getApiClient()) {
+                    resolve();
+                } else {
+                    setTimeout(check, 100);
+                }
+            };
+            check();
+        });
+    },
+
+    createMediaBar() {
+        const existing = document.querySelector('.moonfin-mediabar');
+        if (existing) {
+            existing.remove();
+        }
+
+        const settings = Storage.getAll();
+        const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
+
+        this.container = document.createElement('div');
+        this.container.className = 'moonfin-mediabar';
+        this.container.innerHTML = `
+            <div class="moonfin-mediabar-backdrop">
+                <div class="moonfin-mediabar-backdrop-img moonfin-mediabar-backdrop-current"></div>
+                <div class="moonfin-mediabar-backdrop-img moonfin-mediabar-backdrop-next"></div>
+            </div>
+            <div class="moonfin-mediabar-gradient"></div>
+            <div class="moonfin-mediabar-content">
+                <!-- Left: Info overlay -->
+                <div class="moonfin-mediabar-info" style="background: ${overlayColor}">
+                    <div class="moonfin-mediabar-title"></div>
+                    <div class="moonfin-mediabar-metadata">
+                        <span class="moonfin-mediabar-year"></span>
+                        <span class="moonfin-mediabar-runtime"></span>
+                        <span class="moonfin-mediabar-rating"></span>
+                    </div>
+                    <div class="moonfin-mediabar-genres"></div>
+                    <div class="moonfin-mediabar-overview"></div>
+                </div>
+                <!-- Right: Logo -->
+                <div class="moonfin-mediabar-logo-container">
+                    <img class="moonfin-mediabar-logo" src="" alt="">
+                </div>
+            </div>
+            <!-- Navigation -->
+            <div class="moonfin-mediabar-nav">
+                <button class="moonfin-mediabar-nav-btn moonfin-mediabar-prev" style="background: ${overlayColor}">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>
+                </button>
+                <button class="moonfin-mediabar-nav-btn moonfin-mediabar-next" style="background: ${overlayColor}">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- Dots indicator -->
+            <div class="moonfin-mediabar-dots"></div>
+            <!-- Play/Pause indicator -->
+            <div class="moonfin-mediabar-playstate">
+                <svg viewBox="0 0 24 24" class="moonfin-mediabar-play-icon">
+                    <path fill="currentColor" d="M8 5v14l11-7z"/>
+                </svg>
+                <svg viewBox="0 0 24 24" class="moonfin-mediabar-pause-icon">
+                    <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </div>
+        `;
+
+        // Insert after navbar or at beginning of main content
+        const mainContent = document.querySelector('.mainAnimatedPage') || document.querySelector('#indexPage');
+        if (mainContent) {
+            mainContent.insertBefore(this.container, mainContent.firstChild);
+        } else {
+            document.body.appendChild(this.container);
+        }
+    },
+
+    async loadContent() {
+        const settings = Storage.getAll();
+        
+        this.items = await API.getRandomItems({
+            contentType: settings.mediaBarContentType,
+            limit: settings.mediaBarItemCount
+        });
+
+        if (this.items.length > 0) {
+            this.updateDisplay();
+            this.updateDots();
+        } else {
+            console.log('[Moonfin] No items found for media bar');
+            this.container.classList.add('empty');
+        }
+    },
+
+    updateDisplay() {
+        const item = this.items[this.currentIndex];
+        if (!item) return;
+
+        const backdropUrl = API.getImageUrl(item, 'Backdrop', { maxWidth: 1920 });
+        this.updateBackdrop(backdropUrl);
+
+        const logoUrl = API.getImageUrl(item, 'Logo', { maxWidth: 500 });
+        const logoContainer = this.container.querySelector('.moonfin-mediabar-logo-container');
+        const logoImg = this.container.querySelector('.moonfin-mediabar-logo');
+        
+        if (logoUrl) {
+            logoImg.src = logoUrl;
+            logoImg.alt = item.Name;
+            logoContainer.classList.remove('hidden');
+        } else {
+            logoContainer.classList.add('hidden');
+        }
+
+        const titleEl = this.container.querySelector('.moonfin-mediabar-title');
+        const yearEl = this.container.querySelector('.moonfin-mediabar-year');
+        const runtimeEl = this.container.querySelector('.moonfin-mediabar-runtime');
+        const ratingEl = this.container.querySelector('.moonfin-mediabar-rating');
+        const genresEl = this.container.querySelector('.moonfin-mediabar-genres');
+        const overviewEl = this.container.querySelector('.moonfin-mediabar-overview');
+
+        titleEl.textContent = logoUrl ? '' : item.Name;
+        titleEl.classList.toggle('hidden', !!logoUrl);
+
+        yearEl.textContent = item.ProductionYear || '';
+
+        if (item.RunTimeTicks) {
+            const minutes = Math.round(item.RunTimeTicks / 600000000);
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            runtimeEl.textContent = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+        } else {
+            runtimeEl.textContent = '';
+        }
+
+        if (item.OfficialRating) {
+            ratingEl.textContent = item.OfficialRating;
+        } else if (item.CommunityRating) {
+            ratingEl.textContent = `★ ${item.CommunityRating.toFixed(1)}`;
+        } else {
+            ratingEl.textContent = '';
+        }
+
+        if (item.Genres && item.Genres.length > 0) {
+            genresEl.textContent = item.Genres.slice(0, 3).join(' • ');
+        } else {
+            genresEl.textContent = '';
+        }
+
+        if (item.Overview) {
+            const truncated = item.Overview.length > 200 
+                ? item.Overview.substring(0, 200) + '...' 
+                : item.Overview;
+            overviewEl.textContent = truncated;
+        } else {
+            overviewEl.textContent = '';
+        }
+
+        this.updateActiveDot();
+    },
+
+    updateBackdrop(url) {
+        const current = this.container.querySelector('.moonfin-mediabar-backdrop-current');
+        const next = this.container.querySelector('.moonfin-mediabar-backdrop-next');
+
+        if (!url) {
+            current.style.backgroundImage = '';
+            return;
+        }
+
+        next.style.backgroundImage = `url('${url}')`;
+        
+        next.classList.add('active');
+        
+        setTimeout(() => {
+            current.style.backgroundImage = `url('${url}')`;
+            next.classList.remove('active');
+            
+            this.applyKenBurns(current);
+        }, 500);
+    },
+
+    applyKenBurns(element) {
+        element.classList.remove('ken-burns-1', 'ken-burns-2', 'ken-burns-3', 'ken-burns-4');
+        
+        // Apply random Ken Burns variant
+        const variant = Math.floor(Math.random() * 4) + 1;
+        void element.offsetWidth; // Force reflow
+        element.classList.add(`ken-burns-${variant}`);
+    },
+
+    updateDots() {
+        const dotsContainer = this.container.querySelector('.moonfin-mediabar-dots');
+        const settings = Storage.getAll();
+        const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
+
+        dotsContainer.innerHTML = this.items.map((_, index) => `
+            <button class="moonfin-mediabar-dot ${index === this.currentIndex ? 'active' : ''}" 
+                    data-index="${index}"
+                    style="background: ${index === this.currentIndex ? '#fff' : overlayColor}">
+            </button>
+        `).join('');
+    },
+
+    updateActiveDot() {
+        const dots = this.container.querySelectorAll('.moonfin-mediabar-dot');
+        const settings = Storage.getAll();
+        const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.currentIndex);
+            dot.style.background = index === this.currentIndex ? '#fff' : overlayColor;
+        });
+    },
+
+    nextSlide() {
+        this.currentIndex = (this.currentIndex + 1) % this.items.length;
+        this.updateDisplay();
+        this.resetAutoAdvance();
+    },
+
+    prevSlide() {
+        this.currentIndex = (this.currentIndex - 1 + this.items.length) % this.items.length;
+        this.updateDisplay();
+        this.resetAutoAdvance();
+    },
+
+    goToSlide(index) {
+        if (index >= 0 && index < this.items.length) {
+            this.currentIndex = index;
+            this.updateDisplay();
+            this.resetAutoAdvance();
+        }
+    },
+
+    handleSwipe(startX, endX, startY, endY, minDistance) {
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+
+        // Only handle horizontal swipes (ignore vertical scrolling)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minDistance) {
+            if (diffX > 0) {
+                this.prevSlide();
+            } else {
+                this.nextSlide();
+            }
+        }
+    },
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        this.container.classList.toggle('paused', this.isPaused);
+
+        if (this.isPaused) {
+            this.stopAutoAdvance();
+        } else {
+            this.startAutoAdvance();
+        }
+    },
+
+    startAutoAdvance() {
+        const settings = Storage.getAll();
+        if (!settings.mediaBarAutoAdvance) return;
+
+        this.autoAdvanceTimer = setInterval(() => {
+            if (!this.isPaused && this.isVisible) {
+                this.nextSlide();
+            }
+        }, settings.mediaBarIntervalMs);
+    },
+
+    stopAutoAdvance() {
+        if (this.autoAdvanceTimer) {
+            clearInterval(this.autoAdvanceTimer);
+            this.autoAdvanceTimer = null;
+        }
+    },
+
+    resetAutoAdvance() {
+        this.stopAutoAdvance();
+        if (!this.isPaused) {
+            this.startAutoAdvance();
+        }
+    },
+
+    setupEventListeners() {
+        this.container.querySelector('.moonfin-mediabar-prev')?.addEventListener('click', () => {
+            this.prevSlide();
+        });
+
+        this.container.querySelector('.moonfin-mediabar-next')?.addEventListener('click', () => {
+            this.nextSlide();
+        });
+
+        this.container.querySelector('.moonfin-mediabar-dots')?.addEventListener('click', (e) => {
+            const dot = e.target.closest('.moonfin-mediabar-dot');
+            if (dot) {
+                this.goToSlide(parseInt(dot.dataset.index, 10));
+            }
+        });
+
+        this.container.querySelector('.moonfin-mediabar-content')?.addEventListener('click', () => {
+            const item = this.items[this.currentIndex];
+            if (item) {
+                API.navigateToItem(item.Id);
+            }
+        });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const minSwipeDistance = 50;
+
+        this.container.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        this.container.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            this.handleSwipe(touchStartX, touchEndX, touchStartY, touchEndY, minSwipeDistance);
+        }, { passive: true });
+
+        this.container.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowLeft':
+                    this.prevSlide();
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    this.nextSlide();
+                    e.preventDefault();
+                    break;
+                case ' ':
+                    this.togglePause();
+                    e.preventDefault();
+                    break;
+                case 'Enter':
+                    const item = this.items[this.currentIndex];
+                    if (item) {
+                        API.navigateToItem(item.Id);
+                    }
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        this.container.addEventListener('mouseenter', () => {
+            this.container.classList.add('focused');
+        });
+
+        this.container.addEventListener('mouseleave', () => {
+            this.container.classList.remove('focused');
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            this.isVisible = !document.hidden;
+        });
+
+        window.addEventListener('moonfin-settings-changed', (e) => {
+            this.applySettings(e.detail);
+        });
+
+        window.addEventListener('viewshow', (e) => {
+            this.updateVisibility();
+        });
+
+        window.addEventListener('hashchange', () => {
+            this.updateVisibility();
+        });
+    },
+
+    updateVisibility() {
+        if (!this.container) return;
+
+        const hash = window.location.hash || '';
+        const isHomePage = hash === '#/home.html' || hash === '#/home' || hash === '';
+        
+        this.container.style.display = isHomePage ? '' : 'none';
+    },
+
+    applySettings(settings) {
+        if (!this.container) return;
+
+        if (!settings.mediaBarEnabled) {
+            this.hide();
+            return;
+        } else {
+            this.show();
+        }
+
+        const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
+
+        const infoBox = this.container.querySelector('.moonfin-mediabar-info');
+        if (infoBox) {
+            infoBox.style.background = overlayColor;
+        }
+
+        this.container.querySelectorAll('.moonfin-mediabar-nav-btn').forEach(btn => {
+            btn.style.background = overlayColor;
+        });
+
+        this.updateDots();
+
+        this.resetAutoAdvance();
+
+        if (this._lastContentType !== settings.mediaBarContentType || 
+            this._lastItemCount !== settings.mediaBarItemCount) {
+            this._lastContentType = settings.mediaBarContentType;
+            this._lastItemCount = settings.mediaBarItemCount;
+            this.loadContent();
+        }
+    },
+
+    show() {
+        if (this.container) {
+            this.container.classList.remove('disabled');
+        }
+    },
+
+    hide() {
+        if (this.container) {
+            this.container.classList.add('disabled');
+        }
+    },
+
+    async refresh() {
+        this.currentIndex = 0;
+        await this.loadContent();
+    },
+
+    destroy() {
+        this.stopAutoAdvance();
+        if (this.container) {
+            this.container.remove();
+            this.container = null;
+        }
+        this.initialized = false;
+        this.items = [];
+        this.currentIndex = 0;
     }
 };
 
@@ -959,6 +1427,60 @@ const Settings = {
                     </button>
                 </div>
                 <div class="moonfin-settings-content">
+                    <!-- Media Bar Section -->
+                    <div class="moonfin-settings-section">
+                        <h3>Media Bar</h3>
+                        <div class="moonfin-settings-group">
+                            <label class="moonfin-settings-toggle">
+                                <span>Enable Media Bar</span>
+                                <input type="checkbox" name="mediaBarEnabled" ${settings.mediaBarEnabled ? 'checked' : ''}>
+                                <span class="moonfin-toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="moonfin-settings-group">
+                            <label>Content Type</label>
+                            <select name="mediaBarContentType">
+                                <option value="both" ${settings.mediaBarContentType === 'both' ? 'selected' : ''}>Movies & TV Shows</option>
+                                <option value="movies" ${settings.mediaBarContentType === 'movies' ? 'selected' : ''}>Movies Only</option>
+                                <option value="tv" ${settings.mediaBarContentType === 'tv' ? 'selected' : ''}>TV Shows Only</option>
+                            </select>
+                        </div>
+                        <div class="moonfin-settings-group">
+                            <label>Number of Items</label>
+                            <select name="mediaBarItemCount">
+                                ${[5, 10, 15, 20].map(n => `
+                                    <option value="${n}" ${settings.mediaBarItemCount === n ? 'selected' : ''}>${n}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="moonfin-settings-group">
+                            <label>Auto-advance Interval</label>
+                            <select name="mediaBarIntervalMs">
+                                ${[5000, 7000, 10000, 15000, 20000].map(ms => `
+                                    <option value="${ms}" ${settings.mediaBarIntervalMs === ms ? 'selected' : ''}>${ms / 1000}s</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Overlay Appearance Section -->
+                    <div class="moonfin-settings-section">
+                        <h3>Overlay Appearance</h3>
+                        <div class="moonfin-settings-group">
+                            <label>Overlay Color</label>
+                            <select name="mediaBarOverlayColor">
+                                ${Object.entries(Storage.colorOptions).map(([key, value]) => `
+                                    <option value="${key}" ${settings.mediaBarOverlayColor === key ? 'selected' : ''}>${value.name}</option>
+                                `).join('')}
+                            </select>
+                            <div class="moonfin-color-preview" style="background: ${Storage.getColorHex(settings.mediaBarOverlayColor)}"></div>
+                        </div>
+                        <div class="moonfin-settings-group">
+                            <label>Overlay Opacity: <span class="moonfin-opacity-value">${settings.mediaBarOverlayOpacity}%</span></label>
+                            <input type="range" name="mediaBarOverlayOpacity" min="0" max="100" step="5" value="${settings.mediaBarOverlayOpacity}">
+                        </div>
+                    </div>
+
                     <!-- Toolbar Section -->
                     <div class="moonfin-settings-section">
                         <h3>Toolbar Buttons</h3>
@@ -1112,6 +1634,20 @@ const Settings = {
             
             this.hide();
             setTimeout(() => this.show(), 350);
+        });
+
+        const opacitySlider = this.dialog.querySelector('input[name="mediaBarOverlayOpacity"]');
+        const opacityValue = this.dialog.querySelector('.moonfin-opacity-value');
+        opacitySlider?.addEventListener('input', (e) => {
+            opacityValue.textContent = `${e.target.value}%`;
+            this.previewSettings();
+        });
+
+        const colorSelect = this.dialog.querySelector('select[name="mediaBarOverlayColor"]');
+        const colorPreview = this.dialog.querySelector('.moonfin-color-preview');
+        colorSelect?.addEventListener('change', (e) => {
+            colorPreview.style.background = Storage.getColorHex(e.target.value);
+            this.previewSettings();
         });
 
         this.dialog.querySelectorAll('input, select').forEach(input => {
@@ -1402,6 +1938,7 @@ const Plugin = {
 
         try {
             await Navbar.init();
+            await MediaBar.init();
             await Jellyseerr.init();
             this.initSeasonalEffects();
         } catch (e) {
@@ -1499,11 +2036,11 @@ const Plugin = {
     setupGlobalListeners() {
         window.addEventListener('viewshow', () => {
             this.onPageChange();
-            this.injectSettingsMenuItem();
         });
 
         window.addEventListener('moonfin-settings-preview', (e) => {
             Navbar.applySettings(e.detail);
+            MediaBar.applySettings(e.detail);
         });
 
         window.addEventListener('moonfin-settings-changed', (e) => {
@@ -1511,58 +2048,20 @@ const Plugin = {
         });
     },
 
-    injectSettingsMenuItem() {
-        // Check if we're on the user settings page
-        const hash = window.location.hash || '';
-        if (!hash.includes('mypreferencesmenu.html') && !hash.includes('mypreferences.html')) {
-            return;
-        }
-
-        // Check if already injected
-        if (document.querySelector('.moonfin-settings-menu-item')) {
-            return;
-        }
-
-        // Wait for the settings menu to be available
-        setTimeout(() => {
-            const settingsListContainer = document.querySelector('.paperList, .listItem-content');
-            if (!settingsListContainer) {
-                return;
-            }
-
-            // Create Moonfin settings menu item
-            const moonfinItem = document.createElement('button');
-            moonfinItem.className = 'listItem listItem-button emby-button moonfin-settings-menu-item';
-            moonfinItem.setAttribute('is', 'emby-button');
-            moonfinItem.innerHTML = `
-                <div class="listItemBody">
-                    <div class="listItemBodyText">🌙 Moonfin</div>
-                </div>
-            `;
-
-            moonfinItem.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                Settings.show();
-            });
-
-            // Insert at the beginning of the list
-            const firstItem = settingsListContainer.querySelector('.listItem');
-            if (firstItem) {
-                settingsListContainer.insertBefore(moonfinItem, firstItem);
-            } else {
-                settingsListContainer.appendChild(moonfinItem);
-            }
-        }, 100);
-    },
-
     onPageChange() {
         const path = window.location.pathname;
+        
+        const isHomePage = path.includes('/home') || path === '/' || path.includes('/index');
+        if (MediaBar.container) {
+            MediaBar.container.classList.toggle('hidden', !isHomePage);
+        }
+
         Navbar.updateActiveState();
     },
 
     destroy() {
         Navbar.destroy();
+        MediaBar.destroy();
         Jellyseerr.destroy();
         document.querySelectorAll('.moonfin-seasonal-effect').forEach(el => el.remove());
         this.initialized = false;

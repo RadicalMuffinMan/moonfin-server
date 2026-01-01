@@ -18,14 +18,9 @@ dotnet build -c Release
 RELEASE_DIR="release"
 rm -rf "$RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
-mkdir -p "$RELEASE_DIR/Web"
 
 # Copy DLL to release folder
 cp "bin/Release/net8.0/Moonfin.Server.dll" "$RELEASE_DIR/"
-
-# Copy Web assets (JS and CSS)
-cp "Web/plugin.js" "$RELEASE_DIR/Web/"
-cp "Web/plugin.css" "$RELEASE_DIR/Web/"
 
 # Create the ZIP file
 ZIP_NAME="Moonfin.Server-${TARGET_ABI}.zip"
@@ -41,7 +36,6 @@ elif command -v md5 &> /dev/null; then
 else
     CHECKSUM="UNABLE_TO_CALCULATE"
 fi
-
 # Update manifest.json
 MANIFEST_FILE="manifest.json"
 if [ -f "$MANIFEST_FILE" ]; then
@@ -79,12 +73,6 @@ echo "========================================="
 echo "ZIP file: $ZIP_NAME"
 echo "MD5 Checksum: $CHECKSUM"
 echo "Manifest updated: $MANIFEST_FILE"
-echo ""
-echo "To publish:"
-echo "  1. Upload $ZIP_NAME to GitHub releases"
-echo "  2. Update sourceUrl in manifest.json with the release URL"
-echo "  3. Commit and push manifest.json"
-echo "  4. Users can add repository URL to Jellyfin"
 echo "========================================="
 
 # Cleanup

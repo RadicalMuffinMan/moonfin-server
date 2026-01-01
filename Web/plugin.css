@@ -298,6 +298,402 @@ body.moonfin-navbar-active .skinHeader {
 }
 
 
+/* === styles/mediabar.css === */
+/**
+ * Moonfin Media Bar Styles
+ * Featured content slideshow styling
+ */
+
+.moonfin-mediabar {
+    position: relative;
+    width: 100%;
+    height: 50vh;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* Push home page sections down below media bar */
+body.moonfin-navbar-active .homeSectionsContainer {
+    position: relative !important;
+    top: 50vh;
+    z-index: 6;
+}
+
+.moonfin-mediabar.hidden,
+.moonfin-mediabar.disabled {
+    display: none;
+}
+
+.moonfin-mediabar.empty {
+    display: none;
+}
+
+/* Backdrop */
+.moonfin-mediabar-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.moonfin-mediabar-backdrop-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center top;
+    transition: opacity 0.5s ease;
+}
+
+.moonfin-mediabar-backdrop-current {
+    z-index: 1;
+}
+
+.moonfin-mediabar-backdrop-next {
+    z-index: 2;
+    opacity: 0;
+}
+
+.moonfin-mediabar-backdrop-next.active {
+    opacity: 1;
+}
+
+/* Gradient overlay */
+.moonfin-mediabar-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0) 100%
+    ),
+    linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0) 40%
+    );
+}
+
+/* Content container */
+.moonfin-mediabar-content {
+    position: absolute;
+    bottom: 30px;
+    left: 40px;
+    right: 40px;
+    z-index: 4;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+}
+
+/* Info overlay */
+.moonfin-mediabar-info {
+    max-width: 550px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.moonfin-mediabar-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.moonfin-mediabar-title.hidden {
+    display: none;
+}
+
+.moonfin-mediabar-metadata {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.moonfin-mediabar-metadata span {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.moonfin-mediabar-metadata span:empty {
+    display: none;
+}
+
+.moonfin-mediabar-year::after,
+.moonfin-mediabar-runtime::after {
+    content: '•';
+    margin-left: 12px;
+    opacity: 0.5;
+}
+
+.moonfin-mediabar-year:empty::after,
+.moonfin-mediabar-runtime:empty::after {
+    display: none;
+}
+
+.moonfin-mediabar-genres {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 10px;
+}
+
+.moonfin-mediabar-overview {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Logo container */
+.moonfin-mediabar-logo-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 400px;
+    height: 120px;
+}
+
+.moonfin-mediabar-logo-container.hidden {
+    display: none;
+}
+
+.moonfin-mediabar-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* Navigation */
+.moonfin-mediabar-nav {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.moonfin-mediabar:hover .moonfin-mediabar-nav,
+.moonfin-mediabar.focused .moonfin-mediabar-nav {
+    opacity: 1;
+}
+
+.moonfin-mediabar-nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.moonfin-mediabar-nav-btn svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+.moonfin-mediabar-nav-btn:hover {
+    transform: scale(1.1);
+}
+
+.moonfin-mediabar-nav-btn:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* Dots indicator */
+.moonfin-mediabar-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+}
+
+.moonfin-mediabar-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.moonfin-mediabar-dot.active {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.moonfin-mediabar-dot:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Play/Pause state */
+.moonfin-mediabar-playstate {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.moonfin-mediabar.paused .moonfin-mediabar-playstate {
+    opacity: 0.7;
+}
+
+.moonfin-mediabar-playstate svg {
+    width: 32px;
+    height: 32px;
+    color: white;
+}
+
+.moonfin-mediabar-play-icon {
+    display: none;
+}
+
+.moonfin-mediabar.paused .moonfin-mediabar-play-icon {
+    display: block;
+}
+
+.moonfin-mediabar.paused .moonfin-mediabar-pause-icon {
+    display: none;
+}
+
+/* Ken Burns animations */
+.moonfin-mediabar-backdrop-img.ken-burns-1 {
+    animation: kenBurns1 10s ease-out forwards;
+}
+
+.moonfin-mediabar-backdrop-img.ken-burns-2 {
+    animation: kenBurns2 10s ease-out forwards;
+}
+
+.moonfin-mediabar-backdrop-img.ken-burns-3 {
+    animation: kenBurns3 10s ease-out forwards;
+}
+
+.moonfin-mediabar-backdrop-img.ken-burns-4 {
+    animation: kenBurns4 10s ease-out forwards;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .moonfin-mediabar {
+        height: 240px;
+    }
+
+    body.moonfin-navbar-active .homeSectionsContainer {
+        top: 240px;
+    }
+
+    .moonfin-mediabar-info {
+        max-width: 450px;
+        padding: 12px 16px;
+    }
+
+    .moonfin-mediabar-title {
+        font-size: 24px;
+    }
+
+    .moonfin-mediabar-logo-container {
+        max-width: 300px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .moonfin-mediabar {
+        height: 45vh;
+    }
+
+    body.moonfin-navbar-active .homeSectionsContainer {
+        top: 45vh;
+    }
+
+    .moonfin-mediabar-content {
+        left: 20px;
+        right: 20px;
+        bottom: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .moonfin-mediabar-info {
+        max-width: 100%;
+        padding: 10px 14px;
+    }
+
+    .moonfin-mediabar-title {
+        font-size: 20px;
+    }
+
+    .moonfin-mediabar-overview {
+        display: none;
+    }
+
+    .moonfin-mediabar-logo-container {
+        display: none;
+    }
+
+    .moonfin-mediabar-nav-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .moonfin-mediabar-nav-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .moonfin-mediabar {
+        height: 55vh;
+    }
+
+    body.moonfin-navbar-active .homeSectionsContainer {
+        top: 55vh;
+    }
+}
+
+
 /* === styles/settings.css === */
 /**
  * Moonfin Settings Dialog Styles
@@ -881,8 +1277,45 @@ body.moonfin-navbar-bottom .moonfin-jellyseerr-container {
 /* === styles/animations.css === */
 /**
  * Moonfin Animation Styles
- * Seasonal animations
+ * Ken Burns effects and seasonal animations
  */
+
+/* Ken Burns animations for backdrops */
+@keyframes kenBurns1 {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        transform: scale(1.1) translate(-1%, -1%);
+    }
+}
+
+@keyframes kenBurns2 {
+    0% {
+        transform: scale(1.1) translate(-1%, 0);
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+    }
+}
+
+@keyframes kenBurns3 {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        transform: scale(1.1) translate(1%, -1%);
+    }
+}
+
+@keyframes kenBurns4 {
+    0% {
+        transform: scale(1.05) translate(0.5%, 0);
+    }
+    100% {
+        transform: scale(1) translate(-0.5%, -0.5%);
+    }
+}
 
 /* Seasonal effects container */
 .moonfin-seasonal-effect {
