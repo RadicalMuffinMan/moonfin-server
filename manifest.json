@@ -13,8 +13,8 @@
         "changelog": "Initial release\n- Custom navbar and media bar UI\n- Settings synchronization across Moonfin clients\n- Jellyseerr integration with admin configuration\n- Device-aware configuration (mobile/desktop/TV)",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-10.10.0.zip",
-        "checksum": "D750F6FA7A9A45B1E0DE0796AC3621C3",
-        "timestamp": "2026-01-01T19:46:47",
+        "checksum": "AD5AE9449F8207E288284F55E0D7ECC9",
+        "timestamp": "2026-01-01T19:48:55",
         "dependencies": [
           "5e87cc92-571a-4d8d-8d98-d2d4147f9f90"
         ]
