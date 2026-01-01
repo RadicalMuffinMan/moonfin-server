@@ -585,11 +585,11 @@ const Navbar = {
             <div class="moonfin-navbar-content">
                 <!-- Left section: Logo and User -->
                 <div class="moonfin-navbar-left">
-                    <div class="moonfin-logo">
+                    <button class="moonfin-home-btn" data-action="home" title="Home">
                         <svg viewBox="0 0 24 24" class="moonfin-logo-icon">
-                            <path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 2c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m-5.5 3a1.5 1.5 0 0 0-1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 1.5-1.5A1.5 1.5 0 0 0 6.5 7m11 0a1.5 1.5 0 0 0-1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 1.5-1.5A1.5 1.5 0 0 0 17.5 7M12 17.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5"/>
+                            <path fill="currentColor" d="M21.4 7.5c.8.8.8 2.1 0 2.9l-6.3 6.3-2.5-2.5-2.6 2.6c-.5.5-1.2.5-1.6 0l-.7-.7c-.4-.4-.4-1.1 0-1.5l2.6-2.6-1.8-1.8c-.4-.4-.4-1.1 0-1.5L14.8 3c.8-.8 2.1-.8 2.9 0L21.4 7.5M2 22l.1-3.8 5.9-5.9 2.5 2.5L4.6 20.7 2 22z"/>
                         </svg>
-                    </div>
+                    </button>
                     <button class="moonfin-user-btn" title="Switch User">
                         <div class="moonfin-user-avatar">
                             <svg viewBox="0 0 24 24" class="moonfin-user-icon">
@@ -745,13 +745,13 @@ const Navbar = {
                 await this.handleShuffle();
                 break;
             case 'genres':
-                API.navigateTo('/list.html?type=Genre&parentId=');
+                API.navigateTo('/genres.html');
                 break;
             case 'favorites':
-                API.navigateTo('/list.html?type=Folder&parentId=favorites');
+                API.navigateTo('/favorites.html');
                 break;
             case 'settings':
-                Settings.show();
+                API.navigateTo('/dashboard');
                 break;
             case 'jellyseerr':
                 Jellyseerr.toggle();

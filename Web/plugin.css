@@ -8,7 +8,7 @@
 
 /* Body adjustment when navbar is active */
 body.moonfin-navbar-active {
-    padding-top: 70px !important;
+    padding-top: 85px !important;
 }
 
 body.moonfin-navbar-active .skinHeader {
@@ -21,7 +21,7 @@ body.moonfin-navbar-active .skinHeader {
     top: 0;
     left: 0;
     right: 0;
-    height: 65px;
+    height: 80px;
     z-index: 9999;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
     padding: 8px 24px;
@@ -54,9 +54,32 @@ body.moonfin-navbar-active .skinHeader {
 }
 
 .moonfin-logo-icon {
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     color: #00a4dc;
+}
+
+/* Home button (logo area) */
+.moonfin-home-btn {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moonfin-home-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.moonfin-home-btn:focus {
+    outline: 2px solid #00a4dc;
+    outline-offset: 2px;
 }
 
 /* User button */
@@ -79,8 +102,8 @@ body.moonfin-navbar-active .skinHeader {
 }
 
 .moonfin-user-avatar {
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
     display: flex;
@@ -110,29 +133,27 @@ body.moonfin-navbar-active .skinHeader {
     border-radius: 28px;
     flex-grow: 1;
     justify-content: center;
-    max-width: fit-content;
-    margin: 0 auto;
 }
 
 /* Navigation buttons */
 .moonfin-nav-btn {
     background: transparent;
     border: none;
-    padding: 8px 12px;
+    padding: 10px 16px;
     cursor: pointer;
-    border-radius: 20px;
+    border-radius: 24px;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    min-width: 44px;
-    height: 44px;
+    min-width: 52px;
+    height: 52px;
 }
 
 .moonfin-nav-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
 }
 
 .moonfin-nav-btn:hover {
@@ -265,6 +286,17 @@ body.moonfin-navbar-active .skinHeader {
     height: 280px;
     overflow: hidden;
     cursor: pointer;
+    z-index: 1;
+    margin-bottom: 20px;
+}
+
+/* Ensure home page sections flow after media bar */
+body.moonfin-navbar-active .homeSectionsContainer,
+body.moonfin-navbar-active .homePageContent,
+body.moonfin-navbar-active .sections,
+body.moonfin-navbar-active .view-home-page-sections {
+    position: relative !important;
+    z-index: 0;
 }
 
 .moonfin-mediabar.hidden,
