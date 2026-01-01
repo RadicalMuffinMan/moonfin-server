@@ -131,7 +131,10 @@ body.moonfin-navbar-active .skinHeader {
     gap: 4px;
     padding: 6px 12px;
     border-radius: 28px;
-    flex-grow: 1;
+    flex-grow: 0;
+    flex-shrink: 1;
+    max-width: 80%;
+    width: auto;
     justify-content: center;
 }
 
@@ -226,13 +229,23 @@ body.moonfin-navbar-active .skinHeader {
 /* Responsive adjustments */
 @media (max-width: 1200px) {
     .moonfin-navbar-center {
-        max-width: 80%;
         overflow-x: auto;
-        scrollbar-width: none;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
     }
 
     .moonfin-navbar-center::-webkit-scrollbar {
-        display: none;
+        height: 4px;
+    }
+
+    .moonfin-navbar-center::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+
+    .moonfin-navbar-center::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
     }
 }
 
@@ -244,6 +257,18 @@ body.moonfin-navbar-active .skinHeader {
     .moonfin-navbar {
         height: 55px;
         padding: 6px 12px;
+    }
+
+    .moonfin-navbar-center {
+        flex-grow: 0;
+        max-width: none;
+        overflow-x: auto;
+        scrollbar-width: none;
+        justify-content: flex-start;
+    }
+
+    .moonfin-navbar-center::-webkit-scrollbar {
+        display: none;
     }
 
     .moonfin-nav-btn {
@@ -286,16 +311,13 @@ body.moonfin-navbar-active .skinHeader {
     overflow: hidden;
     cursor: pointer;
     z-index: 1;
-    margin-bottom: 20px;
 }
 
-/* Ensure home page sections flow after media bar */
-body.moonfin-navbar-active .homeSectionsContainer,
-body.moonfin-navbar-active .homePageContent,
-body.moonfin-navbar-active .sections,
-body.moonfin-navbar-active .view-home-page-sections {
+/* Push home page sections down below media bar */
+body.moonfin-navbar-active .homeSectionsContainer {
     position: relative !important;
-    z-index: 0;
+    top: 50vh;
+    z-index: 6;
 }
 
 .moonfin-mediabar.hidden,
@@ -597,6 +619,10 @@ body.moonfin-navbar-active .view-home-page-sections {
         height: 240px;
     }
 
+    body.moonfin-navbar-active .homeSectionsContainer {
+        top: 240px;
+    }
+
     .moonfin-mediabar-info {
         max-width: 450px;
         padding: 12px 16px;
@@ -615,7 +641,10 @@ body.moonfin-navbar-active .view-home-page-sections {
 @media (max-width: 768px) {
     .moonfin-mediabar {
         height: 45vh;
-        margin-bottom: 1rem;
+    }
+
+    body.moonfin-navbar-active .homeSectionsContainer {
+        top: 45vh;
     }
 
     .moonfin-mediabar-content {
@@ -657,6 +686,10 @@ body.moonfin-navbar-active .view-home-page-sections {
 @media (min-width: 1920px) {
     .moonfin-mediabar {
         height: 55vh;
+    }
+
+    body.moonfin-navbar-active .homeSectionsContainer {
+        top: 55vh;
     }
 }
 

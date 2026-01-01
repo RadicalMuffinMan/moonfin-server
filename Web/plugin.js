@@ -778,10 +778,12 @@ const Navbar = {
                 await this.handleShuffle();
                 break;
             case 'genres':
-                API.navigateTo('/list.html?genreIds=&serverId=' + API.getApiClient()?.serverId());
+                const serverId = API.getApiClient()?.serverId();
+                API.navigateTo(`/movies.html?tab=1&serverId=${serverId}`);
                 break;
             case 'favorites':
-                API.navigateTo('/list.html?isFavorite=true&serverId=' + API.getApiClient()?.serverId());
+                const favServerId = API.getApiClient()?.serverId();
+                API.navigateTo(`/list.html?type=Movie&IsFavorite=true&serverId=${favServerId}`);
                 break;
             case 'settings':
                 API.navigateTo('/mypreferencesmenu.html');

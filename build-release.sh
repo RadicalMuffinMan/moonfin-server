@@ -6,8 +6,10 @@ set -e
 
 VERSION="${1:-1.0.0.0}"
 TARGET_ABI="${2:-10.10.0}"
+BUILD_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 echo "Building Moonfin.Server v${VERSION} for Jellyfin ${TARGET_ABI}..."
+echo "Build Time: ${BUILD_TIMESTAMP}"
 
 # Build the plugin
 dotnet build -c Release
@@ -38,6 +40,7 @@ fi
 echo ""
 echo "========================================="
 echo "Build complete!"
+echo "Build Time: ${BUILD_TIMESTAMP}"
 echo "========================================="
 echo "ZIP file: $ZIP_NAME"
 echo "MD5 Checksum: $CHECKSUM"
