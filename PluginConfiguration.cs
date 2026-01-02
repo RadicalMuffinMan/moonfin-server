@@ -1,4 +1,4 @@
-using Jellyfin.Model.Plugins;
+using MediaBrowser.Model.Plugins;
 
 namespace Moonfin.Server;
 

@@ -6,8 +6,24 @@ set -e
 
 VERSION="${1:-1.0.0.0}"
 TARGET_ABI="${2:-10.10.0}"
+BUILD_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+# Get script directory (where build-release.sh lives)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WEB_PLUGIN_DIR="$SCRIPT_DIR/../moonfin-web-plugin/dist"
 
 echo "Building Moonfin.Server v${VERSION} for Jellyfin ${TARGET_ABI}..."
+echo "Build Time: ${BUILD_TIMESTAMP}"
+
+# Sync web plugin files
+if [ -d "$WEB_PLUGIN_DIR" ]; then
+    echo "Syncing web plugin files..."
+    cp "$SCRIPT_DIR/Web/plugin.js" "$WEB_PLUGIN_DIR/plugin.js"
+    cp "$SCRIPT_DIR/Web/plugin.css" "$WEB_PLUGIN_DIR/plugin.css"
+    echo "Web files synced to moonfin-web-plugin/dist/"
+else
+    echo "Warning: moonfin-web-plugin/dist/ not found, skipping web file sync"
+fi
 
 # Build the plugin
 dotnet build -c Release
@@ -34,23 +50,43 @@ elif command -v md5 &> /dev/null; then
 else
     CHECKSUM="UNABLE_TO_CALCULATE"
 fi
+# Update manifest.json
+MANIFEST_FILE="manifest.json"
+if [ -f "$MANIFEST_FILE" ]; then
+    # Create timestamp in ISO 8601 format
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S")
+    
+    # Use jq if available, otherwise use sed
+    if command -v jq &> /dev/null; then
+        # Update using jq
+        jq --arg ver "$VERSION" \
+           --arg abi "${TARGET_ABI}.0" \
+           --arg sum "$CHECKSUM" \
+           --arg time "$TIMESTAMP" \
+           '.[0].versions[0].version = $ver | 
+            .[0].versions[0].targetAbi = $abi | 
+            .[0].versions[0].checksum = $sum | 
+            .[0].versions[0].timestamp = $time' \
+           "$MANIFEST_FILE" > "${MANIFEST_FILE}.tmp" && mv "${MANIFEST_FILE}.tmp" "$MANIFEST_FILE"
+        echo "Updated $MANIFEST_FILE with new checksum and version"
+    else
+        # Fallback to sed
+        sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" "$MANIFEST_FILE"
+        sed -i.bak -E "s/\"checksum\": \"[^\"]+\"/\"checksum\": \"$CHECKSUM\"/" "$MANIFEST_FILE"
+        sed -i.bak -E "s/\"timestamp\": \"[^\"]+\"/\"timestamp\": \"$TIMESTAMP\"/" "$MANIFEST_FILE"
+        rm -f "${MANIFEST_FILE}.bak"
+        echo "Updated $MANIFEST_FILE with new checksum and version (using sed)"
+    fi
+fi
 
 echo ""
 echo "========================================="
 echo "Build complete!"
+echo "Build Time: ${BUILD_TIMESTAMP}"
 echo "========================================="
 echo "ZIP file: $ZIP_NAME"
 echo "MD5 Checksum: $CHECKSUM"
-echo ""
-echo "Update manifest.json with:"
-echo "  - sourceUrl: URL to your hosted $ZIP_NAME"
-echo "  - checksum: $CHECKSUM"
-echo "  - version: $VERSION"
-echo "  - targetAbi: ${TARGET_ABI}.0"
-echo ""
-echo "To install manually:"
-echo "  1. Upload $ZIP_NAME to your Jellyfin plugins folder"
-echo "  2. Or host manifest.json and add as plugin repository"
+echo "Manifest updated: $MANIFEST_FILE"
 echo "========================================="
 
 # Cleanup
