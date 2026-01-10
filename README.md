@@ -9,7 +9,7 @@ A Jellyfin server plugin that enables cross-client settings synchronization and 
 1. Open Jellyfin Dashboard → Administration → Plugins → Repositories
 2. Click "Add" and enter:
    - **Name:** Moonfin
-   - **URL:** `https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/main/manifest.json`
+   - **URL:** `https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/master/manifest.json`
 3. Go to the Catalog tab and find "Moonfin Settings Sync"
 4. Click Install and restart Jellyfin
 
