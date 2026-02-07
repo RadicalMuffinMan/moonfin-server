@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T06:44:00.741Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T06:54:57.820Z */
 
 /* === styles/navbar.css === */
 /**
@@ -9,7 +9,7 @@
 
 /* Body adjustment when navbar is active */
 body.moonfin-navbar-active {
-    padding-top: 70px !important;
+    padding-top: 80px !important;
 }
 
 body.moonfin-navbar-active .skinHeader {
@@ -23,7 +23,7 @@ body.moonfin-navbar-active .skinHeader {
 /* ── Main container ── */
 .moonfin-navbar {
     position: fixed;
-    top: 0;
+    top: 12px;
     left: 0;
     right: 0;
     height: auto;
@@ -87,12 +87,11 @@ body.moonfin-navbar-active .skinHeader {
 
 /* ── Center section: Nav pill ── */
 .moonfin-navbar-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 0;
 }
 
 .moonfin-nav-pill {
@@ -261,7 +260,8 @@ body.moonfin-navbar-active .skinHeader {
     }
 
     .moonfin-navbar {
-        padding: 8px 16px;
+        top: 4px;
+        padding: 8px 12px;
     }
 
     .moonfin-nav-btn {
@@ -289,8 +289,9 @@ body.moonfin-navbar-active .skinHeader {
         font-size: 18px;
     }
 
-    .moonfin-clock {
-        font-size: 18px;
+    /* Hide clock on mobile */
+    .moonfin-navbar-right {
+        display: none !important;
     }
 
     /* Hide non-essential buttons on small screens */

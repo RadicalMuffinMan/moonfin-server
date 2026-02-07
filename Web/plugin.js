@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T06:44:00.740Z
+// Moonfin Web Plugin - Built 2026-02-07T06:54:57.819Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1091,6 +1091,9 @@ const Navbar = {
   currentUser: null,
   librariesExpanded: false,
   librariesTimeout: null,
+  isMobile: function () {
+    return window.innerWidth <= 768;
+  },
   init() {
     var _this8 = this;
     return _asyncToGenerator(function* () {
@@ -1184,6 +1187,8 @@ const Navbar = {
     group.classList.toggle('expanded', this.librariesExpanded);
   },
   collapseLibraries() {
+    // On mobile, don't auto-collapse; user taps toggle to close
+    if (this.isMobile()) return;
     var self = this;
     if (this.librariesTimeout) {
       clearTimeout(this.librariesTimeout);
@@ -1225,21 +1230,28 @@ const Navbar = {
       });
     }
 
-    // Libraries group hover expand/collapse
+    // Libraries group hover expand/collapse (desktop only)
     var librariesGroup = this.container.querySelector('.moonfin-libraries-group');
     if (librariesGroup) {
       librariesGroup.addEventListener('mouseenter', function () {
-        self.cancelCollapseLibraries();
+        if (!self.isMobile()) {
+          self.cancelCollapseLibraries();
+        }
       });
       librariesGroup.addEventListener('mouseleave', function () {
-        self.collapseLibraries();
+        if (!self.isMobile()) {
+          self.collapseLibraries();
+        }
       });
       librariesGroup.addEventListener('focusin', function () {
-        self.cancelCollapseLibraries();
-        self.librariesExpanded = true;
-        librariesGroup.classList.add('expanded');
+        if (!self.isMobile()) {
+          self.cancelCollapseLibraries();
+          self.librariesExpanded = true;
+          librariesGroup.classList.add('expanded');
+        }
       });
       librariesGroup.addEventListener('focusout', function (e) {
+        if (self.isMobile()) return;
         if (e.relatedTarget && librariesGroup.contains(e.relatedTarget)) {
           return;
         }
