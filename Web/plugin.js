@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T07:07:39.516Z
+// Moonfin Web Plugin - Built 2026-02-07T07:25:14.039Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1177,8 +1177,28 @@ const Navbar = {
       return type !== 'playlists' && type !== 'boxsets';
     });
     librariesList.innerHTML = filteredLibraries.map(function (lib) {
-      return '<button class="moonfin-nav-btn moonfin-library-btn" data-action="library" data-library-id="' + lib.Id + '" title="' + lib.Name + '">' + '<span class="moonfin-library-name">' + lib.Name + '</span>' + '</button>';
+      var collectionType = lib.CollectionType || '';
+      return '<button class="moonfin-nav-btn moonfin-library-btn" data-action="library" data-library-id="' + lib.Id + '" data-collection-type="' + collectionType + '" title="' + lib.Name + '">' + '<span class="moonfin-library-name">' + lib.Name + '</span>' + '</button>';
     }).join('');
+  },
+  getLibraryUrl: function (libraryId, collectionType) {
+    var type = (collectionType || '').toLowerCase();
+    switch (type) {
+      case 'movies':
+        return '/movies?topParentId=' + libraryId + '&collectionType=' + collectionType;
+      case 'tvshows':
+        return '/tv?topParentId=' + libraryId + '&collectionType=' + collectionType;
+      case 'music':
+        return '/music?topParentId=' + libraryId + '&collectionType=' + collectionType;
+      case 'livetv':
+        return '/livetv?collectionType=' + collectionType;
+      case 'homevideos':
+        return '/homevideos?topParentId=' + libraryId;
+      case 'books':
+        return '/list?parentId=' + libraryId;
+      default:
+        return '/list?parentId=' + libraryId;
+    }
   },
   toggleLibraries() {
     var group = this.container.querySelector('.moonfin-libraries-group');
@@ -1240,7 +1260,7 @@ const Navbar = {
     var userBtn = this.container.querySelector('.moonfin-user-btn');
     if (userBtn) {
       userBtn.addEventListener('click', function () {
-        API.navigateTo('/mypreferencesmenu.html');
+        API.navigateTo('/mypreferencesmenu');
       });
     }
 
@@ -1308,19 +1328,19 @@ const Navbar = {
       }
       switch (action) {
         case 'home':
-          API.navigateTo('/home.html');
+          API.navigateTo('/home');
           break;
         case 'search':
-          API.navigateTo('/search.html');
+          API.navigateTo('/search');
           break;
         case 'shuffle':
           yield _this0.handleShuffle();
           break;
         case 'genres':
-          API.navigateTo('/list.html?type=Genre&parentId=');
+          API.navigateTo('/list?type=Genre');
           break;
         case 'favorites':
-          API.navigateTo('/list.html?type=Folder&parentId=favorites');
+          API.navigateTo('/home?tab=1');
           break;
         case 'settings':
           Settings.show();
@@ -1337,8 +1357,9 @@ const Navbar = {
           break;
         case 'library':
           var libraryId = btn.dataset.libraryId;
+          var collectionType = btn.dataset.collectionType;
           if (libraryId) {
-            API.navigateTo('/list.html?parentId=' + libraryId);
+            API.navigateTo(_this0.getLibraryUrl(libraryId, collectionType));
           }
           break;
       }
@@ -1577,13 +1598,9 @@ const MediaBar = {
             </div>
         `;
 
-    // Insert after navbar or at beginning of main content
-    const mainContent = document.querySelector('.mainAnimatedPage') || document.querySelector('#indexPage');
-    if (mainContent) {
-      mainContent.insertBefore(this.container, mainContent.firstChild);
-    } else {
-      document.body.appendChild(this.container);
-    }
+    // Insert into document.body so it persists across SPA navigation
+    // (Jellyfin replaces .mainAnimatedPage content on route changes)
+    document.body.appendChild(this.container);
   },
   loadContent() {
     var _this10 = this;
@@ -1744,6 +1761,15 @@ const MediaBar = {
       this.startAutoAdvance();
     }
   },
+  isInDOM() {
+    return this.container && document.body.contains(this.container);
+  },
+  ensureInDOM() {
+    if (this.container && !document.body.contains(this.container)) {
+      console.log('[Moonfin] MediaBar: Re-inserting container into DOM');
+      document.body.appendChild(this.container);
+    }
+  },
   setupEventListeners() {
     var _this$container$query, _this$container$query2, _this$container$query3, _this$container$query4;
     (_this$container$query = this.container.querySelector('.moonfin-mediabar-prev')) === null || _this$container$query === void 0 || _this$container$query.addEventListener('click', () => {
@@ -1799,25 +1825,9 @@ const MediaBar = {
     window.addEventListener('moonfin-settings-changed', e => {
       this.applySettings(e.detail);
     });
-    window.addEventListener('viewshow', e => {
-      // Use hash for SPA navigation
-      const hash = window.location.hash || '';
-      const path = window.location.pathname;
-      const shouldShow = hash.includes('/home') || hash === '#/' || hash === '' || path.includes('/home') || path === '/' || path.includes('/index');
-      if (this.container) {
-        this.container.classList.toggle('hidden', !shouldShow);
-      }
-      // Update body class to control home sections margin
-      if (this.items.length > 0) {
-        document.body.classList.toggle('moonfin-mediabar-active', shouldShow);
-      }
-      console.log('[Moonfin] MediaBar viewshow:', {
-        hash,
-        path,
-        shouldShow,
-        itemCount: this.items.length
-      });
-    });
+
+    // Note: visibility toggling is handled by Plugin.onPageChange()
+    // No need for a separate viewshow listener here
   },
   applySettings(settings) {
     if (!this.container) return;
@@ -3120,7 +3130,7 @@ const Plugin = {
   initialized: false,
   isHomePage() {
     const hash = window.location.hash.toLowerCase();
-    return hash === '#/home.html' || hash === '#/home' || hash.startsWith('#/home.html?') || hash.startsWith('#/home?');
+    return hash === '#/home' || hash.startsWith('#/home?') || hash === '#/home.html' || hash.startsWith('#/home.html?');
   },
   isAdminPage() {
     const path = window.location.pathname.toLowerCase();
@@ -3321,12 +3331,20 @@ const Plugin = {
       document.body.classList.toggle('moonfin-navbar-active', !!navbarEnabled);
     }
     document.querySelectorAll('.moonfin-seasonal-effect').forEach(el => el.style.display = '');
-    if (MediaBar.container) {
+    if (MediaBar.initialized && MediaBar.container) {
+      // Ensure the media bar element is still in the DOM
+      // (Jellyfin SPA navigation can detach elements)
+      MediaBar.ensureInDOM();
       var showMediaBar = this.isHomePage();
       MediaBar.container.classList.toggle('hidden', !showMediaBar);
       if (MediaBar.items && MediaBar.items.length > 0) {
         document.body.classList.toggle('moonfin-mediabar-active', showMediaBar);
+      } else {
+        document.body.classList.remove('moonfin-mediabar-active');
       }
+    } else {
+      // No media bar - ensure the push-down class is removed
+      document.body.classList.remove('moonfin-mediabar-active');
     }
     Navbar.updateActiveState();
   },
