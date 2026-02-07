@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T22:56:02.111Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T23:44:13.721Z */
 
 /* === styles/navbar.css === */
 /**
@@ -3900,6 +3900,24 @@ body.moonfin-navbar-active .moonfin-details-back {
 .moonfin-more-item-text {
     flex: 1;
     font-size: 16px;
+}
+
+.moonfin-more-item-danger {
+    color: #ff6b6b;
+}
+
+.moonfin-more-item-danger .moonfin-more-item-icon svg {
+    color: #ff6b6b;
+}
+
+.moonfin-more-item-danger:hover,
+.moonfin-more-item-danger:focus {
+    background: rgba(255, 50, 50, 0.15);
+}
+
+.moonfin-more-item-danger:hover .moonfin-more-item-icon svg,
+.moonfin-more-item-danger:focus .moonfin-more-item-icon svg {
+    color: #ff4444;
 }
 
 /* Toast notification */

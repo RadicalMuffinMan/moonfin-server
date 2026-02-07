@@ -376,6 +376,100 @@ public class JellyseerrSessionService
         }
     }
 
+    /// <summary>
+    /// Proxies a raw HTTP request to Jellyseerr for web content (no /api/v1/ prefix).
+    /// Session cookie is optional — if unavailable, the request proceeds without auth.
+    /// </summary>
+    public async Task<JellyseerrProxyResponse> ProxyWebRequestAsync(
+        Guid userId,
+        HttpMethod method,
+        string path,
+        string? queryString = null,
+        byte[]? body = null,
+        string? contentType = null)
+    {
+        var config = MoonfinPlugin.Instance?.Configuration;
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
+
+        if (string.IsNullOrEmpty(jellyseerrUrl))
+        {
+            return new JellyseerrProxyResponse
+            {
+                StatusCode = 503,
+                Body = Encoding.UTF8.GetBytes("Jellyseerr not configured"),
+                ContentType = "text/plain"
+            };
+        }
+
+        var session = await LoadSessionAsync(userId);
+
+        try
+        {
+            var cookieContainer = new CookieContainer();
+            if (session != null)
+            {
+                cookieContainer.Add(new Uri(jellyseerrUrl), new Cookie("connect.sid", session.SessionCookie));
+            }
+
+            using var handler = new HttpClientHandler
+            {
+                CookieContainer = cookieContainer,
+                UseCookies = true,
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
+            };
+            using var client = new HttpClient(handler);
+            client.Timeout = TimeSpan.FromSeconds(30);
+
+            var targetUrl = $"{jellyseerrUrl}/{path?.TrimStart('/') ?? ""}";
+            if (!string.IsNullOrEmpty(queryString))
+            {
+                targetUrl += queryString.StartsWith('?') ? queryString : $"?{queryString}";
+            }
+
+            var request = new HttpRequestMessage(method, targetUrl);
+
+            if (body != null && body.Length > 0)
+            {
+                request.Content = new ByteArrayContent(body);
+                if (!string.IsNullOrEmpty(contentType))
+                {
+                    request.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+                }
+            }
+
+            var response = await client.SendAsync(request);
+            var responseBody = await response.Content.ReadAsByteArrayAsync();
+            var responseContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+
+            return new JellyseerrProxyResponse
+            {
+                StatusCode = (int)response.StatusCode,
+                Body = responseBody,
+                ContentType = responseContentType
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Failed to proxy web request to Jellyseerr: {Path}", path);
+            return new JellyseerrProxyResponse
+            {
+                StatusCode = 502,
+                Body = Encoding.UTF8.GetBytes($"Cannot reach Jellyseerr: {ex.Message}"),
+                ContentType = "text/plain"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error proxying web request to Jellyseerr: {Path}", path);
+            return new JellyseerrProxyResponse
+            {
+                StatusCode = 500,
+                Body = Encoding.UTF8.GetBytes("Internal proxy error"),
+                ContentType = "text/plain"
+            };
+        }
+    }
+
     private async Task SaveSessionAsync(JellyseerrSession session)
     {
         await _lock.WaitAsync();

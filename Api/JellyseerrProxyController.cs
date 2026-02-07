@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
 using System.Net.Mime;
+using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -263,6 +266,168 @@ public class JellyseerrProxyController : ControllerBase
             : null);
     }
 
+    // ── Jellyseerr Web Proxy (iframe auth) ──────────────────────────────
+
+    private const string ProxyBasePath = "/Moonfin/Jellyseerr/Web";
+
+    // Short-lived proxy sessions: token → (userId, expiry)
+    // Allows iframe sub-resource loads without api_key in every URL
+    private static readonly ConcurrentDictionary<string, (Guid UserId, DateTimeOffset Expiry)> _proxySessions = new();
+
+    /// <summary>
+    /// Proxies Jellyseerr web content through the Jellyfin server, injecting the stored
+    /// SSO session cookie. This allows the Jellyseerr iframe to be pre-authenticated.
+    /// The first request must include api_key for Jellyfin auth; a proxy session cookie is
+    /// then set so subsequent resource loads (scripts, styles, etc.) don't need it.
+    /// </summary>
+    [Route("Web/{**path}")]
+    [Route("Web")]
+    [AllowAnonymous]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [AcceptVerbs("GET", "POST", "PUT", "DELETE")]
+    public async Task<IActionResult> ProxyWeb(string? path = null)
+    {
+        // Authenticate: proxy session cookie first, then Jellyfin auth (api_key)
+        var userId = GetProxySessionUserId() ?? GetJellyfinAuthUserId();
+        if (userId == null)
+        {
+            return Unauthorized("Authentication required");
+        }
+
+        // Set/refresh proxy session cookie for subsequent requests
+        EnsureProxySession(userId.Value);
+
+        var method = new HttpMethod(Request.Method);
+
+        // Read body for POST/PUT
+        byte[]? body = null;
+        string? contentType = null;
+        if (method == HttpMethod.Post || method == HttpMethod.Put)
+        {
+            using var ms = new MemoryStream();
+            await Request.Body.CopyToAsync(ms);
+            body = ms.ToArray();
+            contentType = Request.ContentType;
+        }
+
+        // Strip api_key from query string before forwarding to Jellyseerr
+        var queryString = StripQueryParam(Request.QueryString.Value, "api_key");
+
+        var result = await _sessionService.ProxyWebRequestAsync(
+            userId.Value,
+            method,
+            path ?? "",
+            queryString,
+            body,
+            contentType);
+
+        if (result.Body == null)
+        {
+            return StatusCode(result.StatusCode);
+        }
+
+        // For HTML responses, rewrite absolute paths and inject proxy script
+        if (result.ContentType.Contains("text/html", StringComparison.OrdinalIgnoreCase))
+        {
+            var html = Encoding.UTF8.GetString(result.Body);
+            html = RewriteHtmlForProxy(html);
+            return Content(html, "text/html; charset=utf-8");
+        }
+
+        return File(result.Body, result.ContentType);
+    }
+
+    private Guid? GetProxySessionUserId()
+    {
+        var cookie = Request.Cookies["moonfin_proxy"];
+        if (string.IsNullOrEmpty(cookie)) return null;
+
+        if (_proxySessions.TryGetValue(cookie, out var session) && session.Expiry > DateTimeOffset.UtcNow)
+        {
+            return session.UserId;
+        }
+
+        _proxySessions.TryRemove(cookie, out _);
+        return null;
+    }
+
+    private Guid? GetJellyfinAuthUserId()
+    {
+        return User.Identity?.IsAuthenticated == true ? this.GetUserIdFromClaims() : null;
+    }
+
+    private void EnsureProxySession(Guid userId)
+    {
+        if (Request.Cookies.ContainsKey("moonfin_proxy")) return;
+
+        // Clean expired sessions periodically
+        var now = DateTimeOffset.UtcNow;
+        if (_proxySessions.Count > 100)
+        {
+            foreach (var kvp in _proxySessions)
+            {
+                if (kvp.Value.Expiry < now)
+                    _proxySessions.TryRemove(kvp.Key, out _);
+            }
+        }
+
+        var token = Guid.NewGuid().ToString("N");
+        _proxySessions[token] = (userId, now.AddHours(12));
+
+        Response.Cookies.Append("moonfin_proxy", token, new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            Path = ProxyBasePath,
+            MaxAge = TimeSpan.FromHours(12),
+            Secure = Request.IsHttps
+        });
+    }
+
+    private static string? StripQueryParam(string? queryString, string param)
+    {
+        if (string.IsNullOrEmpty(queryString)) return null;
+
+        var parts = queryString.TrimStart('?').Split('&')
+            .Where(p => !p.StartsWith(param + "=", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        return parts.Length > 0 ? "?" + string.Join("&", parts) : null;
+    }
+
+    private static string RewriteHtmlForProxy(string html)
+    {
+        // Rewrite absolute paths in src, href, action, srcset attributes
+        // Matches: src="/ but not src="// (protocol-relative) or already-proxied paths
+        html = Regex.Replace(html,
+            @"((?:src|href|action|srcset)\s*=\s*"")\/(?!\/|Moonfin)",
+            $"$1{ProxyBasePath}/");
+        html = Regex.Replace(html,
+            @"((?:src|href|action|srcset)\s*=\s*')\/(?!\/|Moonfin)",
+            $"$1{ProxyBasePath}/");
+
+        // Inject proxy URL rewriter script after <head>
+        var headIdx = html.IndexOf("<head", StringComparison.OrdinalIgnoreCase);
+        if (headIdx >= 0)
+        {
+            var closeIdx = html.IndexOf('>', headIdx);
+            if (closeIdx >= 0)
+            {
+                html = html.Insert(closeIdx + 1, ProxyScript);
+            }
+        }
+
+        return html;
+    }
+
+    private const string ProxyScript = @"<script data-moonfin-proxy>(function(){
+var b='/Moonfin/Jellyseerr/Web';
+function r(v){return typeof v==='string'&&v[0]==='/'&&v[1]!=='/'&&v.indexOf(b)!==0?b+v:v}
+var F=window.fetch;window.fetch=function(u,o){return F.call(this,typeof u==='string'?r(u):u,o)};
+var X=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(){if(typeof arguments[1]==='string')arguments[1]=r(arguments[1]);return X.apply(this,arguments)};
+var S=Element.prototype.setAttribute;Element.prototype.setAttribute=function(n,v){if(n==='src'||n==='href'||n==='action')v=r(v);return S.call(this,n,v)};
+new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;var fix=function(e){['src','href'].forEach(function(a){var v=e.getAttribute(a);if(v&&v[0]==='/'&&v[1]!=='/'&&v.indexOf(b)!==0)S.call(e,a,b+v)})};fix(n);if(n.querySelectorAll)n.querySelectorAll('[src],[href]').forEach(fix)})})}).observe(document.documentElement,{childList:true,subtree:true});
+})()</script>";
 }
 
 /// <summary>

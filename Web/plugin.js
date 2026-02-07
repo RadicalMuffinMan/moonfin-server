@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T22:56:02.110Z
+// Moonfin Web Plugin - Built 2026-02-07T23:44:13.712Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1493,6 +1493,11 @@ const Navbar = {
   handleNavigation(action, btn) {
     var _this0 = this;
     return _asyncToGenerator(function* () {
+      // Close details overlay on any navigation
+      if (Details.isVisible) {
+        Details.hide();
+      }
+
       // Close Jellyseerr iframe on any navigation except toggling jellyseerr itself
       if (action !== 'jellyseerr' && action !== 'settings' && Jellyseerr.isOpen) {
         Jellyseerr.close();
@@ -2701,6 +2706,13 @@ const Jellyseerr = {
   isOpen: false,
   config: null,
   ssoStatus: null,
+  getProxyUrl() {
+    var _window$ApiClient7, _window$ApiClient7$se, _window$ApiClient8, _window$ApiClient8$ac;
+    var serverUrl = ((_window$ApiClient7 = window.ApiClient) === null || _window$ApiClient7 === void 0 || (_window$ApiClient7$se = _window$ApiClient7.serverAddress) === null || _window$ApiClient7$se === void 0 ? void 0 : _window$ApiClient7$se.call(_window$ApiClient7)) || '';
+    var token = (_window$ApiClient8 = window.ApiClient) === null || _window$ApiClient8 === void 0 || (_window$ApiClient8$ac = _window$ApiClient8.accessToken) === null || _window$ApiClient8$ac === void 0 ? void 0 : _window$ApiClient8$ac.call(_window$ApiClient8);
+    if (!serverUrl || !token) return null;
+    return serverUrl + '/Moonfin/Jellyseerr/Web/?api_key=' + encodeURIComponent(token);
+  },
   init() {
     var _this12 = this;
     return _asyncToGenerator(function* () {
@@ -2719,9 +2731,9 @@ const Jellyseerr = {
     var _this13 = this;
     return _asyncToGenerator(function* () {
       try {
-        var _window$ApiClient7, _window$ApiClient7$se, _window$ApiClient8, _window$ApiClient8$ac;
-        const serverUrl = ((_window$ApiClient7 = window.ApiClient) === null || _window$ApiClient7 === void 0 || (_window$ApiClient7$se = _window$ApiClient7.serverAddress) === null || _window$ApiClient7$se === void 0 ? void 0 : _window$ApiClient7$se.call(_window$ApiClient7)) || '';
-        const token = (_window$ApiClient8 = window.ApiClient) === null || _window$ApiClient8 === void 0 || (_window$ApiClient8$ac = _window$ApiClient8.accessToken) === null || _window$ApiClient8$ac === void 0 ? void 0 : _window$ApiClient8$ac.call(_window$ApiClient8);
+        var _window$ApiClient9, _window$ApiClient9$se, _window$ApiClient0, _window$ApiClient0$ac;
+        const serverUrl = ((_window$ApiClient9 = window.ApiClient) === null || _window$ApiClient9 === void 0 || (_window$ApiClient9$se = _window$ApiClient9.serverAddress) === null || _window$ApiClient9$se === void 0 ? void 0 : _window$ApiClient9$se.call(_window$ApiClient9)) || '';
+        const token = (_window$ApiClient0 = window.ApiClient) === null || _window$ApiClient0 === void 0 || (_window$ApiClient0$ac = _window$ApiClient0.accessToken) === null || _window$ApiClient0$ac === void 0 ? void 0 : _window$ApiClient0$ac.call(_window$ApiClient0);
         if (!serverUrl || !token) {
           console.log('[Moonfin] Cannot fetch Jellyseerr config - not authenticated');
           return;
@@ -2751,9 +2763,9 @@ const Jellyseerr = {
     var _this14 = this;
     return _asyncToGenerator(function* () {
       try {
-        var _window$ApiClient9, _window$ApiClient9$se, _window$ApiClient0, _window$ApiClient0$ac;
-        var serverUrl = ((_window$ApiClient9 = window.ApiClient) === null || _window$ApiClient9 === void 0 || (_window$ApiClient9$se = _window$ApiClient9.serverAddress) === null || _window$ApiClient9$se === void 0 ? void 0 : _window$ApiClient9$se.call(_window$ApiClient9)) || '';
-        var token = (_window$ApiClient0 = window.ApiClient) === null || _window$ApiClient0 === void 0 || (_window$ApiClient0$ac = _window$ApiClient0.accessToken) === null || _window$ApiClient0$ac === void 0 ? void 0 : _window$ApiClient0$ac.call(_window$ApiClient0);
+        var _window$ApiClient1, _window$ApiClient1$se, _window$ApiClient10, _window$ApiClient10$a;
+        var serverUrl = ((_window$ApiClient1 = window.ApiClient) === null || _window$ApiClient1 === void 0 || (_window$ApiClient1$se = _window$ApiClient1.serverAddress) === null || _window$ApiClient1$se === void 0 ? void 0 : _window$ApiClient1$se.call(_window$ApiClient1)) || '';
+        var token = (_window$ApiClient10 = window.ApiClient) === null || _window$ApiClient10 === void 0 || (_window$ApiClient10$a = _window$ApiClient10.accessToken) === null || _window$ApiClient10$a === void 0 ? void 0 : _window$ApiClient10$a.call(_window$ApiClient10);
         if (!serverUrl || !token) return;
         var response = yield fetch(serverUrl + '/Moonfin/Jellyseerr/Status', {
           method: 'GET',
@@ -2775,9 +2787,9 @@ const Jellyseerr = {
     var _this15 = this;
     return _asyncToGenerator(function* () {
       try {
-        var _window$ApiClient1, _window$ApiClient1$se, _window$ApiClient10, _window$ApiClient10$a;
-        var serverUrl = ((_window$ApiClient1 = window.ApiClient) === null || _window$ApiClient1 === void 0 || (_window$ApiClient1$se = _window$ApiClient1.serverAddress) === null || _window$ApiClient1$se === void 0 ? void 0 : _window$ApiClient1$se.call(_window$ApiClient1)) || '';
-        var token = (_window$ApiClient10 = window.ApiClient) === null || _window$ApiClient10 === void 0 || (_window$ApiClient10$a = _window$ApiClient10.accessToken) === null || _window$ApiClient10$a === void 0 ? void 0 : _window$ApiClient10$a.call(_window$ApiClient10);
+        var _window$ApiClient11, _window$ApiClient11$s, _window$ApiClient12, _window$ApiClient12$a;
+        var serverUrl = ((_window$ApiClient11 = window.ApiClient) === null || _window$ApiClient11 === void 0 || (_window$ApiClient11$s = _window$ApiClient11.serverAddress) === null || _window$ApiClient11$s === void 0 ? void 0 : _window$ApiClient11$s.call(_window$ApiClient11)) || '';
+        var token = (_window$ApiClient12 = window.ApiClient) === null || _window$ApiClient12 === void 0 || (_window$ApiClient12$a = _window$ApiClient12.accessToken) === null || _window$ApiClient12$a === void 0 ? void 0 : _window$ApiClient12$a.call(_window$ApiClient12);
         if (!serverUrl || !token) {
           return {
             success: false,
@@ -2829,9 +2841,9 @@ const Jellyseerr = {
     var _this16 = this;
     return _asyncToGenerator(function* () {
       try {
-        var _window$ApiClient11, _window$ApiClient11$s, _window$ApiClient12, _window$ApiClient12$a, _this16$config;
-        var serverUrl = ((_window$ApiClient11 = window.ApiClient) === null || _window$ApiClient11 === void 0 || (_window$ApiClient11$s = _window$ApiClient11.serverAddress) === null || _window$ApiClient11$s === void 0 ? void 0 : _window$ApiClient11$s.call(_window$ApiClient11)) || '';
-        var token = (_window$ApiClient12 = window.ApiClient) === null || _window$ApiClient12 === void 0 || (_window$ApiClient12$a = _window$ApiClient12.accessToken) === null || _window$ApiClient12$a === void 0 ? void 0 : _window$ApiClient12$a.call(_window$ApiClient12);
+        var _window$ApiClient13, _window$ApiClient13$s, _window$ApiClient14, _window$ApiClient14$a, _this16$config;
+        var serverUrl = ((_window$ApiClient13 = window.ApiClient) === null || _window$ApiClient13 === void 0 || (_window$ApiClient13$s = _window$ApiClient13.serverAddress) === null || _window$ApiClient13$s === void 0 ? void 0 : _window$ApiClient13$s.call(_window$ApiClient13)) || '';
+        var token = (_window$ApiClient14 = window.ApiClient) === null || _window$ApiClient14 === void 0 || (_window$ApiClient14$a = _window$ApiClient14.accessToken) === null || _window$ApiClient14$a === void 0 ? void 0 : _window$ApiClient14$a.call(_window$ApiClient14);
         if (!serverUrl || !token) return;
         yield fetch(serverUrl + '/Moonfin/Jellyseerr/Logout', {
           method: 'DELETE',
@@ -2853,9 +2865,9 @@ const Jellyseerr = {
   ssoApiCall(method, path, body) {
     var _this17 = this;
     return _asyncToGenerator(function* () {
-      var _window$ApiClient13, _window$ApiClient13$s, _window$ApiClient14, _window$ApiClient14$a;
-      var serverUrl = ((_window$ApiClient13 = window.ApiClient) === null || _window$ApiClient13 === void 0 || (_window$ApiClient13$s = _window$ApiClient13.serverAddress) === null || _window$ApiClient13$s === void 0 ? void 0 : _window$ApiClient13$s.call(_window$ApiClient13)) || '';
-      var token = (_window$ApiClient14 = window.ApiClient) === null || _window$ApiClient14 === void 0 || (_window$ApiClient14$a = _window$ApiClient14.accessToken) === null || _window$ApiClient14$a === void 0 ? void 0 : _window$ApiClient14$a.call(_window$ApiClient14);
+      var _window$ApiClient15, _window$ApiClient15$s, _window$ApiClient16, _window$ApiClient16$a;
+      var serverUrl = ((_window$ApiClient15 = window.ApiClient) === null || _window$ApiClient15 === void 0 || (_window$ApiClient15$s = _window$ApiClient15.serverAddress) === null || _window$ApiClient15$s === void 0 ? void 0 : _window$ApiClient15$s.call(_window$ApiClient15)) || '';
+      var token = (_window$ApiClient16 = window.ApiClient) === null || _window$ApiClient16 === void 0 || (_window$ApiClient16$a = _window$ApiClient16.accessToken) === null || _window$ApiClient16$a === void 0 ? void 0 : _window$ApiClient16$a.call(_window$ApiClient16);
       if (!serverUrl || !token) {
         throw new Error('Not authenticated with Jellyfin');
       }
@@ -2894,10 +2906,6 @@ const Jellyseerr = {
     // Check SSO status - direct user to Settings if not authenticated
     if (!((_this$ssoStatus = this.ssoStatus) !== null && _this$ssoStatus !== void 0 && _this$ssoStatus.authenticated)) {
       this.showSignInPrompt();
-      return;
-    }
-    if (this.config.openInNewTab) {
-      window.open(this.config.url, '_blank');
       return;
     }
     this.createContainer();
@@ -2961,7 +2969,8 @@ const Jellyseerr = {
     this.container.className = 'moonfin-jellyseerr-container';
     var displayName = ((_this$config3 = this.config) === null || _this$config3 === void 0 ? void 0 : _this$config3.displayName) || 'Jellyseerr';
     var ssoUser = ((_this$ssoStatus2 = this.ssoStatus) === null || _this$ssoStatus2 === void 0 ? void 0 : _this$ssoStatus2.displayName) || '';
-    this.container.innerHTML = '<div class="moonfin-jellyseerr-header">' + '<div class="moonfin-jellyseerr-title">' + '<svg class="moonfin-jellyseerr-icon" viewBox="0 0 24 24" width="24" height="24">' + '<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>' + '</svg>' + '<span>' + displayName + '</span>' + (ssoUser ? '<span class="moonfin-jellyseerr-sso-user"> &mdash; ' + ssoUser + '</span>' : '') + '</div>' + '<div class="moonfin-jellyseerr-actions">' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-refresh" title="Refresh">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>' + '</svg>' + '</button>' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-external" title="Open in new tab">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>' + '</svg>' + '</button>' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-signout" title="Sign out of Jellyseerr">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>' + '</svg>' + '</button>' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-close" title="Close">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>' + '</svg>' + '</button>' + '</div>' + '</div>' + '<div class="moonfin-jellyseerr-loading">' + '<div class="moonfin-jellyseerr-spinner"></div>' + '<span>Loading ' + displayName + '...</span>' + '</div>' + '<iframe ' + 'class="moonfin-jellyseerr-iframe" ' + 'src="' + this.config.url + '" ' + 'allow="fullscreen" ' + 'sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"' + '></iframe>';
+    var iframeSrc = this.getProxyUrl() || this.config.url;
+    this.container.innerHTML = '<div class="moonfin-jellyseerr-header">' + '<div class="moonfin-jellyseerr-title">' + '<svg class="moonfin-jellyseerr-icon" viewBox="0 0 24 24" width="24" height="24">' + '<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>' + '</svg>' + '<span>' + displayName + '</span>' + (ssoUser ? '<span class="moonfin-jellyseerr-sso-user"> &mdash; ' + ssoUser + '</span>' : '') + '</div>' + '<div class="moonfin-jellyseerr-actions">' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-refresh" title="Refresh">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>' + '</svg>' + '</button>' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-external" title="Open in new tab">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>' + '</svg>' + '</button>' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-signout" title="Sign out of Jellyseerr">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>' + '</svg>' + '</button>' + '<button class="moonfin-jellyseerr-btn moonfin-jellyseerr-close" title="Close">' + '<svg viewBox="0 0 24 24" width="20" height="20">' + '<path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>' + '</svg>' + '</button>' + '</div>' + '</div>' + '<div class="moonfin-jellyseerr-loading">' + '<div class="moonfin-jellyseerr-spinner"></div>' + '<span>Loading ' + displayName + '...</span>' + '</div>' + '<iframe ' + 'class="moonfin-jellyseerr-iframe" ' + 'src="' + iframeSrc + '" ' + 'allow="fullscreen" ' + 'sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"' + '></iframe>';
     document.body.appendChild(this.container);
     this.iframe = this.container.querySelector('.moonfin-jellyseerr-iframe');
     this.setupEventListeners();
@@ -2998,10 +3007,9 @@ const Jellyseerr = {
     document.addEventListener('keydown', this._escHandler);
   },
   refresh() {
-    var _this$config4;
-    if (this.iframe && (_this$config4 = this.config) !== null && _this$config4 !== void 0 && _this$config4.url) {
+    if (this.iframe) {
       this.container.classList.remove('loaded');
-      this.iframe.src = this.config.url;
+      this.iframe.src = this.getProxyUrl() || this.config.url;
     }
   },
   showError(message) {
@@ -3115,7 +3123,7 @@ var Details = {
       }
     }, true);
 
-    // Close on back button
+    // Close on back button (keyboard/remote)
     document.addEventListener('keydown', function (e) {
       if (self.isVisible && (e.key === 'Escape' || e.keyCode === 27 || e.keyCode === 461 || e.keyCode === 10009)) {
         e.preventDefault();
@@ -3123,6 +3131,14 @@ var Details = {
         self.hide();
       }
     }, true);
+
+    // Close on mobile physical back button (popstate)
+    window.addEventListener('popstate', function (e) {
+      if (self.isVisible) {
+        e.preventDefault();
+        self.hide(true);
+      }
+    });
   },
   getItemIdFromCard: function (card) {
     var idFromAttr = card.getAttribute('data-id') || card.getAttribute('data-itemid');
@@ -3168,6 +3184,11 @@ var Details = {
     this.container.classList.add('visible');
     this.isVisible = true;
     document.body.classList.add('moonfin-details-visible');
+
+    // Push history state so mobile back button closes the overlay
+    history.pushState({
+      moonfinDetails: true
+    }, '');
     var panel = this.container.querySelector('.moonfin-details-panel');
     panel.innerHTML = '<div class="moonfin-details-loading"><div class="moonfin-spinner"></div><span>Loading...</span></div>';
     this.fetchItem(api, itemId).then(function (item) {
@@ -3778,24 +3799,74 @@ var Details = {
       name: 'Add to Playlist',
       icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-120v-80h280v80H480Zm0-160v-80h280v80H480Zm0-160v-80h280v80H480ZM200-360v-240h80v240h-80Zm120-120v-120h80v120h-80Z"/></svg>'
     });
+
+    // Instant Mix (for music-type items)
+    if (item.Type === 'MusicAlbum' || item.Type === 'MusicArtist' || item.Type === 'Audio' || item.Type === 'Playlist') {
+      menuItems.push({
+        id: 'instantmix',
+        name: 'Instant Mix',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47Z"/></svg>'
+      });
+    }
     menuItems.push({
       id: 'mediainfo',
       name: 'Media Info',
       icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>'
     });
+
+    // Download (for playable items)
+    if (item.Type === 'Movie' || item.Type === 'Episode' || item.Type === 'Audio') {
+      menuItems.push({
+        id: 'download',
+        name: 'Download',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg>'
+      });
+    }
     menuItems.push({
       id: 'refresh',
       name: 'Refresh Metadata',
       icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>'
+    });
+
+    // Admin options: Edit Metadata, Edit Images, Edit Subtitles, Identify
+    menuItems.push({
+      id: 'editmetadata',
+      name: 'Edit Metadata',
+      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>'
+    });
+    menuItems.push({
+      id: 'editimages',
+      name: 'Edit Images',
+      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/></svg>'
+    });
+    if (item.Type === 'Movie' || item.Type === 'Episode') {
+      menuItems.push({
+        id: 'editsubtitles',
+        name: 'Edit Subtitles',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-160q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h560q33 0 56.5 23.5T840-720v480q0 33-23.5 56.5T760-160H200Zm0-80h560v-480H200v480Zm80-120h120v-80H280v80Zm200 0h200v-80H480v80ZM280-480h200v-80H280v80Zm280 0h120v-80H560v80Z"/></svg>'
+      });
+    }
+    menuItems.push({
+      id: 'identify',
+      name: 'Identify',
+      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>'
     });
     menuItems.push({
       id: 'opennative',
       name: 'Open in Jellyfin',
       icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/></svg>'
     });
+
+    // Delete (admin, with confirmation)
+    menuItems.push({
+      id: 'delete',
+      name: 'Delete',
+      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>',
+      className: 'moonfin-more-item-danger'
+    });
     var menuHtml = '<div class="moonfin-more-menu">' + '<h3 class="moonfin-more-title">' + (item.Name || 'Options') + '</h3>' + '<div class="moonfin-more-items">';
     for (var i = 0; i < menuItems.length; i++) {
-      menuHtml += '<button class="moonfin-more-item moonfin-focusable" data-more-action="' + menuItems[i].id + '" tabindex="0">' + '<span class="moonfin-more-item-icon">' + menuItems[i].icon + '</span>' + '<span class="moonfin-more-item-text">' + menuItems[i].name + '</span>' + '</button>';
+      menuHtml += '<button class="moonfin-more-item moonfin-focusable' + (menuItems[i].className ? ' ' + menuItems[i].className : '') + '" data-more-action="' + menuItems[i].id + '" tabindex="0">' + '<span class="moonfin-more-item-icon">' + menuItems[i].icon + '</span>' + '<span class="moonfin-more-item-text">' + menuItems[i].name + '</span>' + '</button>';
     }
     menuHtml += '</div></div>';
     overlay.innerHTML = menuHtml;
@@ -3872,11 +3943,101 @@ var Details = {
           console.error('[Moonfin] Details: Failed to refresh metadata', err);
         });
         break;
+      case 'instantmix':
+        this.hide();
+        var instantMixUrl = serverUrl + '/Items/' + item.Id + '/InstantMix?UserId=' + api.getCurrentUserId() + '&Limit=50';
+        fetch(instantMixUrl, {
+          headers: headers
+        }).then(function (resp) {
+          return resp.json();
+        }).then(function (result) {
+          var mixIds = (result.Items || []).map(function (i) {
+            return i.Id;
+          });
+          if (mixIds.length > 0) self.playItem(mixIds[0], 0);
+        }).catch(function (err) {
+          console.error('[Moonfin] Details: Instant mix failed', err);
+        });
+        break;
+      case 'download':
+        var downloadUrl = serverUrl + '/Items/' + item.Id + '/Download?api_key=' + api.accessToken();
+        var a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = item.Name || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        break;
+      case 'editmetadata':
+        this.hide();
+        API.navigateTo('/edititemmetadata?id=' + item.Id);
+        break;
+      case 'editimages':
+        this.hide();
+        API.navigateTo('/edititemimages?id=' + item.Id);
+        break;
+      case 'editsubtitles':
+        this.hide();
+        API.navigateTo('/edititemsubtitles?id=' + item.Id);
+        break;
+      case 'identify':
+        this.hide();
+        API.navigateTo('/itemidentify?id=' + item.Id);
+        break;
       case 'opennative':
         this.hide();
         API.navigateTo('/details?id=' + item.Id);
         break;
+      case 'delete':
+        self.confirmDelete(item);
+        break;
     }
+  },
+  confirmDelete: function (item) {
+    var self = this;
+    var serverUrl = this.getServerUrl();
+    var headers = this.getAuthHeaders();
+    var overlay = document.createElement('div');
+    overlay.className = 'moonfin-more-overlay';
+    overlay.innerHTML = '<div class="moonfin-more-menu">' + '<h3 class="moonfin-more-title">Delete</h3>' + '<p style="color:rgba(255,255,255,0.7);margin:0 0 20px;text-align:center">Are you sure you want to delete<br><strong>' + (item.Name || 'this item') + '</strong>?<br><span style="color:#ff6b6b;font-size:13px">This action cannot be undone.</span></p>' + '<div style="display:flex;gap:12px;justify-content:center">' + '<button class="moonfin-more-item moonfin-focusable moonfin-delete-cancel" tabindex="0"><span class="moonfin-more-item-text">Cancel</span></button>' + '<button class="moonfin-more-item moonfin-focusable moonfin-more-item-danger moonfin-delete-confirm" tabindex="0"><span class="moonfin-more-item-text">Delete</span></button>' + '</div>' + '</div>';
+    var closeOverlay = function () {
+      if (overlay._escHandler) document.removeEventListener('keydown', overlay._escHandler, true);
+      overlay.remove();
+    };
+    overlay._escHandler = function (e) {
+      if (e.key === 'Escape' || e.keyCode === 27 || e.keyCode === 461 || e.keyCode === 10009) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeOverlay();
+      }
+    };
+    document.addEventListener('keydown', overlay._escHandler, true);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeOverlay();
+    });
+    overlay.querySelector('.moonfin-delete-cancel').addEventListener('click', closeOverlay);
+    overlay.querySelector('.moonfin-delete-confirm').addEventListener('click', function () {
+      fetch(serverUrl + '/Items/' + item.Id, {
+        method: 'DELETE',
+        headers: headers
+      }).then(function (resp) {
+        if (resp.ok) {
+          self.showToast('Deleted successfully');
+          self.hide();
+        } else {
+          self.showToast('Failed to delete - check permissions');
+        }
+        closeOverlay();
+      }).catch(function (err) {
+        console.error('[Moonfin] Details: Delete failed', err);
+        self.showToast('Delete failed');
+        closeOverlay();
+      });
+    });
+    document.body.appendChild(overlay);
+    setTimeout(function () {
+      overlay.querySelector('.moonfin-delete-cancel').focus();
+    }, 50);
   },
   showToast: function (message) {
     var toast = document.createElement('div');
@@ -4047,6 +4208,30 @@ var Details = {
     var posterTag = item.ImageTags ? item.ImageTags.Primary : null;
     var posterUrl = posterTag ? serverUrl + '/Items/' + item.Id + '/Images/Primary?maxHeight=500&quality=90' : '';
 
+    // Determine state for action buttons
+    var isPlayed = item.UserData && item.UserData.Played;
+    var isFavorite = item.UserData && item.UserData.IsFavorite;
+
+    // Find first unwatched episode for play button
+    var firstUnwatched = null;
+    for (var e = 0; e < episodes.length; e++) {
+      if (!episodes[e].UserData || !episodes[e].UserData.Played) {
+        firstUnwatched = episodes[e];
+        break;
+      }
+    }
+    var playTarget = firstUnwatched || episodes[0];
+
+    // Build action buttons
+    var seasonActions = '';
+    if (episodes.length > 0) {
+      seasonActions += '<div class="moonfin-btn-wrapper moonfin-focusable" data-action="play" tabindex="0">' + '<div class="moonfin-btn-circle moonfin-btn-primary">' + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">Play</span>' + '</div>';
+      seasonActions += '<div class="moonfin-btn-wrapper moonfin-focusable" data-action="shuffle" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M560-160v-80h104L537-367l57-57 126 126v-102h80v240H560Zm-344 0-56-56 504-504H560v-80h240v240h-80v-104L216-160Zm151-377L160-744l56-56 207 207-56 56Z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">Shuffle</span>' + '</div>';
+    }
+    seasonActions += '<div class="moonfin-btn-wrapper moonfin-focusable ' + (isPlayed ? 'active' : '') + '" data-action="played" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">' + (isPlayed ? 'Watched' : 'Unwatched') + '</span>' + '</div>';
+    seasonActions += '<div class="moonfin-btn-wrapper moonfin-focusable ' + (isFavorite ? 'active' : '') + '" data-action="favorite" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="' + (isFavorite ? 'm480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z' : 'M480-120q-14 0-28.5-5T426-140q-43-38-97.5-82.5T232-308q-41.5-41.5-72-83T122-475q-8-32-11-60.5T108-596q0-86 57-147t147-61q52 0 99 22t69 62q22-40 69-62t99-22q90 0 147 61t57 147q0 32-3 60.5T837-475q-7 42-37.5 83.5T728-308q-42 42-96.5 86.5T534-140q-11 10-25.5 15t-28.5 5Zm0-80q41-37 88.5-75t83-68.5q35.5-30.5 61-58T746-456q9-27 11.5-49t2.5-43q0-53-34.5-91.5T636-678q-43 0-77.5 24T507-602h-54q-17-28-51.5-52T324-678q-55 0-89.5 38.5T200-548q0 21 2.5 43t11.5 49q9 27 34.5 54.5t61 58Q345-313 392.5-275T480-200Z') + '"/></svg>' + '</div>' + '<span class="moonfin-btn-label">' + (isFavorite ? 'Favorited' : 'Favorite') + '</span>' + '</div>';
+    seasonActions += '<div class="moonfin-btn-wrapper moonfin-focusable" data-action="more" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">More</span>' + '</div>';
+
     // Build episode list (vertical layout)
     var episodeListHtml = episodes.map(function (ep) {
       var epThumbTag = ep.ImageTags ? ep.ImageTags.Primary : null;
@@ -4056,10 +4241,10 @@ var Details = {
       var isPlayed = ep.UserData && ep.UserData.Played;
       return '<div class="moonfin-season-ep moonfin-focusable" data-item-id="' + ep.Id + '" data-type="Episode" tabindex="0">' + '<div class="moonfin-season-ep-thumb">' + (epThumbUrl ? '<img src="' + epThumbUrl + '" alt="" loading="lazy">' : '<div class="moonfin-season-ep-thumb-placeholder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9.5 7.5l7 4.5-7 4.5z"/></svg></div>') + (epProgress ? '<div class="moonfin-episode-progress"><div class="moonfin-episode-progress-bar" style="width:' + Math.min(epProgress, 100) + '%"></div></div>' : '') + '</div>' + '<div class="moonfin-season-ep-body">' + '<div class="moonfin-season-ep-top">' + '<span class="moonfin-season-ep-number">Episode ' + (ep.IndexNumber || '?') + '</span>' + '<span class="moonfin-season-ep-meta">' + (epRuntime ? '<span>' + epRuntime + '</span>' : '') + (isPlayed ? '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" class="moonfin-season-ep-check"><path d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>' : '') + '</span>' + '</div>' + '<span class="moonfin-season-ep-title">' + ep.Name + '</span>' + (ep.Overview ? '<p class="moonfin-season-ep-overview">' + ep.Overview + '</p>' : '') + '</div>' + '</div>';
     }).join('');
-    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-back moonfin-focusable" title="Back" tabindex="0">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' + '<div class="moonfin-season-detail-header">' + '<div class="moonfin-season-detail-poster">' + (posterUrl ? '<img src="' + posterUrl + '" alt="">' : '') + '</div>' + '<div class="moonfin-season-detail-info">' + (item.SeriesName ? '<span class="moonfin-season-detail-series">' + item.SeriesName + '</span>' : '') + '<h1 class="moonfin-season-detail-title">' + item.Name + '</h1>' + '<span class="moonfin-season-detail-count">' + episodes.length + ' Episode' + (episodes.length !== 1 ? 's' : '') + '</span>' + '</div>' + '</div>' + '<div class="moonfin-season-episodes-list">' + episodeListHtml + '</div>' + '</div>';
-    this.setupSeasonPanelListeners(panel, item);
+    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-back moonfin-focusable" title="Back" tabindex="0">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' + '<div class="moonfin-season-detail-header">' + '<div class="moonfin-season-detail-poster">' + (posterUrl ? '<img src="' + posterUrl + '" alt="">' : '') + '</div>' + '<div class="moonfin-season-detail-info">' + (item.SeriesName ? '<span class="moonfin-season-detail-series">' + item.SeriesName + '</span>' : '') + '<h1 class="moonfin-season-detail-title">' + item.Name + '</h1>' + '<span class="moonfin-season-detail-count">' + episodes.length + ' Episode' + (episodes.length !== 1 ? 's' : '') + '</span>' + '</div>' + '</div>' + '<div class="moonfin-actions">' + seasonActions + '</div>' + '<div class="moonfin-season-episodes-list">' + episodeListHtml + '</div>' + '</div>';
+    this.setupSeasonPanelListeners(panel, item, episodes);
   },
-  setupSeasonPanelListeners: function (panel, item) {
+  setupSeasonPanelListeners: function (panel, item, episodes) {
     var self = this;
 
     // Back button goes to series
@@ -4074,6 +4259,17 @@ var Details = {
       });
     }
 
+    // Action buttons
+    var actionBtns = panel.querySelectorAll('[data-action]');
+    for (var j = 0; j < actionBtns.length; j++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var action = btn.getAttribute('data-action');
+          self.handleSeasonAction(action, item, episodes);
+        });
+      })(actionBtns[j]);
+    }
+
     // Episode cards open episode details
     var episodeCards = panel.querySelectorAll('.moonfin-season-ep');
     for (var i = 0; i < episodeCards.length; i++) {
@@ -4084,11 +4280,116 @@ var Details = {
       })(episodeCards[i]);
     }
   },
-  hide: function () {
+  handleSeasonAction: function (action, item, episodes) {
+    var self = this;
+    var api = API.getApiClient();
+    var userId = api.getCurrentUserId();
+    var serverUrl = this.getServerUrl();
+    var headers = this.getAuthHeaders();
+    switch (action) {
+      case 'play':
+        if (episodes.length === 0) return;
+        var firstUnwatched = null;
+        for (var i = 0; i < episodes.length; i++) {
+          if (!episodes[i].UserData || !episodes[i].UserData.Played) {
+            firstUnwatched = episodes[i];
+            break;
+          }
+        }
+        var playTarget = firstUnwatched || episodes[0];
+        self.hide();
+        self.playItem(playTarget.Id, playTarget.UserData && playTarget.UserData.PlaybackPositionTicks ? playTarget.UserData.PlaybackPositionTicks : 0);
+        break;
+      case 'shuffle':
+        if (episodes.length === 0) return;
+        self.hide();
+        var ids = episodes.map(function (ep) {
+          return ep.Id;
+        });
+        for (var s = ids.length - 1; s > 0; s--) {
+          var r = Math.floor(Math.random() * (s + 1));
+          var temp = ids[s];
+          ids[s] = ids[r];
+          ids[r] = temp;
+        }
+        if (typeof api.sendPlayCommand === 'function') {
+          var deviceId = api.deviceId();
+          api.getSessions({
+            DeviceId: deviceId
+          }).then(function (sessions) {
+            if (sessions && sessions.length > 0) {
+              return api.sendPlayCommand(sessions[0].Id, {
+                ItemIds: ids,
+                PlayCommand: 'PlayNow',
+                StartPositionTicks: 0
+              });
+            }
+            throw new Error('No session');
+          }).catch(function () {
+            self._shuffleViaSession(ids);
+          });
+        } else {
+          self._shuffleViaSession(ids);
+        }
+        break;
+      case 'favorite':
+        var isFav = item.UserData ? item.UserData.IsFavorite : false;
+        fetch(serverUrl + '/Users/' + userId + '/FavoriteItems/' + item.Id, {
+          method: isFav ? 'DELETE' : 'POST',
+          headers: headers
+        }).then(function (resp) {
+          if (resp.ok) {
+            if (!item.UserData) item.UserData = {};
+            item.UserData.IsFavorite = !isFav;
+            var wrapper = self.container.querySelector('[data-action="favorite"]');
+            if (wrapper) {
+              wrapper.classList.toggle('active');
+              var label = wrapper.querySelector('.moonfin-btn-label');
+              if (label) label.textContent = item.UserData.IsFavorite ? 'Favorited' : 'Favorite';
+            }
+          }
+        }).catch(function (err) {
+          console.error('[Moonfin] Details: Failed to toggle favorite', err);
+        });
+        break;
+      case 'played':
+        var isPlayed = item.UserData ? item.UserData.Played : false;
+        fetch(serverUrl + '/Users/' + userId + '/PlayedItems/' + item.Id, {
+          method: isPlayed ? 'DELETE' : 'POST',
+          headers: headers
+        }).then(function (resp) {
+          if (resp.ok) {
+            if (!item.UserData) item.UserData = {};
+            item.UserData.Played = !isPlayed;
+            var wrapper = self.container.querySelector('[data-action="played"]');
+            if (wrapper) {
+              wrapper.classList.toggle('active');
+              var label = wrapper.querySelector('.moonfin-btn-label');
+              if (label) label.textContent = item.UserData.Played ? 'Watched' : 'Unwatched';
+            }
+          }
+        }).catch(function (err) {
+          console.error('[Moonfin] Details: Failed to toggle played', err);
+        });
+        break;
+      case 'more':
+        self.showMoreMenu(item);
+        break;
+    }
+  },
+  hide: function (fromPopstate) {
+    if (!this.isVisible) return;
     this.container.classList.remove('visible');
     this.isVisible = false;
     this.currentItem = null;
     document.body.classList.remove('moonfin-details-visible');
+
+    // Pop the history entry we pushed, unless we're already handling popstate
+    if (!fromPopstate) {
+      try {
+        history.back();
+      } catch (e) {}
+    }
   }
 };
 
