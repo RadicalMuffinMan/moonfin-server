@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T08:55:22.053Z
+// Moonfin Web Plugin - Built 2026-02-07T15:12:36.935Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -479,7 +479,7 @@ const Storage = {
     }).apply(this, arguments);
   },
   mapServerToLocal(serverSettings) {
-    var _serverSettings$navba, _serverSettings$media, _serverSettings$media2, _serverSettings$media3, _serverSettings$overl, _serverSettings$overl2, _serverSettings$media4, _serverSettings$media5, _serverSettings$showS, _serverSettings$showG, _serverSettings$showF, _serverSettings$showL, _serverSettings$shuff, _serverSettings$seaso, _serverSettings$backd, _serverSettings$confi, _serverSettings$navba2, _serverSettings$showC, _serverSettings$use;
+    var _serverSettings$navba, _serverSettings$media, _serverSettings$media2, _serverSettings$media3, _serverSettings$overl, _serverSettings$overl2, _serverSettings$media4, _serverSettings$media5, _serverSettings$showS, _serverSettings$showG, _serverSettings$showF, _serverSettings$showL, _serverSettings$shuff, _serverSettings$seaso, _serverSettings$backd, _serverSettings$confi, _serverSettings$navba2, _serverSettings$showC, _serverSettings$use, _serverSettings$mdbli, _serverSettings$mdbli2, _serverSettings$mdbli3;
     return {
       // UI Feature Toggles
       navbarEnabled: (_serverSettings$navba = serverSettings.navbarEnabled) !== null && _serverSettings$navba !== void 0 ? _serverSettings$navba : this.defaults.navbarEnabled,
@@ -504,7 +504,11 @@ const Storage = {
       // UI
       navbarPosition: (_serverSettings$navba2 = serverSettings.navbarPosition) !== null && _serverSettings$navba2 !== void 0 ? _serverSettings$navba2 : this.defaults.navbarPosition,
       showClock: (_serverSettings$showC = serverSettings.showClock) !== null && _serverSettings$showC !== void 0 ? _serverSettings$showC : this.defaults.showClock,
-      use24HourClock: (_serverSettings$use = serverSettings.use24HourClock) !== null && _serverSettings$use !== void 0 ? _serverSettings$use : this.defaults.use24HourClock
+      use24HourClock: (_serverSettings$use = serverSettings.use24HourClock) !== null && _serverSettings$use !== void 0 ? _serverSettings$use : this.defaults.use24HourClock,
+      // MDBList
+      mdblistEnabled: (_serverSettings$mdbli = serverSettings.mdblistEnabled) !== null && _serverSettings$mdbli !== void 0 ? _serverSettings$mdbli : this.defaults.mdblistEnabled,
+      mdblistApiKey: (_serverSettings$mdbli2 = serverSettings.mdblistApiKey) !== null && _serverSettings$mdbli2 !== void 0 ? _serverSettings$mdbli2 : this.defaults.mdblistApiKey,
+      mdblistRatingSources: (_serverSettings$mdbli3 = serverSettings.mdblistRatingSources) !== null && _serverSettings$mdbli3 !== void 0 ? _serverSettings$mdbli3 : this.defaults.mdblistRatingSources
     };
   },
   mapLocalToServer(localSettings) {
@@ -532,7 +536,11 @@ const Storage = {
       // UI
       navbarPosition: localSettings.navbarPosition,
       showClock: localSettings.showClock,
-      use24HourClock: localSettings.use24HourClock
+      use24HourClock: localSettings.use24HourClock,
+      // MDBList
+      mdblistEnabled: localSettings.mdblistEnabled,
+      mdblistApiKey: localSettings.mdblistApiKey,
+      mdblistRatingSources: localSettings.mdblistRatingSources
     };
   },
   sync() {
