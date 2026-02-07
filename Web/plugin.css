@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T06:54:57.820Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T07:07:39.517Z */
 
 /* === styles/navbar.css === */
 /**
@@ -400,7 +400,7 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     z-index: 4;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 0;
 }
 
@@ -408,20 +408,20 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 .moonfin-mediabar-info {
     width: 70%;
     flex-shrink: 0;
-    padding: 24px 28px;
+    padding: 16px 22px;
     border-radius: 16px;
     backdrop-filter: blur(10px);
-    min-height: 250px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .moonfin-mediabar-title {
-    font-size: 56px;
+    font-size: 28px;
     font-weight: 700;
     color: #fff;
-    margin: 0 0 16px 0;
-    line-height: 1.1;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
     text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.9);
     white-space: nowrap;
     overflow: hidden;
@@ -435,14 +435,14 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 
 .moonfin-mediabar-metadata {
     display: flex;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     align-items: center;
     flex-wrap: wrap;
     width: 100%;
 }
 
 .moonfin-mediabar-metadata span {
-    font-size: 20px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
 }
@@ -453,18 +453,18 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 
 .moonfin-mediabar-metadata span:not(:empty):not(:last-child)::after {
     content: '\2022';
-    margin-left: 15px;
+    margin-left: 12px;
     color: rgba(255, 255, 255, 0.5);
 }
 
 .moonfin-mediabar-metadata span + span:not(:empty) {
-    margin-left: 15px;
+    margin-left: 12px;
 }
 
 .moonfin-mediabar-genres {
-    font-size: 18px;
-    color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 16px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
 }
 
 .moonfin-mediabar-genres:empty {
@@ -472,11 +472,11 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 }
 
 .moonfin-mediabar-overview {
-    font-size: 22px;
+    font-size: 15px;
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 0.9);
     margin: 0;
-    text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.9);
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -491,7 +491,6 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    align-self: flex-end;
     max-height: 200px;
 }
 
@@ -652,24 +651,23 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     }
 
     .moonfin-mediabar-info {
-        min-height: 180px;
-        padding: 20px 24px;
+        padding: 14px 20px;
     }
 
     .moonfin-mediabar-title {
-        font-size: 40px;
+        font-size: 24px;
     }
 
     .moonfin-mediabar-metadata span {
-        font-size: 18px;
+        font-size: 13px;
     }
 
     .moonfin-mediabar-overview {
-        font-size: 18px;
+        font-size: 14px;
     }
 
     .moonfin-mediabar-genres {
-        font-size: 16px;
+        font-size: 12px;
     }
 
     .moonfin-mediabar-logo-container {
@@ -692,34 +690,31 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     }
 
     .moonfin-mediabar-content {
-        left: 20px;
-        right: 20px;
-        bottom: 30px;
-        flex-direction: column;
-        align-items: flex-start;
+        left: 16px;
+        right: 16px;
+        bottom: 24px;
     }
 
     .moonfin-mediabar-info {
         width: 100%;
-        min-height: auto;
-        padding: 16px 20px;
+        padding: 12px 16px;
     }
 
     .moonfin-mediabar-title {
-        font-size: 28px;
+        font-size: 20px;
     }
 
     .moonfin-mediabar-metadata span {
-        font-size: 16px;
+        font-size: 12px;
     }
 
     .moonfin-mediabar-overview {
-        font-size: 16px;
+        font-size: 13px;
         -webkit-line-clamp: 2;
     }
 
     .moonfin-mediabar-genres {
-        font-size: 14px;
+        font-size: 11px;
     }
 
     .moonfin-mediabar-logo-container {

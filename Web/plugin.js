@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T06:54:57.819Z
+// Moonfin Web Plugin - Built 2026-02-07T07:07:39.516Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1185,6 +1185,20 @@ const Navbar = {
     if (!group) return;
     this.librariesExpanded = !this.librariesExpanded;
     group.classList.toggle('expanded', this.librariesExpanded);
+
+    // On mobile, scroll the pill so libraries are visible
+    if (this.isMobile() && this.librariesExpanded) {
+      var pill = this.container.querySelector('.moonfin-nav-pill');
+      if (pill) {
+        setTimeout(function () {
+          group.scrollIntoView({
+            behavior: 'smooth',
+            inline: 'start',
+            block: 'nearest'
+          });
+        }, 50);
+      }
+    }
   },
   collapseLibraries() {
     // On mobile, don't auto-collapse; user taps toggle to close
@@ -1524,7 +1538,6 @@ const MediaBar = {
             <div class="moonfin-mediabar-content">
                 <!-- Left: Info overlay -->
                 <div class="moonfin-mediabar-info" style="background: ${overlayColor}">
-                    <div class="moonfin-mediabar-title"></div>
                     <div class="moonfin-mediabar-metadata">
                         <span class="moonfin-mediabar-year"></span>
                         <span class="moonfin-mediabar-runtime"></span>
@@ -1608,14 +1621,11 @@ const MediaBar = {
     } else {
       logoContainer.classList.add('hidden');
     }
-    const titleEl = this.container.querySelector('.moonfin-mediabar-title');
     const yearEl = this.container.querySelector('.moonfin-mediabar-year');
     const runtimeEl = this.container.querySelector('.moonfin-mediabar-runtime');
     const ratingEl = this.container.querySelector('.moonfin-mediabar-rating');
     const genresEl = this.container.querySelector('.moonfin-mediabar-genres');
     const overviewEl = this.container.querySelector('.moonfin-mediabar-overview');
-    titleEl.textContent = item.Name;
-    titleEl.classList.remove('hidden');
     yearEl.textContent = item.ProductionYear || '';
     if (item.RunTimeTicks) {
       const minutes = Math.round(item.RunTimeTicks / 600000000);
