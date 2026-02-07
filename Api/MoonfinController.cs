@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,9 +20,10 @@ public class MoonfinController : ControllerBase
     /// <summary>
     /// Initializes a new instance of the <see cref="MoonfinController"/> class.
     /// </summary>
-    public MoonfinController()
+    /// <param name="settingsService">The settings service.</param>
+    public MoonfinController(MoonfinSettingsService settingsService)
     {
-        _settingsService = new MoonfinSettingsService();
+        _settingsService = settingsService;
     }
 
     /// <summary>
@@ -40,7 +40,6 @@ public class MoonfinController : ControllerBase
         
         if (config?.AllowAnonymousPing != true)
         {
-            // If anonymous ping is disabled, still return basic info
             return Ok(new MoonfinPingResponse
             {
                 Installed = true,
@@ -55,7 +54,9 @@ public class MoonfinController : ControllerBase
             SettingsSyncEnabled = config.EnableSettingsSync,
             ServerName = "Jellyfin",
             JellyseerrEnabled = config.JellyseerrEnabled,
-            JellyseerrUrl = config.JellyseerrEnabled ? config.JellyseerrUrl : null
+            JellyseerrUrl = config.JellyseerrEnabled
+                ? (!string.IsNullOrEmpty(config.JellyseerrUrl) ? config.JellyseerrUrl : config.JellyseerrInternalUrl)
+                : null
         });
     }
 
@@ -290,37 +291,28 @@ public class MoonfinController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the Jellyseerr configuration.
+    /// Gets the Jellyseerr configuration (admin URL + user enablement).
     /// </summary>
-    /// <param name="deviceType">The device type (desktop, mobile, tablet, tv).</param>
-    /// <param name="isMobile">Whether the device is mobile.</param>
-    /// <param name="hasTouch">Whether the device has touch support.</param>
-    /// <returns>Jellyseerr configuration.</returns>
     [HttpGet("Jellyseerr/Config")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<JellyseerrConfigResponse> GetJellyseerrConfig(
-        [FromQuery] string? deviceType = null,
-        [FromQuery] bool isMobile = false,
-        [FromQuery] bool hasTouch = false)
+    public async Task<ActionResult<JellyseerrConfigResponse>> GetJellyseerrConfig()
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-
-        var openInNewTab = config?.JellyseerrOpenInNewTab ?? false;
         
-        if (isMobile && (config?.JellyseerrOpenInNewTabOnMobile ?? true))
+        var userId = GetUserIdFromClaims();
+        MoonfinUserSettings? userSettings = null;
+        
+        if (userId != null)
         {
-            openInNewTab = true;
+            userSettings = await _settingsService.GetUserSettingsAsync(userId.Value);
         }
 
         return Ok(new JellyseerrConfigResponse
         {
             Enabled = config?.JellyseerrEnabled ?? false,
-            Url = config?.JellyseerrUrl,
-            DisplayName = config?.JellyseerrDisplayName ?? "Jellyseerr",
-            OpenInNewTab = openInNewTab,
-            DeviceType = deviceType ?? "unknown",
-            IsMobile = isMobile
+            Url = !string.IsNullOrEmpty(config?.JellyseerrUrl) ? config.JellyseerrUrl : config?.JellyseerrInternalUrl,
+            UserEnabled = userSettings?.JellyseerrEnabled ?? true
         });
     }
 }
@@ -330,34 +322,22 @@ public class MoonfinController : ControllerBase
 /// </summary>
 public class MoonfinPingResponse
 {
-    /// <summary>
-    /// Gets or sets whether the plugin is installed.
-    /// </summary>
+    /// <summary>Indicates the plugin is installed.</summary>
     public bool Installed { get; set; }
 
-    /// <summary>
-    /// Gets or sets the plugin version.
-    /// </summary>
+    /// <summary>Plugin version.</summary>
     public string Version { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets whether settings sync is enabled.
-    /// </summary>
+    /// <summary>Whether settings sync is enabled by admin.</summary>
     public bool? SettingsSyncEnabled { get; set; }
 
-    /// <summary>
-    /// Gets or sets the server name.
-    /// </summary>
+    /// <summary>Jellyfin server name.</summary>
     public string? ServerName { get; set; }
 
-    /// <summary>
-    /// Gets or sets whether Jellyseerr is enabled.
-    /// </summary>
+    /// <summary>Whether Jellyseerr is enabled by admin.</summary>
     public bool? JellyseerrEnabled { get; set; }
 
-    /// <summary>
-    /// Gets or sets the Jellyseerr URL if enabled.
-    /// </summary>
+    /// <summary>Admin-configured Jellyseerr URL.</summary>
     public string? JellyseerrUrl { get; set; }
 }
 
@@ -366,35 +346,14 @@ public class MoonfinPingResponse
 /// </summary>
 public class JellyseerrConfigResponse
 {
-    /// <summary>
-    /// Gets or sets whether Jellyseerr is enabled.
-    /// </summary>
+    /// <summary>Whether Jellyseerr is enabled by admin.</summary>
     public bool Enabled { get; set; }
 
-    /// <summary>
-    /// Gets or sets the Jellyseerr URL.
-    /// </summary>
+    /// <summary>Admin-configured Jellyseerr URL.</summary>
     public string? Url { get; set; }
 
-    /// <summary>
-    /// Gets or sets the display name for Jellyseerr.
-    /// </summary>
-    public string DisplayName { get; set; } = "Jellyseerr";
-
-    /// <summary>
-    /// Gets or sets whether to open in new tab instead of iframe.
-    /// </summary>
-    public bool OpenInNewTab { get; set; }
-
-    /// <summary>
-    /// Gets or sets the device type that was detected.
-    /// </summary>
-    public string DeviceType { get; set; } = "unknown";
-
-    /// <summary>
-    /// Gets or sets whether the device is mobile.
-    /// </summary>
-    public bool IsMobile { get; set; }
+    /// <summary>Whether Jellyseerr is enabled in user settings.</summary>
+    public bool UserEnabled { get; set; }
 }
 
 /// <summary>
@@ -402,20 +361,13 @@ public class JellyseerrConfigResponse
 /// </summary>
 public class MoonfinSaveRequest
 {
-    /// <summary>
-    /// Gets or sets the settings to save.
-    /// </summary>
-    [Required]
+    /// <summary>User settings to save.</summary>
     public MoonfinUserSettings? Settings { get; set; }
 
-    /// <summary>
-    /// Gets or sets the client ID making the request.
-    /// </summary>
+    /// <summary>Client identifier for tracking.</summary>
     public string? ClientId { get; set; }
 
-    /// <summary>
-    /// Gets or sets the merge mode. "merge" to merge with existing, "replace" to overwrite.
-    /// </summary>
+    /// <summary>Merge strategy (replace, merge, client).</summary>
     public string? MergeMode { get; set; }
 }
 
@@ -424,18 +376,12 @@ public class MoonfinSaveRequest
 /// </summary>
 public class MoonfinSaveResponse
 {
-    /// <summary>
-    /// Gets or sets whether the save was successful.
-    /// </summary>
+    /// <summary>Whether the save was successful.</summary>
     public bool Success { get; set; }
 
-    /// <summary>
-    /// Gets or sets whether settings were created (vs updated).
-    /// </summary>
+    /// <summary>Whether new settings were created (vs updated).</summary>
     public bool Created { get; set; }
 
-    /// <summary>
-    /// Gets or sets the user ID.
-    /// </summary>
+    /// <summary>User ID the settings were saved for.</summary>
     public Guid UserId { get; set; }
 }

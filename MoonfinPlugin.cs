@@ -1,7 +1,8 @@
 using System;
-using Jellyfin.Model.Plugins;
+using System.Collections.Generic;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 
 namespace Moonfin.Server;
@@ -10,7 +11,7 @@ namespace Moonfin.Server;
 /// Moonfin Server Plugin for Jellyfin.
 /// Provides settings synchronization across Moonfin clients.
 /// </summary>
-public class MoonfinPlugin : BasePlugin<PluginConfiguration>
+public class MoonfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
     /// Gets the plugin instance.
@@ -27,16 +28,29 @@ public class MoonfinPlugin : BasePlugin<PluginConfiguration>
     }
 
     /// <inheritdoc />
-    public override string Name => "Moonfin Settings Sync";
+    public override string Name => "Moonfin";
 
     /// <inheritdoc />
-    public override string Description => "Synchronizes Moonfin settings across all Moonfin clients (Android TV, Roku, Tizen, webOS, tvOS, Web).";
+    public override string Description => "Moonfin brings a modern TV-style UI to Jellyfin web. Features include: custom navbar, media bar with featured content, Jellyseerr integration, and cross-device settings synchronization. Works with Android TV, Roku, Tizen, webOS, and Web clients. Requires File Transformation plugin for automatic UI injection.";
 
     /// <inheritdoc />
-    public override Guid Id => Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+    public override Guid Id => Guid.Parse("8c5d0e91-4f2a-4b6d-9e3f-1a7c8d9e0f2b");
 
     /// <summary>
     /// Gets the data folder path for storing user settings.
     /// </summary>
-    public string DataFolderPath => Path.Combine(ApplicationPaths.PluginConfigurationsPath, "Moonfin");
+    public new string DataFolderPath => Path.Combine(ApplicationPaths.PluginConfigurationsPath, "Moonfin");
+
+    /// <inheritdoc />
+    public IEnumerable<PluginPageInfo> GetPages()
+    {
+        return new[]
+        {
+            new PluginPageInfo
+            {
+                Name = Name,
+                EmbeddedResourcePath = GetType().Namespace + ".Pages.configPage.html"
+            }
+        };
+    }
 }

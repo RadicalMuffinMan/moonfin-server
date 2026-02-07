@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Moonfin.Server.Models;
 
 namespace Moonfin.Server.Services;
@@ -10,13 +11,16 @@ public class MoonfinSettingsService
 {
     private readonly string _dataPath;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ILogger<MoonfinSettingsService> _logger;
     private static readonly SemaphoreSlim _lock = new(1, 1);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MoonfinSettingsService"/> class.
     /// </summary>
-    public MoonfinSettingsService()
+    /// <param name="logger">The logger.</param>
+    public MoonfinSettingsService(ILogger<MoonfinSettingsService> logger)
     {
+        _logger = logger;
         _dataPath = MoonfinPlugin.Instance?.DataFolderPath 
             ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jellyfin", "plugins", "Moonfin");
         
@@ -71,7 +75,7 @@ public class MoonfinSettingsService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Moonfin] Error reading settings for user {userId}: {ex.Message}");
+            _logger.LogError(ex, "Error reading settings for user {UserId}", userId);
             return null;
         }
         finally
