@@ -17,11 +17,6 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public bool AllowAnonymousPing { get; set; } = true;
 
-    // ==========================================
-    // JELLYSEERR (Admin Settings)
-    // User API keys are stored in user settings
-    // ==========================================
-
     /// <summary>
     /// Enable Jellyseerr integration for all users.
     /// </summary>
@@ -38,4 +33,15 @@ public class PluginConfiguration : BasePluginConfiguration
     /// If empty, the public JellyseerrUrl is used for API proxying.
     /// </summary>
     public string? JellyseerrInternalUrl { get; set; }
+
+    /// <summary>
+    /// Gets the effective Jellyseerr URL, preferring internal URL for server-to-server communication.
+    /// </summary>
+    public string? GetEffectiveJellyseerrUrl()
+    {
+        var url = !string.IsNullOrEmpty(JellyseerrInternalUrl)
+            ? JellyseerrInternalUrl
+            : JellyseerrUrl;
+        return url?.TrimEnd('/');
+    }
 }

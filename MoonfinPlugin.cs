@@ -13,14 +13,8 @@ namespace Moonfin.Server;
 /// </summary>
 public class MoonfinPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
-    /// <summary>
-    /// Gets the plugin instance.
-    /// </summary>
     public static MoonfinPlugin? Instance { get; private set; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MoonfinPlugin"/> class.
-    /// </summary>
     public MoonfinPlugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
         : base(applicationPaths, xmlSerializer)
     {

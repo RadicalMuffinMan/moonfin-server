@@ -14,9 +14,6 @@ public class MoonfinWebController : ControllerBase
 {
     private readonly Assembly _assembly;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MoonfinWebController"/> class.
-    /// </summary>
     public MoonfinWebController()
     {
         _assembly = typeof(MoonfinWebController).Assembly;

@@ -8,10 +8,6 @@ namespace Moonfin.Server.Models;
 /// </summary>
 public class MoonfinUserSettings
 {
-    // ==========================================
-    // METADATA
-    // ==========================================
-
     /// <summary>Settings schema version for migration support.</summary>
     [JsonPropertyName("schemaVersion")]
     public int SchemaVersion { get; set; } = 1;
@@ -24,11 +20,6 @@ public class MoonfinUserSettings
     [JsonPropertyName("lastUpdatedBy")]
     public string? LastUpdatedBy { get; set; }
 
-    // ==========================================
-    // JELLYSEERR (User Settings)
-    // URL is admin-configured in PluginConfiguration
-    // ==========================================
-
     /// <summary>Whether Jellyseerr integration is enabled for this user.</summary>
     [JsonPropertyName("jellyseerrEnabled")]
     public bool? JellyseerrEnabled { get; set; }
@@ -40,10 +31,6 @@ public class MoonfinUserSettings
     /// <summary>Configuration for Jellyseerr discovery rows.</summary>
     [JsonPropertyName("jellyseerrRows")]
     public JellyseerrRowsConfig? JellyseerrRows { get; set; }
-
-    // ==========================================
-    // ADDITIONAL RATINGS - MDBLIST
-    // ==========================================
 
     /// <summary>Whether MDBList ratings integration is enabled.</summary>
     [JsonPropertyName("mdblistEnabled")]
@@ -61,17 +48,9 @@ public class MoonfinUserSettings
     [JsonPropertyName("mdblistRatingSources")]
     public List<string>? MdblistRatingSources { get; set; }
 
-    // ==========================================
-    // TMDB API KEY
-    // ==========================================
-
     /// <summary>User's TMDB API key for additional metadata.</summary>
     [JsonPropertyName("tmdbApiKey")]
     public string? TmdbApiKey { get; set; }
-
-    // ==========================================
-    // TOOLBAR/NAVBAR CUSTOMIZATION
-    // ==========================================
 
     /// <summary>Navbar position (top, bottom, left, right).</summary>
     [JsonPropertyName("navbarPosition")]
@@ -105,10 +84,6 @@ public class MoonfinUserSettings
     [JsonPropertyName("shuffleContentType")]
     public string? ShuffleContentType { get; set; }
 
-    // ==========================================
-    // HOME SCREEN ENHANCEMENTS
-    // ==========================================
-
     /// <summary>Merge Continue Watching and Next Up rows.</summary>
     [JsonPropertyName("mergeContinueWatchingNextUp")]
     public bool? MergeContinueWatchingNextUp { get; set; }
@@ -124,10 +99,6 @@ public class MoonfinUserSettings
     /// <summary>Show confirm exit dialog.</summary>
     [JsonPropertyName("confirmExit")]
     public bool? ConfirmExit { get; set; }
-
-    // ==========================================
-    // MEDIA BAR
-    // ==========================================
 
     /// <summary>Enable the media bar on home screen.</summary>
     [JsonPropertyName("mediaBarEnabled")]
@@ -149,10 +120,6 @@ public class MoonfinUserSettings
     [JsonPropertyName("mediaBarOverlayColor")]
     public string? MediaBarOverlayColor { get; set; }
 
-    // ==========================================
-    // VISUAL CUSTOMIZATION
-    // ==========================================
-
     /// <summary>Override default home rows image type.</summary>
     [JsonPropertyName("homeRowsImageTypeOverride")]
     public bool? HomeRowsImageTypeOverride { get; set; }
@@ -169,10 +136,6 @@ public class MoonfinUserSettings
     [JsonPropertyName("browsingBlur")]
     public string? BrowsingBlur { get; set; }
 
-    // ==========================================
-    // THEME MUSIC
-    // ==========================================
-
     /// <summary>Enable theme music playback.</summary>
     [JsonPropertyName("themeMusicEnabled")]
     public bool? ThemeMusicEnabled { get; set; }
@@ -185,17 +148,9 @@ public class MoonfinUserSettings
     [JsonPropertyName("themeMusicVolume")]
     public int? ThemeMusicVolume { get; set; }
 
-    // ==========================================
-    // PARENTAL CONTROLS
-    // ==========================================
-
     /// <summary>List of content ratings to block.</summary>
     [JsonPropertyName("blockedRatings")]
     public List<string>? BlockedRatings { get; set; }
-
-    // ==========================================
-    // CLIENT-SPECIFIC BLOB
-    // ==========================================
 
     /// <summary>Client-specific settings (keyed by client ID).</summary>
     [JsonPropertyName("clientSpecific")]

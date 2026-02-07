@@ -26,10 +26,6 @@ public class MoonfinStartupService : IScheduledTask
     /// <inheritdoc />
     public string Category => "Moonfin";
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MoonfinStartupService"/> class.
-    /// </summary>
-    /// <param name="logger">The logger.</param>
     public MoonfinStartupService(ILogger<MoonfinStartupService> logger)
     {
         _logger = logger;

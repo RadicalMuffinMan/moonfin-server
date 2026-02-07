@@ -19,9 +19,6 @@ public class JellyseerrProxyController : ControllerBase
 {
     private readonly JellyseerrSessionService _sessionService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="JellyseerrProxyController"/> class.
-    /// </summary>
     public JellyseerrProxyController(JellyseerrSessionService sessionService)
     {
         _sessionService = sessionService;
@@ -43,14 +40,14 @@ public class JellyseerrProxyController : ControllerBase
     public async Task<IActionResult> Login([FromBody] JellyseerrLoginRequest request)
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        var jellyseerrUrl = GetEffectiveUrl(config);
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
         if (config?.JellyseerrEnabled != true || string.IsNullOrEmpty(jellyseerrUrl))
         {
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { error = "Jellyseerr integration is not enabled" });
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { error = "User not authenticated" });
@@ -92,7 +89,7 @@ public class JellyseerrProxyController : ControllerBase
     public async Task<IActionResult> GetStatus()
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        var jellyseerrUrl = GetEffectiveUrl(config);
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
         if (config?.JellyseerrEnabled != true || string.IsNullOrEmpty(jellyseerrUrl))
         {
             return Ok(new
@@ -103,7 +100,7 @@ public class JellyseerrProxyController : ControllerBase
             });
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Ok(new
@@ -139,7 +136,7 @@ public class JellyseerrProxyController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Validate()
     {
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Ok(new { valid = false, error = "Not authenticated with Jellyfin" });
@@ -162,7 +159,7 @@ public class JellyseerrProxyController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Logout()
     {
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { error = "User not authenticated" });
@@ -225,20 +222,17 @@ public class JellyseerrProxyController : ControllerBase
         return await ProxyApiRequest(HttpMethod.Delete, path);
     }
 
-    /// <summary>
-    /// Internal method to proxy requests to Jellyseerr.
-    /// </summary>
     private async Task<IActionResult> ProxyApiRequest(HttpMethod method, string path)
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        var jellyseerrUrl = GetEffectiveUrl(config);
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
         if (config?.JellyseerrEnabled != true || string.IsNullOrEmpty(jellyseerrUrl))
         {
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 new { error = "Jellyseerr integration is not enabled" });
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { error = "User not authenticated" });
@@ -269,33 +263,6 @@ public class JellyseerrProxyController : ControllerBase
             : null);
     }
 
-    /// <summary>
-    /// Gets the user ID from the authentication claims.
-    /// </summary>
-    private Guid? GetUserIdFromClaims()
-    {
-        var userIdClaim = User.FindFirst("Jellyfin-UserId")?.Value
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        if (Guid.TryParse(userIdClaim, out var userId))
-        {
-            return userId;
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Gets the effective Jellyseerr URL, preferring internal URL for server-to-server communication.
-    /// </summary>
-    private static string? GetEffectiveUrl(PluginConfiguration? config)
-    {
-        if (config == null) return null;
-        var url = !string.IsNullOrEmpty(config.JellyseerrInternalUrl)
-            ? config.JellyseerrInternalUrl
-            : config.JellyseerrUrl;
-        return url?.TrimEnd('/');
-    }
 }
 
 /// <summary>

@@ -17,10 +17,6 @@ public class MoonfinController : ControllerBase
 {
     private readonly MoonfinSettingsService _settingsService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MoonfinController"/> class.
-    /// </summary>
-    /// <param name="settingsService">The settings service.</param>
     public MoonfinController(MoonfinSettingsService settingsService)
     {
         _settingsService = settingsService;
@@ -78,7 +74,7 @@ public class MoonfinController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Error = "Settings sync is disabled" });
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { Error = "User not authenticated" });
@@ -142,7 +138,7 @@ public class MoonfinController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Error = "Settings sync is disabled" });
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { Error = "User not authenticated" });
@@ -231,7 +227,7 @@ public class MoonfinController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Error = "Settings sync is disabled" });
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { Error = "User not authenticated" });
@@ -260,7 +256,7 @@ public class MoonfinController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
 
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized();
@@ -275,22 +271,6 @@ public class MoonfinController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the user ID from the authentication claims.
-    /// </summary>
-    private Guid? GetUserIdFromClaims()
-    {
-        var userIdClaim = User.FindFirst("Jellyfin-UserId")?.Value 
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
-        if (Guid.TryParse(userIdClaim, out var userId))
-        {
-            return userId;
-        }
-
-        return null;
-    }
-
-    /// <summary>
     /// Gets the Jellyseerr configuration (admin URL + user enablement).
     /// </summary>
     [HttpGet("Jellyseerr/Config")]
@@ -300,7 +280,7 @@ public class MoonfinController : ControllerBase
     {
         var config = MoonfinPlugin.Instance?.Configuration;
         
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         MoonfinUserSettings? userSettings = null;
         
         if (userId != null)

@@ -24,9 +24,6 @@ public class MdbListController : ControllerBase
     private static readonly ConcurrentDictionary<string, (MdbListResponse Response, DateTimeOffset CachedAt)> _cache = new();
     private static readonly TimeSpan CacheTtl = TimeSpan.FromHours(24);
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MdbListController"/> class.
-    /// </summary>
     public MdbListController(MoonfinSettingsService settingsService, IHttpClientFactory httpClientFactory)
     {
         _settingsService = settingsService;
@@ -62,7 +59,7 @@ public class MdbListController : ControllerBase
         }
 
         // Get user's API key from their settings
-        var userId = GetUserIdFromClaims();
+        var userId = this.GetUserIdFromClaims();
         if (userId == null)
         {
             return Unauthorized(new { Error = "User not authenticated" });
@@ -142,19 +139,6 @@ public class MdbListController : ControllerBase
                 Error = $"Failed to fetch from MDBList: {ex.Message}"
             });
         }
-    }
-
-    private Guid? GetUserIdFromClaims()
-    {
-        var userIdClaim = User.FindFirst("Jellyfin-UserId")?.Value
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        if (Guid.TryParse(userIdClaim, out var userId))
-        {
-            return userId;
-        }
-
-        return null;
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()

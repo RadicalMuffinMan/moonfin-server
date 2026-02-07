@@ -18,9 +18,6 @@ public class JellyseerrSessionService
     private readonly IHttpClientFactory _httpClientFactory;
     private static readonly SemaphoreSlim _lock = new(1, 1);
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="JellyseerrSessionService"/> class.
-    /// </summary>
     public JellyseerrSessionService(
         ILogger<JellyseerrSessionService> logger,
         IHttpClientFactory httpClientFactory)
@@ -63,7 +60,7 @@ public class JellyseerrSessionService
     public async Task<JellyseerrAuthResult?> AuthenticateAsync(Guid userId, string username, string password)
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        var jellyseerrUrl = GetJellyseerrBaseUrl(config);
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
 
         if (string.IsNullOrEmpty(jellyseerrUrl))
         {
@@ -205,7 +202,7 @@ public class JellyseerrSessionService
     private async Task<bool> ValidateSessionAsync(JellyseerrSession session)
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        var jellyseerrUrl = GetJellyseerrBaseUrl(config);
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
 
         if (string.IsNullOrEmpty(jellyseerrUrl)) return false;
 
@@ -241,9 +238,6 @@ public class JellyseerrSessionService
         }
     }
 
-    /// <summary>
-    /// Clears the stored session for a user.
-    /// </summary>
     public async Task ClearSessionAsync(Guid userId)
     {
         await _lock.WaitAsync();
@@ -281,7 +275,7 @@ public class JellyseerrSessionService
         string? contentType = null)
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        var jellyseerrUrl = GetJellyseerrBaseUrl(config);
+        var jellyseerrUrl = config?.GetEffectiveJellyseerrUrl();
 
         if (string.IsNullOrEmpty(jellyseerrUrl))
         {
@@ -380,21 +374,6 @@ public class JellyseerrSessionService
                 ContentType = "application/json"
             };
         }
-    }
-
-    /// <summary>
-    /// Gets the Jellyseerr base URL from config, preferring internal URL for server-to-server.
-    /// </summary>
-    private static string? GetJellyseerrBaseUrl(PluginConfiguration? config)
-    {
-        if (config == null) return null;
-
-        // Prefer internal URL for server-to-server communication
-        var url = !string.IsNullOrEmpty(config.JellyseerrInternalUrl)
-            ? config.JellyseerrInternalUrl
-            : config.JellyseerrUrl;
-
-        return url?.TrimEnd('/');
     }
 
     private async Task SaveSessionAsync(JellyseerrSession session)
