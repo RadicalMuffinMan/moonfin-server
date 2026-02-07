@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T06:37:00.464Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T06:44:00.741Z */
 
 /* === styles/navbar.css === */
 /**
@@ -393,31 +393,39 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 /* Content container */
 .moonfin-mediabar-content {
     position: absolute;
-    bottom: 30px;
-    left: 40px;
-    right: 40px;
+    bottom: 80px;
+    left: 60px;
+    right: 60px;
     z-index: 4;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 24px;
+    gap: 0;
 }
 
 /* Info overlay */
 .moonfin-mediabar-info {
-    max-width: 550px;
-    padding: 16px 20px;
-    border-radius: 12px;
+    width: 70%;
+    flex-shrink: 0;
+    padding: 24px 28px;
+    border-radius: 16px;
     backdrop-filter: blur(10px);
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
 }
 
 .moonfin-mediabar-title {
-    font-size: 28px;
+    font-size: 56px;
     font-weight: 700;
-    color: white;
-    margin-bottom: 8px;
-    line-height: 1.2;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    margin: 0 0 16px 0;
+    line-height: 1.1;
+    text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .moonfin-mediabar-title.hidden {
@@ -426,13 +434,14 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 
 .moonfin-mediabar-metadata {
     display: flex;
-    gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
+    align-items: center;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .moonfin-mediabar-metadata span {
-    font-size: 14px;
+    font-size: 20px;
     color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
 }
@@ -441,42 +450,48 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     display: none;
 }
 
-.moonfin-mediabar-year::after,
-.moonfin-mediabar-runtime::after {
-    content: '•';
-    margin-left: 12px;
-    opacity: 0.5;
+.moonfin-mediabar-metadata span:not(:empty):not(:last-child)::after {
+    content: '\2022';
+    margin-left: 15px;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.moonfin-mediabar-year:empty::after,
-.moonfin-mediabar-runtime:empty::after {
-    display: none;
+.moonfin-mediabar-metadata span + span:not(:empty) {
+    margin-left: 15px;
 }
 
 .moonfin-mediabar-genres {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 10px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 16px;
+}
+
+.moonfin-mediabar-genres:empty {
+    display: none;
 }
 
 .moonfin-mediabar-overview {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 22px;
     line-height: 1.5;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.9);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    width: 100%;
 }
 
 /* Logo container */
 .moonfin-mediabar-logo-container {
-    flex: 1;
+    width: 30%;
+    padding-left: 24px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    max-width: 400px;
-    height: 120px;
+    justify-content: center;
+    align-self: flex-end;
+    max-height: 200px;
 }
 
 .moonfin-mediabar-logo-container.hidden {
@@ -485,7 +500,7 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 
 .moonfin-mediabar-logo {
     max-width: 100%;
-    max-height: 100%;
+    max-height: 200px;
     object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
@@ -629,18 +644,39 @@ body.moonfin-mediabar-active .homeSectionsContainer {
         top: 425px;
     }
 
+    .moonfin-mediabar-content {
+        left: 40px;
+        right: 40px;
+        bottom: 60px;
+    }
+
     .moonfin-mediabar-info {
-        max-width: 450px;
-        padding: 12px 16px;
+        min-height: 180px;
+        padding: 20px 24px;
     }
 
     .moonfin-mediabar-title {
-        font-size: 24px;
+        font-size: 40px;
+    }
+
+    .moonfin-mediabar-metadata span {
+        font-size: 18px;
+    }
+
+    .moonfin-mediabar-overview {
+        font-size: 18px;
+    }
+
+    .moonfin-mediabar-genres {
+        font-size: 16px;
     }
 
     .moonfin-mediabar-logo-container {
-        max-width: 300px;
-        height: 100px;
+        max-height: 150px;
+    }
+
+    .moonfin-mediabar-logo {
+        max-height: 150px;
     }
 }
 
@@ -657,22 +693,32 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     .moonfin-mediabar-content {
         left: 20px;
         right: 20px;
-        bottom: 24px;
+        bottom: 30px;
         flex-direction: column;
         align-items: flex-start;
     }
 
     .moonfin-mediabar-info {
-        max-width: 100%;
-        padding: 10px 14px;
+        width: 100%;
+        min-height: auto;
+        padding: 16px 20px;
     }
 
     .moonfin-mediabar-title {
-        font-size: 20px;
+        font-size: 28px;
+    }
+
+    .moonfin-mediabar-metadata span {
+        font-size: 16px;
     }
 
     .moonfin-mediabar-overview {
-        display: none;
+        font-size: 16px;
+        -webkit-line-clamp: 2;
+    }
+
+    .moonfin-mediabar-genres {
+        font-size: 14px;
     }
 
     .moonfin-mediabar-logo-container {

@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T06:37:00.463Z
+// Moonfin Web Plugin - Built 2026-02-07T06:44:00.740Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1602,8 +1602,8 @@ const MediaBar = {
     const ratingEl = this.container.querySelector('.moonfin-mediabar-rating');
     const genresEl = this.container.querySelector('.moonfin-mediabar-genres');
     const overviewEl = this.container.querySelector('.moonfin-mediabar-overview');
-    titleEl.textContent = logoUrl ? '' : item.Name;
-    titleEl.classList.toggle('hidden', !!logoUrl);
+    titleEl.textContent = item.Name;
+    titleEl.classList.remove('hidden');
     yearEl.textContent = item.ProductionYear || '';
     if (item.RunTimeTicks) {
       const minutes = Math.round(item.RunTimeTicks / 600000000);
@@ -1626,8 +1626,7 @@ const MediaBar = {
       genresEl.textContent = '';
     }
     if (item.Overview) {
-      const truncated = item.Overview.length > 200 ? item.Overview.substring(0, 200) + '...' : item.Overview;
-      overviewEl.textContent = truncated;
+      overviewEl.textContent = item.Overview;
     } else {
       overviewEl.textContent = '';
     }
