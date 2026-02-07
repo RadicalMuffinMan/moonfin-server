@@ -1,9 +1,10 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T06:15:34.222Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T06:37:00.464Z */
 
 /* === styles/navbar.css === */
 /**
  * Moonfin Navbar Styles
- * Custom navigation bar styling
+ * Matches the Moonfin webOS client NavBar design
+ * Centered pill with expandable icon buttons, user avatar left, clock right
  */
 
 /* Body adjustment when navbar is active */
@@ -19,38 +20,27 @@ body.moonfin-navbar-active .skinHeader {
     display: none !important;
 }
 
-/* Navbar container */
+/* ── Main container ── */
 .moonfin-navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 65px;
+    height: auto;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    padding: 10px 32px;
     z-index: 9999;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
-    padding: 8px 24px;
     box-sizing: border-box;
-    display: flex;
-    align-items: center;
 }
 
-.moonfin-navbar-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 16px;
-}
-
-/* Left section */
+/* ── Left section: User avatar ── */
 .moonfin-navbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    margin-right: auto;
 }
 
-/* User button */
 .moonfin-user-btn {
     background: transparent;
     border: none;
@@ -58,10 +48,11 @@ body.moonfin-navbar-active .skinHeader {
     cursor: pointer;
     border-radius: 50%;
     transition: transform 0.2s ease;
+    outline: none;
 }
 
 .moonfin-user-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 .moonfin-user-btn:focus {
@@ -70,138 +61,197 @@ body.moonfin-navbar-active .skinHeader {
 }
 
 .moonfin-user-avatar {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #00a4dc, #0077b6);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
 }
 
-.moonfin-user-icon {
-    width: 24px;
-    height: 24px;
-    color: white;
-}
-
 .moonfin-user-img {
-    width: 100%;
-    height: 100%;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     object-fit: cover;
 }
 
-/* Center navigation */
-.moonfin-navbar-center {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 12px;
-    border-radius: 28px;
-    flex-shrink: 1;
-    flex-grow: 0;
-    max-width: fit-content;
+.moonfin-user-initial {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
 }
 
-/* Navigation buttons */
-.moonfin-nav-btn {
-    background: transparent;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 20px;
-    color: white;
+/* ── Center section: Nav pill ── */
+.moonfin-navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-    min-width: 44px;
-    height: 44px;
 }
 
-.moonfin-nav-btn svg {
-    width: 24px;
-    height: 24px;
+.moonfin-nav-pill {
+    display: flex;
+    align-items: center;
+    border-radius: 36px;
+    padding: 8px;
+    max-width: 1400px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
 }
 
-.moonfin-nav-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+.moonfin-nav-pill::-webkit-scrollbar {
+    display: none;
 }
 
-.moonfin-nav-btn:focus {
+/* ── Nav buttons ── */
+.moonfin-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
     outline: none;
-    background: rgba(255, 255, 255, 0.2);
+    position: relative;
+    border-radius: 28px;
+    min-height: 48px;
+    min-width: 48px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.moonfin-nav-btn:first-child {
+    margin-left: 0;
+}
+
+.moonfin-nav-btn:hover,
+.moonfin-nav-btn:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .moonfin-nav-btn.active {
-    background: #00a4dc;
-    color: white;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.22);
 }
 
 .moonfin-nav-btn.hidden {
     display: none;
 }
 
-/* Library buttons */
-.moonfin-nav-library {
-    padding: 8px 16px;
+/* ── Nav icon ── */
+.moonfin-nav-icon {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+    flex-shrink: 0;
 }
 
-.moonfin-library-name {
-    font-size: 14px;
+/* ── Expandable button: icon only, expands label on hover/focus ── */
+.moonfin-expandable-btn {
+    overflow: hidden;
+}
+
+.moonfin-expand-label {
+    display: none;
+    margin-left: 10px;
+    font-size: 16px;
     font-weight: 600;
     white-space: nowrap;
 }
 
-/* Divider */
-.moonfin-nav-divider {
-    width: 1px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.3);
-    margin: 0 8px;
+.moonfin-expandable-btn:hover,
+.moonfin-expandable-btn:focus {
+    padding: 10px 18px;
 }
 
-.moonfin-nav-divider.hidden {
-    display: none;
+.moonfin-expandable-btn:hover .moonfin-expand-label,
+.moonfin-expandable-btn:focus .moonfin-expand-label {
+    display: inline;
 }
 
-/* Libraries container */
-.moonfin-nav-libraries {
+/* ── Libraries expandable group ── */
+.moonfin-libraries-group {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    position: relative;
+    margin-left: 4px;
 }
 
-.moonfin-nav-libraries.hidden {
+.moonfin-libraries-group.hidden {
     display: none;
 }
 
-/* Right section - Clock */
+.moonfin-libraries-btn {
+    z-index: 1;
+    margin-left: 0;
+}
+
+.moonfin-libraries-list {
+    display: flex;
+    align-items: center;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-width 0.25s ease-out, opacity 0.2s ease-out;
+}
+
+.moonfin-libraries-group.expanded .moonfin-libraries-list {
+    max-width: 800px;
+    opacity: 1;
+}
+
+.moonfin-library-btn {
+    padding: 8px 16px;
+    min-height: 42px;
+    min-width: auto;
+    margin-left: 4px;
+}
+
+.moonfin-library-name {
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* ── Right section: Clock ── */
 .moonfin-navbar-right {
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
 }
 
 .moonfin-clock {
-    color: white;
-    font-size: 18px;
-    font-weight: 400;
-    padding: 8px 16px;
+    font-size: 22px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    padding: 0 8px;
 }
 
 .moonfin-clock.hidden {
     display: none;
 }
 
-/* Responsive adjustments */
+/* ── Responsive ── */
 @media (max-width: 1200px) {
-    .moonfin-navbar-center {
-        max-width: 80%;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .moonfin-navbar-center::-webkit-scrollbar {
-        display: none;
+    .moonfin-nav-pill {
+        max-width: 80vw;
     }
 }
 
@@ -211,27 +261,39 @@ body.moonfin-navbar-active .skinHeader {
     }
 
     .moonfin-navbar {
-        height: 55px;
-        padding: 6px 12px;
+        padding: 8px 16px;
     }
 
     .moonfin-nav-btn {
+        min-height: 40px;
         min-width: 40px;
-        height: 40px;
-        padding: 6px 10px;
+        padding: 8px 10px;
     }
 
-    .moonfin-nav-btn svg {
-        width: 20px;
-        height: 20px;
+    .moonfin-nav-icon {
+        width: 22px;
+        height: 22px;
     }
 
-    .moonfin-library-name {
-        font-size: 12px;
+    .moonfin-user-avatar {
+        width: 36px;
+        height: 36px;
     }
 
-    /* Hide clock  mobile */
-    .moonfin-clock,
+    .moonfin-user-img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .moonfin-user-initial {
+        font-size: 18px;
+    }
+
+    .moonfin-clock {
+        font-size: 18px;
+    }
+
+    /* Hide non-essential buttons on small screens */
     .moonfin-nav-genres,
     .moonfin-nav-shuffle {
         display: none !important;

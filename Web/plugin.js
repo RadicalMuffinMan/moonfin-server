@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T06:15:34.220Z
+// Moonfin Web Plugin - Built 2026-02-07T06:37:00.463Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1089,6 +1089,8 @@ const Navbar = {
   initialized: false,
   libraries: [],
   currentUser: null,
+  librariesExpanded: false,
+  librariesTimeout: null,
   init() {
     var _this8 = this;
     return _asyncToGenerator(function* () {
@@ -1109,13 +1111,11 @@ const Navbar = {
     })();
   },
   waitForApi() {
-    return new Promise((resolve, reject) => {
-      let attempts = 0;
-      const maxAttempts = 100; // 10 seconds max
-
-      const check = () => {
-        const api = API.getApiClient();
-        // Check not just for API but for full auth
+    return new Promise(function (resolve, reject) {
+      var attempts = 0;
+      var maxAttempts = 100;
+      var check = function () {
+        var api = API.getApiClient();
         if (api && api._currentUser && api._currentUser.Id) {
           console.log('[Moonfin] Navbar: API ready with authenticated user');
           resolve();
@@ -1131,88 +1131,15 @@ const Navbar = {
     });
   },
   createNavbar() {
-    const existing = document.querySelector('.moonfin-navbar');
+    var existing = document.querySelector('.moonfin-navbar');
     if (existing) {
       existing.remove();
     }
-    const settings = Storage.getAll();
-    const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
-    this.container = document.createElement('div');
+    var settings = Storage.getAll();
+    var overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
+    this.container = document.createElement('nav');
     this.container.className = 'moonfin-navbar';
-    this.container.innerHTML = `
-            <div class="moonfin-navbar-content">
-                <!-- Left section: User Avatar -->
-                <div class="moonfin-navbar-left">
-                    <button class="moonfin-user-btn" title="Settings">
-                        <div class="moonfin-user-avatar">
-                            <svg viewBox="0 0 24 24" class="moonfin-user-icon">
-                                <path fill="currentColor" d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/>
-                            </svg>
-                        </div>
-                    </button>
-                </div>
-
-                <!-- Center section: Navigation buttons -->
-                <div class="moonfin-navbar-center" style="background: ${overlayColor}">
-                    <button class="moonfin-nav-btn moonfin-nav-home" data-action="home" title="Home">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-search" data-action="search" title="Search">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-shuffle ${!settings.showShuffleButton ? 'hidden' : ''}" data-action="shuffle" title="Shuffle">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M14.83 13.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13M14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-genres ${!settings.showGenresButton ? 'hidden' : ''}" data-action="genres" title="Genres">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-favorites ${!settings.showFavoritesButton ? 'hidden' : ''}" data-action="favorites" title="Favorites">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-cast ${!settings.showCastButton ? 'hidden' : ''}" data-action="cast" title="Cast">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M1 18v3h3c0-1.66-1.34-3-3-3m0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7m0-4v2a9 9 0 0 1 9 9h2c0-6.08-4.93-11-11-11m20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-syncplay ${!settings.showSyncPlayButton ? 'hidden' : ''}" data-action="syncplay" title="SyncPlay">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2M9.5 16.5v-9l7 4.5z"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-settings" data-action="settings" title="Settings">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66"/>
-                        </svg>
-                    </button>
-                    <button class="moonfin-nav-btn moonfin-nav-jellyseerr hidden" data-action="jellyseerr" title="Jellyseerr">
-                        <svg viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM10 17l-3.5-3.5 1.41-1.41L10 14.17l4.59-4.59L16 11l-6 6z"/>
-                        </svg>
-                    </button>
-                    <div class="moonfin-nav-divider ${!settings.showLibrariesInToolbar ? 'hidden' : ''}"></div>
-                    <div class="moonfin-nav-libraries ${!settings.showLibrariesInToolbar ? 'hidden' : ''}">
-                        <!-- Libraries will be inserted here -->
-                    </div>
-                </div>
-
-                <!-- Right section: Clock -->
-                <div class="moonfin-navbar-right">
-                    <div class="moonfin-clock ${!settings.showClock ? 'hidden' : ''}">
-                        <span class="moonfin-clock-time">--:--</span>
-                    </div>
-                </div>
-            </div>
-        `;
+    this.container.innerHTML = ['<!-- Left: User Avatar -->', '<div class="moonfin-navbar-left">', '    <button class="moonfin-user-btn" title="User Menu">', '        <div class="moonfin-user-avatar">', '            <span class="moonfin-user-initial">U</span>', '        </div>', '    </button>', '</div>', '', '<!-- Center: Nav Pill -->', '<div class="moonfin-navbar-center">', '    <div class="moonfin-nav-pill" style="background: ' + overlayColor + '">', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-home" data-action="home" title="Home">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>', '            <span class="moonfin-expand-label">Home</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-search" data-action="search" title="Search">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>', '            <span class="moonfin-expand-label">Search</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-shuffle' + (!settings.showShuffleButton ? ' hidden' : '') + '" data-action="shuffle" title="Shuffle">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>', '            <span class="moonfin-expand-label">Shuffle</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-genres' + (!settings.showGenresButton ? ' hidden' : '') + '" data-action="genres" title="Genres">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9"/></svg>', '            <span class="moonfin-expand-label">Genres</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-favorites' + (!settings.showFavoritesButton ? ' hidden' : '') + '" data-action="favorites" title="Favorites">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>', '            <span class="moonfin-expand-label">Favorites</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-jellyseerr hidden" data-action="jellyseerr" title="Jellyseerr">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM10 17l-3.5-3.5 1.41-1.41L10 14.17l4.59-4.59L16 11l-6 6z"/></svg>', '            <span class="moonfin-expand-label">Jellyseerr</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-cast' + (!settings.showCastButton ? ' hidden' : '') + '" data-action="cast" title="Cast">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M1 18v3h3c0-1.66-1.34-3-3-3m0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7m0-4v2a9 9 0 0 1 9 9h2c0-6.08-4.93-11-11-11m20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"/></svg>', '            <span class="moonfin-expand-label">Cast</span>', '        </button>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-syncplay' + (!settings.showSyncPlayButton ? ' hidden' : '') + '" data-action="syncplay" title="SyncPlay">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2M9.5 16.5v-9l7 4.5z"/></svg>', '            <span class="moonfin-expand-label">SyncPlay</span>', '        </button>', '', '        <!-- Libraries expandable group -->', '        <div class="moonfin-libraries-group' + (!settings.showLibrariesInToolbar ? ' hidden' : '') + '">', '            <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-libraries-btn" data-action="libraries-toggle" title="Libraries">', '                <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>', '                <span class="moonfin-expand-label">Libraries</span>', '            </button>', '            <div class="moonfin-libraries-list">', '                <!-- Library buttons inserted here -->', '            </div>', '        </div>', '', '        <button class="moonfin-nav-btn moonfin-expandable-btn moonfin-nav-settings" data-action="settings" title="Settings">', '            <svg class="moonfin-nav-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>', '            <span class="moonfin-expand-label">Settings</span>', '        </button>', '', '    </div>', '</div>', '', '<!-- Right: Clock -->', '<div class="moonfin-navbar-right">', '    <div class="moonfin-clock' + (!settings.showClock ? ' hidden' : '') + '">', '        <span class="moonfin-clock-time">--:--</span>', '    </div>', '</div>'].join('\n');
     document.body.insertBefore(this.container, document.body.firstChild);
     document.body.classList.add('moonfin-navbar-active');
   },
@@ -1228,66 +1155,131 @@ const Navbar = {
     })();
   },
   updateUserAvatar() {
-    const avatarContainer = this.container.querySelector('.moonfin-user-avatar');
+    var avatarContainer = this.container.querySelector('.moonfin-user-avatar');
     if (!avatarContainer || !this.currentUser) return;
-    const avatarUrl = API.getUserAvatarUrl(this.currentUser);
+    var avatarUrl = API.getUserAvatarUrl(this.currentUser);
     if (avatarUrl) {
-      avatarContainer.innerHTML = `<img src="${avatarUrl}" alt="${this.currentUser.Name}" class="moonfin-user-img">`;
+      avatarContainer.innerHTML = '<img src="' + avatarUrl + '" alt="' + (this.currentUser.Name || '') + '" class="moonfin-user-img">';
+    } else {
+      // Show first letter of username as fallback
+      var initial = this.currentUser.Name && this.currentUser.Name[0] || 'U';
+      avatarContainer.innerHTML = '<span class="moonfin-user-initial">' + initial + '</span>';
     }
   },
   updateLibraries() {
-    const librariesContainer = this.container.querySelector('.moonfin-nav-libraries');
-    if (!librariesContainer) return;
-    const filteredLibraries = this.libraries.filter(lib => lib.CollectionType !== 'playlists' && lib.CollectionType !== 'boxsets');
-    librariesContainer.innerHTML = filteredLibraries.map(lib => `
-            <button class="moonfin-nav-btn moonfin-nav-library" data-action="library" data-library-id="${lib.Id}" title="${lib.Name}">
-                <span class="moonfin-library-name">${lib.Name}</span>
-            </button>
-        `).join('');
+    var librariesList = this.container.querySelector('.moonfin-libraries-list');
+    if (!librariesList) return;
+    var filteredLibraries = this.libraries.filter(function (lib) {
+      var type = lib.CollectionType ? lib.CollectionType.toLowerCase() : '';
+      return type !== 'playlists' && type !== 'boxsets';
+    });
+    librariesList.innerHTML = filteredLibraries.map(function (lib) {
+      return '<button class="moonfin-nav-btn moonfin-library-btn" data-action="library" data-library-id="' + lib.Id + '" title="' + lib.Name + '">' + '<span class="moonfin-library-name">' + lib.Name + '</span>' + '</button>';
+    }).join('');
+  },
+  toggleLibraries() {
+    var group = this.container.querySelector('.moonfin-libraries-group');
+    if (!group) return;
+    this.librariesExpanded = !this.librariesExpanded;
+    group.classList.toggle('expanded', this.librariesExpanded);
+  },
+  collapseLibraries() {
+    var self = this;
+    if (this.librariesTimeout) {
+      clearTimeout(this.librariesTimeout);
+    }
+    this.librariesTimeout = setTimeout(function () {
+      self.librariesExpanded = false;
+      var group = self.container ? self.container.querySelector('.moonfin-libraries-group') : null;
+      if (group) {
+        group.classList.remove('expanded');
+      }
+    }, 150);
+  },
+  cancelCollapseLibraries() {
+    if (this.librariesTimeout) {
+      clearTimeout(this.librariesTimeout);
+      this.librariesTimeout = null;
+    }
   },
   setupEventListeners() {
-    var _this0 = this;
-    this.container.addEventListener('click', /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator(function* (e) {
-        const btn = e.target.closest('.moonfin-nav-btn');
-        if (!btn) return;
-        const action = btn.dataset.action;
-        _this0.handleNavigation(action, btn);
-      });
-      return function (_x2) {
-        return _ref.apply(this, arguments);
-      };
-    }());
-    const userBtn = this.container.querySelector('.moonfin-user-btn');
+    var self = this;
+
+    // Nav button clicks
+    this.container.addEventListener('click', function (e) {
+      var btn = e.target.closest('.moonfin-nav-btn');
+      if (!btn) return;
+      var action = btn.dataset.action;
+      if (action === 'libraries-toggle') {
+        self.toggleLibraries();
+        return;
+      }
+      self.handleNavigation(action, btn);
+    });
+
+    // User avatar click
+    var userBtn = this.container.querySelector('.moonfin-user-btn');
     if (userBtn) {
-      userBtn.addEventListener('click', () => {
+      userBtn.addEventListener('click', function () {
         API.navigateTo('/mypreferencesmenu.html');
       });
     }
-    window.addEventListener('moonfin-settings-changed', e => {
-      this.applySettings(e.detail);
+
+    // Libraries group hover expand/collapse
+    var librariesGroup = this.container.querySelector('.moonfin-libraries-group');
+    if (librariesGroup) {
+      librariesGroup.addEventListener('mouseenter', function () {
+        self.cancelCollapseLibraries();
+      });
+      librariesGroup.addEventListener('mouseleave', function () {
+        self.collapseLibraries();
+      });
+      librariesGroup.addEventListener('focusin', function () {
+        self.cancelCollapseLibraries();
+        self.librariesExpanded = true;
+        librariesGroup.classList.add('expanded');
+      });
+      librariesGroup.addEventListener('focusout', function (e) {
+        if (e.relatedTarget && librariesGroup.contains(e.relatedTarget)) {
+          return;
+        }
+        self.collapseLibraries();
+      });
+    }
+
+    // Global events
+    window.addEventListener('moonfin-settings-changed', function (e) {
+      self.applySettings(e.detail);
     });
-    window.addEventListener('viewshow', () => {
-      this.updateActiveState();
+    window.addEventListener('viewshow', function () {
+      self.updateActiveState();
     });
-    window.addEventListener('moonfin-jellyseerr-config', e => {
-      this.updateJellyseerrButton(e.detail);
+    window.addEventListener('moonfin-jellyseerr-config', function (e) {
+      self.updateJellyseerrButton(e.detail);
     });
   },
   updateJellyseerrButton(config) {
-    var _this$container;
-    const btn = (_this$container = this.container) === null || _this$container === void 0 ? void 0 : _this$container.querySelector('.moonfin-nav-jellyseerr');
+    var btn = this.container ? this.container.querySelector('.moonfin-nav-jellyseerr') : null;
     if (!btn) return;
-    if (config !== null && config !== void 0 && config.enabled && config !== null && config !== void 0 && config.url) {
+    if (config && config.enabled && config.url) {
       btn.classList.remove('hidden');
+      var label = btn.querySelector('.moonfin-expand-label');
+      if (label) {
+        label.textContent = config.displayName || 'Jellyseerr';
+      }
       btn.title = config.displayName || 'Jellyseerr';
     } else {
       btn.classList.add('hidden');
     }
   },
   handleNavigation(action, btn) {
-    var _this1 = this;
+    var _this0 = this;
     return _asyncToGenerator(function* () {
+      // Close Jellyseerr iframe on any navigation except toggling jellyseerr itself
+      if (action !== 'jellyseerr' && action !== 'settings' && Jellyseerr.isOpen) {
+        Jellyseerr.close();
+        _this0.updateJellyseerrButtonState();
+      }
       switch (action) {
         case 'home':
           API.navigateTo('/home.html');
@@ -1296,7 +1288,7 @@ const Navbar = {
           API.navigateTo('/search.html');
           break;
         case 'shuffle':
-          yield _this1.handleShuffle();
+          yield _this0.handleShuffle();
           break;
         case 'genres':
           API.navigateTo('/list.html?type=Genre&parentId=');
@@ -1308,27 +1300,32 @@ const Navbar = {
           Settings.show();
           break;
         case 'cast':
-          _this1.showCastMenu(btn);
+          _this0.showCastMenu(btn);
           break;
         case 'syncplay':
-          _this1.showSyncPlayMenu(btn);
+          _this0.showSyncPlayMenu(btn);
           break;
         case 'jellyseerr':
           Jellyseerr.toggle();
-          btn.classList.toggle('active', Jellyseerr.isOpen);
+          _this0.updateJellyseerrButtonState();
           break;
         case 'library':
-          const libraryId = btn.dataset.libraryId;
+          var libraryId = btn.dataset.libraryId;
           if (libraryId) {
-            API.navigateTo(`/list.html?parentId=${libraryId}`);
+            API.navigateTo('/list.html?parentId=' + libraryId);
           }
           break;
       }
     })();
   },
+  updateJellyseerrButtonState() {
+    var btn = this.container ? this.container.querySelector('.moonfin-nav-jellyseerr') : null;
+    if (btn) {
+      btn.classList.toggle('active', Jellyseerr.isOpen);
+    }
+  },
   showCastMenu(button) {
-    // Find and click the native cast button - it's always in the DOM
-    const nativeCastBtn = document.querySelector('.headerCastButton, .castButton');
+    var nativeCastBtn = document.querySelector('.headerCastButton, .castButton');
     if (nativeCastBtn) {
       console.log('[Moonfin] Triggering Cast menu via native button');
       nativeCastBtn.click();
@@ -1337,8 +1334,7 @@ const Navbar = {
     }
   },
   showSyncPlayMenu(button) {
-    // Find and click the native syncplay button - it's always in the DOM
-    const nativeSyncBtn = document.querySelector('.headerSyncButton, .syncButton');
+    var nativeSyncBtn = document.querySelector('.headerSyncButton, .syncButton');
     if (nativeSyncBtn) {
       console.log('[Moonfin] Triggering SyncPlay menu via native button');
       nativeSyncBtn.click();
@@ -1348,8 +1344,8 @@ const Navbar = {
   },
   handleShuffle() {
     return _asyncToGenerator(function* () {
-      const settings = Storage.getAll();
-      const items = yield API.getRandomItems({
+      var settings = Storage.getAll();
+      var items = yield API.getRandomItems({
         contentType: settings.shuffleContentType,
         limit: 1
       });
@@ -1360,65 +1356,74 @@ const Navbar = {
   },
   updateActiveState() {
     if (!this.container) return;
-    const path = window.location.pathname + window.location.search;
-    this.container.querySelectorAll('.moonfin-nav-btn').forEach(btn => {
+    var path = window.location.pathname + window.location.search;
+    this.container.querySelectorAll('.moonfin-nav-btn').forEach(function (btn) {
       btn.classList.remove('active');
     });
-    if (path.includes('/home')) {
-      var _this$container$query;
-      (_this$container$query = this.container.querySelector('.moonfin-nav-home')) === null || _this$container$query === void 0 || _this$container$query.classList.add('active');
-    } else if (path.includes('/search')) {
-      var _this$container$query2;
-      (_this$container$query2 = this.container.querySelector('.moonfin-nav-search')) === null || _this$container$query2 === void 0 || _this$container$query2.classList.add('active');
+    if (path.indexOf('/home') !== -1) {
+      var homeBtn = this.container.querySelector('.moonfin-nav-home');
+      if (homeBtn) homeBtn.classList.add('active');
+    } else if (path.indexOf('/search') !== -1) {
+      var searchBtn = this.container.querySelector('.moonfin-nav-search');
+      if (searchBtn) searchBtn.classList.add('active');
     }
-    const urlParams = new URLSearchParams(window.location.search);
-    const parentId = urlParams.get('parentId');
+    var urlParams = new URLSearchParams(window.location.search);
+    var parentId = urlParams.get('parentId');
     if (parentId) {
-      const libraryBtn = this.container.querySelector(`[data-library-id="${parentId}"]`);
+      var libraryBtn = this.container.querySelector('[data-library-id="' + parentId + '"]');
       if (libraryBtn) {
         libraryBtn.classList.add('active');
       }
     }
   },
   startClock() {
-    const updateClock = () => {
-      const clockElement = this.container.querySelector('.moonfin-clock-time');
+    var self = this;
+    var updateClock = function () {
+      var clockElement = self.container ? self.container.querySelector('.moonfin-clock-time') : null;
       if (!clockElement) return;
-      const now = new Date();
-      const settings = Storage.getAll();
-      let hours = now.getHours();
-      let minutes = now.getMinutes();
-      let suffix = '';
+      var now = new Date();
+      var settings = Storage.getAll();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      var suffix = '';
       if (!settings.use24HourClock) {
         suffix = hours >= 12 ? ' PM' : ' AM';
         hours = hours % 12 || 12;
       }
-      clockElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}${suffix}`;
+      clockElement.textContent = hours + ':' + minutes.toString().padStart(2, '0') + suffix;
     };
     updateClock();
     setInterval(updateClock, 1000);
   },
   applySettings(settings) {
-    var _this$container$query3, _this$container$query4, _this$container$query5, _this$container$query6, _this$container$query7, _this$container$query8;
     if (!this.container) return;
-    const overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
-    const center = this.container.querySelector('.moonfin-navbar-center');
-    if (center) {
-      center.style.background = overlayColor;
+    var overlayColor = Storage.getColorRgba(settings.mediaBarOverlayColor, settings.mediaBarOverlayOpacity);
+    var pill = this.container.querySelector('.moonfin-nav-pill');
+    if (pill) {
+      pill.style.background = overlayColor;
     }
-    (_this$container$query3 = this.container.querySelector('.moonfin-nav-shuffle')) === null || _this$container$query3 === void 0 || _this$container$query3.classList.toggle('hidden', !settings.showShuffleButton);
-    (_this$container$query4 = this.container.querySelector('.moonfin-nav-genres')) === null || _this$container$query4 === void 0 || _this$container$query4.classList.toggle('hidden', !settings.showGenresButton);
-    (_this$container$query5 = this.container.querySelector('.moonfin-nav-favorites')) === null || _this$container$query5 === void 0 || _this$container$query5.classList.toggle('hidden', !settings.showFavoritesButton);
-    (_this$container$query6 = this.container.querySelector('.moonfin-nav-divider')) === null || _this$container$query6 === void 0 || _this$container$query6.classList.toggle('hidden', !settings.showLibrariesInToolbar);
-    (_this$container$query7 = this.container.querySelector('.moonfin-nav-libraries')) === null || _this$container$query7 === void 0 || _this$container$query7.classList.toggle('hidden', !settings.showLibrariesInToolbar);
-    (_this$container$query8 = this.container.querySelector('.moonfin-clock')) === null || _this$container$query8 === void 0 || _this$container$query8.classList.toggle('hidden', !settings.showClock);
+    var shuffleBtn = this.container.querySelector('.moonfin-nav-shuffle');
+    if (shuffleBtn) shuffleBtn.classList.toggle('hidden', !settings.showShuffleButton);
+    var genresBtn = this.container.querySelector('.moonfin-nav-genres');
+    if (genresBtn) genresBtn.classList.toggle('hidden', !settings.showGenresButton);
+    var favoritesBtn = this.container.querySelector('.moonfin-nav-favorites');
+    if (favoritesBtn) favoritesBtn.classList.toggle('hidden', !settings.showFavoritesButton);
+    var librariesGroup = this.container.querySelector('.moonfin-libraries-group');
+    if (librariesGroup) librariesGroup.classList.toggle('hidden', !settings.showLibrariesInToolbar);
+    var clock = this.container.querySelector('.moonfin-clock');
+    if (clock) clock.classList.toggle('hidden', !settings.showClock);
   },
   destroy() {
+    if (this.librariesTimeout) {
+      clearTimeout(this.librariesTimeout);
+      this.librariesTimeout = null;
+    }
     if (this.container) {
       this.container.remove();
       this.container = null;
     }
     document.body.classList.remove('moonfin-navbar-active');
+    this.librariesExpanded = false;
     this.initialized = false;
   }
 };
@@ -1433,7 +1438,7 @@ const MediaBar = {
   autoAdvanceTimer: null,
   isVisible: true,
   init() {
-    var _this10 = this;
+    var _this1 = this;
     return _asyncToGenerator(function* () {
       const settings = Storage.getAll();
       if (!settings.mediaBarEnabled) {
@@ -1441,30 +1446,30 @@ const MediaBar = {
         document.body.classList.remove('moonfin-mediabar-active');
         return;
       }
-      if (_this10.initialized) return;
+      if (_this1.initialized) return;
       console.log('[Moonfin] Initializing media bar...');
       try {
-        yield _this10.waitForApi();
+        yield _this1.waitForApi();
       } catch (e) {
         console.error('[Moonfin] MediaBar: Failed to initialize -', e.message);
         document.body.classList.remove('moonfin-mediabar-active');
         return;
       }
-      _this10.createMediaBar();
-      yield _this10.loadContent();
+      _this1.createMediaBar();
+      yield _this1.loadContent();
 
       // Only add active class if we have items to show
-      if (_this10.items.length > 0) {
+      if (_this1.items.length > 0) {
         document.body.classList.add('moonfin-mediabar-active');
       } else {
         document.body.classList.remove('moonfin-mediabar-active');
       }
-      _this10.setupEventListeners();
+      _this1.setupEventListeners();
       if (settings.mediaBarAutoAdvance) {
-        _this10.startAutoAdvance();
+        _this1.startAutoAdvance();
       }
-      _this10.initialized = true;
-      console.log('[Moonfin] Media bar initialized with', _this10.items.length, 'items');
+      _this1.initialized = true;
+      console.log('[Moonfin] Media bar initialized with', _this1.items.length, 'items');
     })();
   },
   waitForApi() {
@@ -1556,19 +1561,19 @@ const MediaBar = {
     }
   },
   loadContent() {
-    var _this11 = this;
+    var _this10 = this;
     return _asyncToGenerator(function* () {
       const settings = Storage.getAll();
-      _this11.items = yield API.getRandomItems({
+      _this10.items = yield API.getRandomItems({
         contentType: settings.mediaBarContentType,
         limit: settings.mediaBarItemCount
       });
-      if (_this11.items.length > 0) {
-        _this11.updateDisplay();
-        _this11.updateDots();
+      if (_this10.items.length > 0) {
+        _this10.updateDisplay();
+        _this10.updateDots();
       } else {
         console.log('[Moonfin] No items found for media bar');
-        _this11.container.classList.add('empty');
+        _this10.container.classList.add('empty');
       }
     })();
   },
@@ -1719,20 +1724,20 @@ const MediaBar = {
     }
   },
   setupEventListeners() {
-    var _this$container$query9, _this$container$query0, _this$container$query1, _this$container$query10;
-    (_this$container$query9 = this.container.querySelector('.moonfin-mediabar-prev')) === null || _this$container$query9 === void 0 || _this$container$query9.addEventListener('click', () => {
+    var _this$container$query, _this$container$query2, _this$container$query3, _this$container$query4;
+    (_this$container$query = this.container.querySelector('.moonfin-mediabar-prev')) === null || _this$container$query === void 0 || _this$container$query.addEventListener('click', () => {
       this.prevSlide();
     });
-    (_this$container$query0 = this.container.querySelector('.moonfin-mediabar-next')) === null || _this$container$query0 === void 0 || _this$container$query0.addEventListener('click', () => {
+    (_this$container$query2 = this.container.querySelector('.moonfin-mediabar-next')) === null || _this$container$query2 === void 0 || _this$container$query2.addEventListener('click', () => {
       this.nextSlide();
     });
-    (_this$container$query1 = this.container.querySelector('.moonfin-mediabar-dots')) === null || _this$container$query1 === void 0 || _this$container$query1.addEventListener('click', e => {
+    (_this$container$query3 = this.container.querySelector('.moonfin-mediabar-dots')) === null || _this$container$query3 === void 0 || _this$container$query3.addEventListener('click', e => {
       const dot = e.target.closest('.moonfin-mediabar-dot');
       if (dot) {
         this.goToSlide(parseInt(dot.dataset.index, 10));
       }
     });
-    (_this$container$query10 = this.container.querySelector('.moonfin-mediabar-content')) === null || _this$container$query10 === void 0 || _this$container$query10.addEventListener('click', () => {
+    (_this$container$query4 = this.container.querySelector('.moonfin-mediabar-content')) === null || _this$container$query4 === void 0 || _this$container$query4.addEventListener('click', () => {
       const item = this.items[this.currentIndex];
       if (item) {
         API.navigateToItem(item.Id);
@@ -1830,10 +1835,10 @@ const MediaBar = {
     }
   },
   refresh() {
-    var _this12 = this;
+    var _this11 = this;
     return _asyncToGenerator(function* () {
-      _this12.currentIndex = 0;
-      yield _this12.loadContent();
+      _this11.currentIndex = 0;
+      yield _this11.loadContent();
     })();
   },
   destroy() {
@@ -2267,21 +2272,21 @@ const Jellyseerr = {
   config: null,
   ssoStatus: null,
   init() {
-    var _this13 = this;
+    var _this12 = this;
     return _asyncToGenerator(function* () {
-      var _this13$config, _this13$config2;
-      yield _this13.fetchConfig();
-      if ((_this13$config = _this13.config) !== null && _this13$config !== void 0 && _this13$config.enabled && (_this13$config2 = _this13.config) !== null && _this13$config2 !== void 0 && _this13$config2.url) {
-        console.log('[Moonfin] Jellyseerr enabled:', _this13.config.url);
-        yield _this13.checkSsoStatus();
+      var _this12$config, _this12$config2;
+      yield _this12.fetchConfig();
+      if ((_this12$config = _this12.config) !== null && _this12$config !== void 0 && _this12$config.enabled && (_this12$config2 = _this12.config) !== null && _this12$config2 !== void 0 && _this12$config2.url) {
+        console.log('[Moonfin] Jellyseerr enabled:', _this12.config.url);
+        yield _this12.checkSsoStatus();
         window.dispatchEvent(new CustomEvent('moonfin-jellyseerr-config', {
-          detail: _this13.config
+          detail: _this12.config
         }));
       }
     })();
   },
   fetchConfig() {
-    var _this14 = this;
+    var _this13 = this;
     return _asyncToGenerator(function* () {
       try {
         var _window$ApiClient7, _window$ApiClient7$se, _window$ApiClient8, _window$ApiClient8$ac;
@@ -2305,7 +2310,7 @@ const Jellyseerr = {
           }
         });
         if (response.ok) {
-          _this14.config = API.toCamelCase(yield response.json());
+          _this13.config = API.toCamelCase(yield response.json());
         }
       } catch (e) {
         console.error('[Moonfin] Failed to fetch Jellyseerr config:', e);
@@ -2313,7 +2318,7 @@ const Jellyseerr = {
     })();
   },
   checkSsoStatus() {
-    var _this15 = this;
+    var _this14 = this;
     return _asyncToGenerator(function* () {
       try {
         var _window$ApiClient9, _window$ApiClient9$se, _window$ApiClient0, _window$ApiClient0$ac;
@@ -2328,8 +2333,8 @@ const Jellyseerr = {
           }
         });
         if (response.ok) {
-          _this15.ssoStatus = API.toCamelCase(yield response.json());
-          console.log('[Moonfin] Jellyseerr SSO status:', _this15.ssoStatus.authenticated ? 'authenticated' : 'not authenticated');
+          _this14.ssoStatus = API.toCamelCase(yield response.json());
+          console.log('[Moonfin] Jellyseerr SSO status:', _this14.ssoStatus.authenticated ? 'authenticated' : 'not authenticated');
         }
       } catch (e) {
         console.error('[Moonfin] Failed to check Jellyseerr SSO status:', e);
@@ -2337,7 +2342,7 @@ const Jellyseerr = {
     })();
   },
   ssoLogin(username, password) {
-    var _this16 = this;
+    var _this15 = this;
     return _asyncToGenerator(function* () {
       try {
         var _window$ApiClient1, _window$ApiClient1$se, _window$ApiClient10, _window$ApiClient10$a;
@@ -2362,11 +2367,11 @@ const Jellyseerr = {
         });
         var result = API.toCamelCase(yield response.json());
         if (response.ok && result.success) {
-          var _this16$config;
-          _this16.ssoStatus = {
+          var _this15$config;
+          _this15.ssoStatus = {
             enabled: true,
             authenticated: true,
-            url: (_this16$config = _this16.config) === null || _this16$config === void 0 ? void 0 : _this16$config.url,
+            url: (_this15$config = _this15.config) === null || _this15$config === void 0 ? void 0 : _this15$config.url,
             jellyseerrUserId: result.jellyseerrUserId,
             displayName: result.displayName,
             avatar: result.avatar,
@@ -2391,10 +2396,10 @@ const Jellyseerr = {
     })();
   },
   ssoLogout() {
-    var _this17 = this;
+    var _this16 = this;
     return _asyncToGenerator(function* () {
       try {
-        var _window$ApiClient11, _window$ApiClient11$s, _window$ApiClient12, _window$ApiClient12$a, _this17$config;
+        var _window$ApiClient11, _window$ApiClient11$s, _window$ApiClient12, _window$ApiClient12$a, _this16$config;
         var serverUrl = ((_window$ApiClient11 = window.ApiClient) === null || _window$ApiClient11 === void 0 || (_window$ApiClient11$s = _window$ApiClient11.serverAddress) === null || _window$ApiClient11$s === void 0 ? void 0 : _window$ApiClient11$s.call(_window$ApiClient11)) || '';
         var token = (_window$ApiClient12 = window.ApiClient) === null || _window$ApiClient12 === void 0 || (_window$ApiClient12$a = _window$ApiClient12.accessToken) === null || _window$ApiClient12$a === void 0 ? void 0 : _window$ApiClient12$a.call(_window$ApiClient12);
         if (!serverUrl || !token) return;
@@ -2404,10 +2409,10 @@ const Jellyseerr = {
             'Authorization': 'MediaBrowser Token="' + token + '"'
           }
         });
-        _this17.ssoStatus = {
+        _this16.ssoStatus = {
           enabled: true,
           authenticated: false,
-          url: (_this17$config = _this17.config) === null || _this17$config === void 0 ? void 0 : _this17$config.url
+          url: (_this16$config = _this16.config) === null || _this16$config === void 0 ? void 0 : _this16$config.url
         };
         console.log('[Moonfin] Jellyseerr SSO logged out');
       } catch (e) {
@@ -2416,7 +2421,7 @@ const Jellyseerr = {
     })();
   },
   ssoApiCall(method, path, body) {
-    var _this18 = this;
+    var _this17 = this;
     return _asyncToGenerator(function* () {
       var _window$ApiClient13, _window$ApiClient13$s, _window$ApiClient14, _window$ApiClient14$a;
       var serverUrl = ((_window$ApiClient13 = window.ApiClient) === null || _window$ApiClient13 === void 0 || (_window$ApiClient13$s = _window$ApiClient13.serverAddress) === null || _window$ApiClient13$s === void 0 ? void 0 : _window$ApiClient13$s.call(_window$ApiClient13)) || '';
@@ -2436,12 +2441,12 @@ const Jellyseerr = {
       }
       var response = yield fetch(serverUrl + '/Moonfin/Jellyseerr/Api/' + path, options);
       if (response.status === 401) {
-        var _this18$config;
+        var _this17$config;
         // Session expired - clear status
-        _this18.ssoStatus = {
+        _this17.ssoStatus = {
           enabled: true,
           authenticated: false,
-          url: (_this18$config = _this18.config) === null || _this18$config === void 0 ? void 0 : _this18$config.url
+          url: (_this17$config = _this17.config) === null || _this17$config === void 0 ? void 0 : _this17$config.url
         };
         throw new Error('SESSION_EXPIRED');
       }
@@ -2532,18 +2537,18 @@ const Jellyseerr = {
     this.setupEventListeners();
   },
   setupEventListeners() {
-    var _this$container$query11, _this$container$query12, _this$container$query13, _this$container$query14, _this$iframe, _this$iframe2;
+    var _this$container$query5, _this$container$query6, _this$container$query7, _this$container$query8, _this$iframe, _this$iframe2;
     var self = this;
-    (_this$container$query11 = this.container.querySelector('.moonfin-jellyseerr-close')) === null || _this$container$query11 === void 0 || _this$container$query11.addEventListener('click', function () {
+    (_this$container$query5 = this.container.querySelector('.moonfin-jellyseerr-close')) === null || _this$container$query5 === void 0 || _this$container$query5.addEventListener('click', function () {
       self.close();
     });
-    (_this$container$query12 = this.container.querySelector('.moonfin-jellyseerr-refresh')) === null || _this$container$query12 === void 0 || _this$container$query12.addEventListener('click', function () {
+    (_this$container$query6 = this.container.querySelector('.moonfin-jellyseerr-refresh')) === null || _this$container$query6 === void 0 || _this$container$query6.addEventListener('click', function () {
       self.refresh();
     });
-    (_this$container$query13 = this.container.querySelector('.moonfin-jellyseerr-external')) === null || _this$container$query13 === void 0 || _this$container$query13.addEventListener('click', function () {
+    (_this$container$query7 = this.container.querySelector('.moonfin-jellyseerr-external')) === null || _this$container$query7 === void 0 || _this$container$query7.addEventListener('click', function () {
       window.open(self.config.url, '_blank');
     });
-    (_this$container$query14 = this.container.querySelector('.moonfin-jellyseerr-signout')) === null || _this$container$query14 === void 0 || _this$container$query14.addEventListener('click', function () {
+    (_this$container$query8 = this.container.querySelector('.moonfin-jellyseerr-signout')) === null || _this$container$query8 === void 0 || _this$container$query8.addEventListener('click', function () {
       if (confirm('Sign out of Jellyseerr? You will need to sign in again to use it.')) {
         self.close();
         self.ssoLogout();
@@ -2570,8 +2575,8 @@ const Jellyseerr = {
     }
   },
   showError(message) {
-    var _this$container2;
-    const loading = (_this$container2 = this.container) === null || _this$container2 === void 0 ? void 0 : _this$container2.querySelector('.moonfin-jellyseerr-loading');
+    var _this$container;
+    const loading = (_this$container = this.container) === null || _this$container === void 0 ? void 0 : _this$container.querySelector('.moonfin-jellyseerr-loading');
     if (loading) {
       loading.innerHTML = `
                 <svg viewBox="0 0 24 24" width="48" height="48" style="color: #f44336;">
@@ -3114,28 +3119,28 @@ const Plugin = {
     return path.includes('/dashboard') || path.includes('/configurationpage') || path.includes('/admin') || hash.includes('configurationpage') || hash.includes('dashboard') || hash.includes('plugincatalog') || document.querySelector('.dashboardDocument') !== null || document.querySelector('.type-interior.pluginConfigurationPage') !== null;
   },
   init() {
-    var _this19 = this;
+    var _this18 = this;
     return _asyncToGenerator(function* () {
-      if (_this19.initialized) return;
+      if (_this18.initialized) return;
 
       // Always register global listeners so we can detect navigation back from admin pages
-      if (!_this19._listenersRegistered) {
-        _this19.setupGlobalListeners();
-        _this19._listenersRegistered = true;
+      if (!_this18._listenersRegistered) {
+        _this18.setupGlobalListeners();
+        _this18._listenersRegistered = true;
       }
-      if (_this19.isAdminPage()) {
+      if (_this18.isAdminPage()) {
         console.log('[Moonfin] Skipping initialization on admin page');
         return;
       }
-      console.log(`[Moonfin] ${_this19.name} v${_this19.version} initializing...`);
+      console.log(`[Moonfin] ${_this18.name} v${_this18.version} initializing...`);
       Device.detect();
       if (document.readyState === 'loading') {
         yield new Promise(resolve => {
           document.addEventListener('DOMContentLoaded', resolve);
         });
       }
-      _this19.loadStyles();
-      _this19.applyDeviceClasses();
+      _this18.loadStyles();
+      _this18.applyDeviceClasses();
       Storage.initSync();
       try {
         var settings = Storage.getAll();
@@ -3147,14 +3152,14 @@ const Plugin = {
         }
         yield Jellyseerr.init();
         Details.init();
-        _this19.initSeasonalEffects();
+        _this18.initSeasonalEffects();
         if (Device.isTV()) {
           TVNavigation.init();
         }
       } catch (e) {
         console.error('[Moonfin] Error initializing components:', e);
       }
-      _this19.initialized = true;
+      _this18.initialized = true;
       console.log('[Moonfin] Plugin initialized successfully');
     })();
   },
@@ -3271,6 +3276,11 @@ const Plugin = {
     });
   },
   onPageChange() {
+    // Close Jellyseerr iframe on any page navigation
+    if (Jellyseerr.isOpen) {
+      Jellyseerr.close();
+      Navbar.updateJellyseerrButtonState();
+    }
     if (this.isAdminPage()) {
       if (Navbar.container) Navbar.container.classList.add('hidden');
       if (MediaBar.container) MediaBar.container.classList.add('hidden');
