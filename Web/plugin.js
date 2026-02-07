@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T20:14:11.887Z
+// Moonfin Web Plugin - Built 2026-02-07T20:24:29.180Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -221,6 +221,7 @@ const Storage = {
   defaults: {
     // UI Feature Toggles
     navbarEnabled: false,
+    detailsPageEnabled: true,
     // Media Bar Settings
     mediaBarEnabled: false,
     mediaBarContentType: 'both',
@@ -479,10 +480,11 @@ const Storage = {
     }).apply(this, arguments);
   },
   mapServerToLocal(serverSettings) {
-    var _serverSettings$navba, _serverSettings$media, _serverSettings$media2, _serverSettings$media3, _serverSettings$overl, _serverSettings$overl2, _serverSettings$media4, _serverSettings$media5, _serverSettings$showS, _serverSettings$showG, _serverSettings$showF, _serverSettings$showL, _serverSettings$shuff, _serverSettings$seaso, _serverSettings$backd, _serverSettings$confi, _serverSettings$navba2, _serverSettings$showC, _serverSettings$use, _serverSettings$mdbli, _serverSettings$mdbli2, _serverSettings$mdbli3;
+    var _serverSettings$navba, _serverSettings$detai, _serverSettings$media, _serverSettings$media2, _serverSettings$media3, _serverSettings$overl, _serverSettings$overl2, _serverSettings$media4, _serverSettings$media5, _serverSettings$showS, _serverSettings$showG, _serverSettings$showF, _serverSettings$showL, _serverSettings$shuff, _serverSettings$seaso, _serverSettings$backd, _serverSettings$confi, _serverSettings$navba2, _serverSettings$showC, _serverSettings$use, _serverSettings$mdbli, _serverSettings$mdbli2, _serverSettings$mdbli3;
     return {
       // UI Feature Toggles
       navbarEnabled: (_serverSettings$navba = serverSettings.navbarEnabled) !== null && _serverSettings$navba !== void 0 ? _serverSettings$navba : this.defaults.navbarEnabled,
+      detailsPageEnabled: (_serverSettings$detai = serverSettings.detailsPageEnabled) !== null && _serverSettings$detai !== void 0 ? _serverSettings$detai : this.defaults.detailsPageEnabled,
       // Media Bar
       mediaBarEnabled: (_serverSettings$media = serverSettings.mediaBarEnabled) !== null && _serverSettings$media !== void 0 ? _serverSettings$media : this.defaults.mediaBarEnabled,
       mediaBarContentType: (_serverSettings$media2 = serverSettings.mediaBarContentType) !== null && _serverSettings$media2 !== void 0 ? _serverSettings$media2 : this.defaults.mediaBarContentType,
@@ -515,6 +517,7 @@ const Storage = {
     return {
       // UI Feature Toggles
       navbarEnabled: localSettings.navbarEnabled,
+      detailsPageEnabled: localSettings.detailsPageEnabled,
       // Media Bar
       mediaBarEnabled: localSettings.mediaBarEnabled,
       mediaBarContentType: localSettings.mediaBarContentType,
@@ -2120,7 +2123,11 @@ const MediaBar = {
       }
       const item = this.items[this.currentIndex];
       if (item) {
-        Details.showDetails(item.Id, item.Type);
+        if (Storage.get('detailsPageEnabled')) {
+          Details.showDetails(item.Id, item.Type);
+        } else {
+          API.navigateToItem(item.Id);
+        }
       }
     });
 
@@ -2190,7 +2197,11 @@ const MediaBar = {
         case 'Enter':
           const item = this.items[this.currentIndex];
           if (item) {
-            Details.showDetails(item.Id, item.Type);
+            if (Storage.get('detailsPageEnabled')) {
+              Details.showDetails(item.Id, item.Type);
+            } else {
+              API.navigateToItem(item.Id);
+            }
           }
           e.preventDefault();
           break;
@@ -2369,7 +2380,7 @@ var Settings = {
     // --- Build sections ---
 
     // Moonfin UI Section
-    var uiContent = this.createToggleCard('navbarEnabled', 'Navigation Bar', 'Show the custom navigation bar with quick access buttons', settings.navbarEnabled) + this.createToggleCard('mediaBarEnabled', 'Media Bar', 'Show the featured media carousel on the home page', settings.mediaBarEnabled);
+    var uiContent = this.createToggleCard('navbarEnabled', 'Navigation Bar', 'Show the custom navigation bar with quick access buttons', settings.navbarEnabled) + this.createToggleCard('mediaBarEnabled', 'Media Bar', 'Show the featured media carousel on the home page', settings.mediaBarEnabled) + this.createToggleCard('detailsPageEnabled', 'Details Page', 'Use the custom Moonfin details page instead of the default Jellyfin one', settings.detailsPageEnabled);
 
     // Media Bar Config Section
     var mediaBarContent = this.createSelectCard('mediaBarContentType', 'Content Type', 'What type of content to show in the media bar', [{
@@ -2682,12 +2693,20 @@ var Settings = {
       }
     });
 
-    // MDBList API key - save on blur
+    // MDBList API key - save on input with debounce + on blur
     var mdblistApiKeyInput = this.dialog.querySelector('#moonfin-mdblistApiKey');
     if (mdblistApiKeyInput) {
-      mdblistApiKeyInput.addEventListener('change', function () {
+      var mdblistKeyTimer = null;
+      mdblistApiKeyInput.addEventListener('input', function () {
+        if (mdblistKeyTimer) clearTimeout(mdblistKeyTimer);
+        mdblistKeyTimer = setTimeout(function () {
+          self.saveSetting('mdblistApiKey', mdblistApiKeyInput.value.trim());
+          self.showToast('API key saved');
+        }, 800);
+      });
+      mdblistApiKeyInput.addEventListener('blur', function () {
+        if (mdblistKeyTimer) clearTimeout(mdblistKeyTimer);
         self.saveSetting('mdblistApiKey', mdblistApiKeyInput.value.trim());
-        self.showToast('API key saved');
       });
     }
 
