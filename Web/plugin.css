@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T18:24:27.987Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T20:14:11.888Z */
 
 /* === styles/navbar.css === */
 /**
@@ -2384,11 +2384,11 @@ body.moonfin-tv-mode {
     );
 }
 
-/* Close button */
-.moonfin-details-close {
+/* Back button */
+.moonfin-details-back {
     position: fixed;
     top: 24px;
-    right: 24px;
+    left: 24px;
     z-index: 10001;
     width: 48px;
     height: 48px;
@@ -2404,17 +2404,27 @@ body.moonfin-tv-mode {
     transition: background 0.2s, transform 0.2s;
 }
 
-.moonfin-details-close svg {
+.moonfin-details-back svg {
     width: 24px;
     height: 24px;
     color: #fff;
 }
 
-.moonfin-details-close:hover,
-.moonfin-details-close:focus {
+.moonfin-details-back:hover,
+.moonfin-details-back:focus {
     background: rgba(255, 255, 255, 0.15);
     transform: scale(1.1);
     outline: none;
+}
+
+/* Show navbar above details overlay */
+body.moonfin-details-visible .moonfin-navbar {
+    z-index: 10002;
+}
+
+/* When navbar is active, hide the back button (navbar handles navigation) */
+body.moonfin-navbar-active .moonfin-details-back {
+    display: none;
 }
 
 /* Content container */
@@ -3335,14 +3345,14 @@ body.moonfin-tv-mode {
         padding: 70px 16px 30px;
     }
 
-    .moonfin-details-close {
+    .moonfin-details-back {
         top: 14px;
-        right: 14px;
+        left: 14px;
         width: 40px;
         height: 40px;
     }
 
-    .moonfin-details-close svg {
+    .moonfin-details-back svg {
         width: 20px;
         height: 20px;
     }

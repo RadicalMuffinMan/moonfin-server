@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T18:24:27.986Z
+// Moonfin Web Plugin - Built 2026-02-07T20:14:11.887Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -2112,7 +2112,7 @@ const MediaBar = {
       }
     });
 
-    // Make the entire media bar clickable - navigate to the current item
+    // Make the entire media bar clickable - open custom details
     this.container.addEventListener('click', e => {
       // Don't navigate if clicking nav buttons, dots, or playstate
       if (e.target.closest('.moonfin-mediabar-nav-btn, .moonfin-mediabar-dots, .moonfin-mediabar-playstate')) {
@@ -2120,7 +2120,7 @@ const MediaBar = {
       }
       const item = this.items[this.currentIndex];
       if (item) {
-        API.navigateToItem(item.Id);
+        Details.showDetails(item.Id, item.Type);
       }
     });
 
@@ -2190,7 +2190,7 @@ const MediaBar = {
         case 'Enter':
           const item = this.items[this.currentIndex];
           if (item) {
-            API.navigateToItem(item.Id);
+            Details.showDetails(item.Id, item.Type);
           }
           e.preventDefault();
           break;
@@ -3268,6 +3268,7 @@ var Details = {
     }
     this.container.classList.add('visible');
     this.isVisible = true;
+    document.body.classList.add('moonfin-details-visible');
     var panel = this.container.querySelector('.moonfin-details-panel');
     panel.innerHTML = '<div class="moonfin-details-loading"><div class="moonfin-spinner"></div><span>Loading...</span></div>';
     this.fetchItem(api, itemId).then(function (item) {
@@ -3519,7 +3520,7 @@ var Details = {
     }
 
     // Assemble the full layout
-    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-close moonfin-focusable" title="Close" tabindex="0">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' +
+    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-back moonfin-focusable" title="Back" tabindex="0">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' +
     // Header: info left, poster right
     '<div class="moonfin-details-header">' + '<div class="moonfin-info-section">' + episodeHeader + '<div class="moonfin-title-section">' + (logoUrl ? '<img class="moonfin-logo" src="' + logoUrl + '" alt="' + item.Name + '">' : '<h1 class="moonfin-title">' + item.Name + '</h1>') + '</div>' + infoRowHtml + '<div class="moonfin-mdblist-ratings-row" id="moonfin-details-mdblist"></div>' + (tagline ? '<p class="moonfin-tagline">&ldquo;' + tagline + '&rdquo;</p>' : '') + (item.Overview ? '<p class="moonfin-overview">' + item.Overview + '</p>' : '') + '</div>' + '<div class="moonfin-poster-section">' + '<div class="moonfin-poster">' + (posterUrl ? '<img src="' + posterUrl + '" alt="" loading="lazy">' : '') + '</div>' + '</div>' + '</div>' +
     // Action buttons
@@ -3576,8 +3577,8 @@ var Details = {
    */
   setupPanelListeners: function (panel, item) {
     var self = this;
-    var closeBtn = panel.querySelector('.moonfin-details-close');
-    if (closeBtn) closeBtn.addEventListener('click', function () {
+    var backBtn = panel.querySelector('.moonfin-details-back');
+    if (backBtn) backBtn.addEventListener('click', function () {
       self.hide();
     });
     var actionBtns = panel.querySelectorAll('[data-action]');
@@ -3680,17 +3681,45 @@ var Details = {
     });
   },
   /**
-   * Play an item via the Sessions API (sends play command to current session)
+   * Play an item using the best available method
    */
   playItem: function (itemId, startPositionTicks) {
+    var self = this;
+    var api = API.getApiClient();
+
+    // Method 1: Try ApiClient.sendPlayCommand if available
+    if (api && typeof api.sendPlayCommand === 'function') {
+      var deviceId = api.deviceId();
+      api.getSessions({
+        DeviceId: deviceId
+      }).then(function (sessions) {
+        if (sessions && sessions.length > 0) {
+          return api.sendPlayCommand(sessions[0].Id, {
+            ItemIds: [itemId],
+            PlayCommand: 'PlayNow',
+            StartPositionTicks: startPositionTicks || 0
+          });
+        }
+        throw new Error('No session');
+      }).catch(function () {
+        self._playViaSession(itemId, startPositionTicks);
+      });
+      return;
+    }
+
+    // Method 2: Try REST Sessions API
+    self._playViaSession(itemId, startPositionTicks);
+  },
+  /**
+   * Play via REST Sessions API
+   */
+  _playViaSession: function (itemId, startPositionTicks) {
     var self = this;
     var serverUrl = this.getServerUrl();
     var headers = this.getAuthHeaders();
     this.getSessionId().then(function (sessionId) {
       if (!sessionId) {
-        console.warn('[Moonfin] Details: No session found, falling back to navigation');
-        API.navigateTo('/details?id=' + itemId);
-        return;
+        throw new Error('No session found');
       }
       return fetch(serverUrl + '/Sessions/' + sessionId + '/Playing', {
         method: 'POST',
@@ -3700,11 +3729,31 @@ var Details = {
           StartPositionTicks: startPositionTicks || 0,
           PlayCommand: 'PlayNow'
         })
+      }).then(function (resp) {
+        if (!resp.ok) throw new Error('Play command failed: ' + resp.status);
       });
     }).catch(function (err) {
-      console.error('[Moonfin] Details: Failed to play item', err);
-      API.navigateTo('/details?id=' + itemId);
+      console.error('[Moonfin] Details: Sessions API failed, using fallback', err);
+      self._playViaFallback(itemId);
     });
+  },
+  /**
+   * Fallback: navigate to native details and auto-click play
+   */
+  _playViaFallback: function (itemId) {
+    API.navigateTo('/details?id=' + itemId);
+    // Wait for the Jellyfin details page to load, then click its play button
+    var attempts = 0;
+    var tryClick = setInterval(function () {
+      attempts++;
+      var playBtn = document.querySelector('.btnPlay, .detailButton-primary, [data-action="resume"], [data-action="play"]');
+      if (playBtn) {
+        clearInterval(tryClick);
+        playBtn.click();
+      } else if (attempts > 20) {
+        clearInterval(tryClick);
+      }
+    }, 250);
   },
   /**
    * Shuffle play a series via the Sessions API
@@ -3735,20 +3784,48 @@ var Details = {
         ids[i] = ids[j];
         ids[j] = temp;
       }
-      return self.getSessionId().then(function (sessionId) {
-        if (!sessionId) return;
-        return fetch(serverUrl + '/Sessions/' + sessionId + '/Playing', {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify({
-            ItemIds: ids,
-            StartPositionTicks: 0,
-            PlayCommand: 'PlayNow'
-          })
+
+      // Try ApiClient.sendPlayCommand first
+      if (typeof api.sendPlayCommand === 'function') {
+        var deviceId = api.deviceId();
+        return api.getSessions({
+          DeviceId: deviceId
+        }).then(function (sessions) {
+          if (sessions && sessions.length > 0) {
+            return api.sendPlayCommand(sessions[0].Id, {
+              ItemIds: ids,
+              PlayCommand: 'PlayNow',
+              StartPositionTicks: 0
+            });
+          }
+          throw new Error('No session');
+        }).catch(function () {
+          return self._shuffleViaSession(ids);
         });
-      });
+      }
+      return self._shuffleViaSession(ids);
     }).catch(function (err) {
       console.error('[Moonfin] Details: Failed to shuffle', err);
+    });
+  },
+  /**
+   * Shuffle via REST Sessions API
+   */
+  _shuffleViaSession: function (ids) {
+    var self = this;
+    var serverUrl = this.getServerUrl();
+    var headers = this.getAuthHeaders();
+    return this.getSessionId().then(function (sessionId) {
+      if (!sessionId) return;
+      return fetch(serverUrl + '/Sessions/' + sessionId + '/Playing', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          ItemIds: ids,
+          StartPositionTicks: 0,
+          PlayCommand: 'PlayNow'
+        })
+      });
     });
   },
   /**
@@ -3844,6 +3921,7 @@ var Details = {
     this.container.classList.remove('visible');
     this.isVisible = false;
     this.currentItem = null;
+    document.body.classList.remove('moonfin-details-visible');
   }
 };
 
@@ -4036,6 +4114,11 @@ const Plugin = {
     });
   },
   onPageChange() {
+    // Close details overlay on any page navigation
+    if (Details.isVisible) {
+      Details.hide();
+    }
+
     // Close Jellyseerr iframe on any page navigation
     if (Jellyseerr.isOpen) {
       Jellyseerr.close();
