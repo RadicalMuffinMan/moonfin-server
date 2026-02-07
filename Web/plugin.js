@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T22:22:33.477Z
+// Moonfin Web Plugin - Built 2026-02-07T22:25:42.525Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
