@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T07:25:14.039Z
+// Moonfin Web Plugin - Built 2026-02-07T08:00:49.928Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1562,9 +1562,9 @@ const MediaBar = {
                     <div class="moonfin-mediabar-metadata">
                         <span class="moonfin-mediabar-year"></span>
                         <span class="moonfin-mediabar-runtime"></span>
-                        <span class="moonfin-mediabar-rating"></span>
                     </div>
                     <div class="moonfin-mediabar-genres"></div>
+                    <div class="moonfin-mediabar-ratings"></div>
                     <div class="moonfin-mediabar-overview"></div>
                 </div>
                 <!-- Right: Logo -->
@@ -1640,7 +1640,7 @@ const MediaBar = {
     }
     const yearEl = this.container.querySelector('.moonfin-mediabar-year');
     const runtimeEl = this.container.querySelector('.moonfin-mediabar-runtime');
-    const ratingEl = this.container.querySelector('.moonfin-mediabar-rating');
+    const ratingsEl = this.container.querySelector('.moonfin-mediabar-ratings');
     const genresEl = this.container.querySelector('.moonfin-mediabar-genres');
     const overviewEl = this.container.querySelector('.moonfin-mediabar-overview');
     yearEl.textContent = item.ProductionYear || '';
@@ -1652,13 +1652,19 @@ const MediaBar = {
     } else {
       runtimeEl.textContent = '';
     }
+
+    // Build ratings line
+    var ratingParts = [];
     if (item.OfficialRating) {
-      ratingEl.textContent = item.OfficialRating;
-    } else if (item.CommunityRating) {
-      ratingEl.textContent = `★ ${item.CommunityRating.toFixed(1)}`;
-    } else {
-      ratingEl.textContent = '';
+      ratingParts.push(item.OfficialRating);
     }
+    if (item.CommunityRating) {
+      ratingParts.push('★ ' + item.CommunityRating.toFixed(1));
+    }
+    if (item.CriticRating) {
+      ratingParts.push('🍅 ' + item.CriticRating + '%');
+    }
+    ratingsEl.textContent = ratingParts.join('  •  ');
     if (item.Genres && item.Genres.length > 0) {
       genresEl.textContent = item.Genres.slice(0, 3).join(' • ');
     } else {
