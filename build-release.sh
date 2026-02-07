@@ -15,6 +15,15 @@ WEB_PLUGIN_DIR="$SCRIPT_DIR/../moonfin-web-plugin/dist"
 echo "Building Moonfin.Server v${VERSION} for Jellyfin ${TARGET_ABI}..."
 echo "Build Time: ${BUILD_TIMESTAMP}"
 
+# Build the web plugin first
+WEB_SRC_DIR="$SCRIPT_DIR/../moonfin-web-plugin"
+if [ -f "$WEB_SRC_DIR/build.js" ]; then
+    echo "Building web plugin..."
+    (cd "$WEB_SRC_DIR" && node build.js)
+else
+    echo "Warning: moonfin-web-plugin/build.js not found, skipping web build"
+fi
+
 # Sync web plugin files
 if [ -d "$WEB_PLUGIN_DIR" ]; then
     echo "Syncing web plugin files..."
