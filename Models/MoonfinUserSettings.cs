@@ -53,6 +53,14 @@ public class MoonfinUserSettings
     [JsonPropertyName("mdblistApiKey")]
     public string? MdblistApiKey { get; set; }
 
+    /// <summary>
+    /// Which MDBList rating sources to display.
+    /// Values: imdb, tmdb, trakt, tomatoes, popcorn, metacritic, metacriticuser,
+    /// letterboxd, rogerebert, myanimelist, anilist
+    /// </summary>
+    [JsonPropertyName("mdblistRatingSources")]
+    public List<string>? MdblistRatingSources { get; set; }
+
     // ==========================================
     // TMDB API KEY
     // ==========================================

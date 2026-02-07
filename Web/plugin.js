@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T08:00:49.928Z
+// Moonfin Web Plugin - Built 2026-02-07T08:55:22.053Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -135,7 +135,7 @@ const API = {
           recursive: true,
           hasThemeSong: false,
           hasThemeVideo: false,
-          fields: 'Overview,Genres,CommunityRating,CriticRating,OfficialRating,RunTimeTicks,ProductionYear',
+          fields: 'Overview,Genres,CommunityRating,CriticRating,OfficialRating,RunTimeTicks,ProductionYear,ProviderIds',
           imageTypeLimit: 1,
           enableImageTypes: 'Backdrop,Logo,Primary'
         };
@@ -251,7 +251,11 @@ const Storage = {
     navbarPosition: 'top',
     // 'top', 'bottom'
     showClock: true,
-    use24HourClock: false
+    use24HourClock: false,
+    // MDBList Ratings
+    mdblistEnabled: false,
+    mdblistApiKey: '',
+    mdblistRatingSources: ['imdb', 'tmdb', 'tomatoes', 'metacritic']
   },
   colorOptions: {
     'gray': {
@@ -594,6 +598,306 @@ const Storage = {
       error: this.syncState.lastSyncError,
       syncing: this.syncState.syncing
     };
+  }
+};
+
+// === utils/mdblist.js ===
+/**
+ * Moonfin MDBList Integration
+ * Fetches and displays ratings from MDBList via the server proxy.
+ */
+var MdbList = {
+  // In-memory cache: key = "type:tmdbId" => { ratings, fetchedAt }
+  _cache: {},
+  _cacheTtlMs: 30 * 60 * 1000,
+  // 30 minutes client-side cache
+
+  // Rating source metadata
+  sources: {
+    imdb: {
+      name: 'IMDb',
+      icon: 'IMDb',
+      color: '#F5C518',
+      textColor: '#000'
+    },
+    tmdb: {
+      name: 'TMDb',
+      icon: 'TMDb',
+      color: '#01D277',
+      textColor: '#fff'
+    },
+    trakt: {
+      name: 'Trakt',
+      icon: 'Trakt',
+      color: '#ED1C24',
+      textColor: '#fff'
+    },
+    tomatoes: {
+      name: 'Rotten Tomatoes',
+      icon: '🍅',
+      color: '#FA320A',
+      textColor: '#fff'
+    },
+    popcorn: {
+      name: 'RT Audience',
+      icon: '🍿',
+      color: '#FA320A',
+      textColor: '#fff'
+    },
+    metacritic: {
+      name: 'Metacritic',
+      icon: 'MC',
+      color: '#FFCC34',
+      textColor: '#000'
+    },
+    metacriticuser: {
+      name: 'Metacritic User',
+      icon: 'MC',
+      color: '#00CE7A',
+      textColor: '#000'
+    },
+    letterboxd: {
+      name: 'Letterboxd',
+      icon: 'LB',
+      color: '#00E054',
+      textColor: '#fff'
+    },
+    rogerebert: {
+      name: 'RogerEbert',
+      icon: 'RE',
+      color: '#E50914',
+      textColor: '#fff'
+    },
+    myanimelist: {
+      name: 'MyAnimeList',
+      icon: 'MAL',
+      color: '#2E51A2',
+      textColor: '#fff'
+    },
+    anilist: {
+      name: 'AniList',
+      icon: 'AL',
+      color: '#02A9FF',
+      textColor: '#fff'
+    }
+  },
+  /**
+   * Check if MDBList is enabled in user settings.
+   */
+  isEnabled: function () {
+    var settings = Storage.getAll();
+    return settings.mdblistEnabled === true;
+  },
+  /**
+   * Get the list of selected rating sources from user settings.
+   * Returns all sources if none are explicitly selected.
+   */
+  getSelectedSources: function () {
+    var settings = Storage.getAll();
+    var selected = settings.mdblistRatingSources;
+    if (selected && selected.length > 0) {
+      return selected;
+    }
+    // Default: show the most common ones
+    return ['imdb', 'tmdb', 'tomatoes', 'metacritic'];
+  },
+  /**
+   * Determine MDBList content type from a Jellyfin item.
+   * Returns 'movie' or 'show', or null if not supported.
+   */
+  getContentType: function (item) {
+    if (!item) return null;
+    var type = item.Type || item.type;
+    if (type === 'Movie') return 'movie';
+    if (type === 'Series') return 'show';
+    // Episodes and Seasons map to their parent series
+    if (type === 'Episode' || type === 'Season') return 'show';
+    return null;
+  },
+  /**
+   * Get TMDb ID from a Jellyfin item.
+   */
+  getTmdbId: function (item) {
+    if (!item) return null;
+    var providerIds = item.ProviderIds || item.providerIds;
+    if (!providerIds) return null;
+    return providerIds.Tmdb || providerIds.tmdb || null;
+  },
+  /**
+   * Fetch ratings for a Jellyfin item.
+   * Returns a promise resolving to an array of rating objects, or empty array.
+   */
+  fetchRatings: function (item) {
+    if (!this.isEnabled()) return Promise.resolve([]);
+    var contentType = this.getContentType(item);
+    var tmdbId = this.getTmdbId(item);
+    if (!contentType || !tmdbId) return Promise.resolve([]);
+    return this.fetchRatingsByTmdb(contentType, tmdbId);
+  },
+  /**
+   * Fetch ratings by content type and TMDb ID.
+   */
+  fetchRatingsByTmdb: function (type, tmdbId) {
+    var self = this;
+    var cacheKey = type + ':' + tmdbId;
+
+    // Check client cache
+    var cached = this._cache[cacheKey];
+    if (cached && Date.now() - cached.fetchedAt < this._cacheTtlMs) {
+      return Promise.resolve(cached.ratings);
+    }
+    var api = API.getApiClient();
+    if (!api) return Promise.resolve([]);
+    var url = api.getUrl('Moonfin/MdbList/Ratings', {
+      type: type,
+      tmdbId: tmdbId
+    });
+    return new Promise(function (resolve) {
+      api.ajax({
+        type: 'GET',
+        url: url,
+        dataType: 'json',
+        headers: {
+          'Authorization': 'MediaBrowser Token="' + api.accessToken() + '"'
+        }
+      }).then(function (response) {
+        var resp = API.toCamelCase(response);
+        if (resp && resp.success && resp.ratings) {
+          // Normalize rating keys
+          var ratings = [];
+          for (var i = 0; i < resp.ratings.length; i++) {
+            ratings.push(API.toCamelCase(resp.ratings[i]));
+          }
+          self._cache[cacheKey] = {
+            ratings: ratings,
+            fetchedAt: Date.now()
+          };
+          resolve(ratings);
+        } else {
+          if (resp && resp.error) {
+            console.warn('[Moonfin] MDBList:', resp.error);
+          }
+          resolve([]);
+        }
+      }, function (err) {
+        console.warn('[Moonfin] MDBList fetch failed:', err);
+        resolve([]);
+      });
+    });
+  },
+  /**
+   * Format a rating value for display based on source.
+   * MDBList returns `value` (native scale) and `score` (0-100 normalized).
+   */
+  formatRating: function (rating) {
+    if (!rating || !rating.source) return null;
+    var source = rating.source.toLowerCase();
+    var value = rating.value;
+    var score = rating.score;
+    if (value == null && score == null) return null;
+
+    // Use native value when available for better display
+    switch (source) {
+      case 'imdb':
+        // IMDb: 0-10 scale
+        return value != null ? value.toFixed(1) : score != null ? (score / 10).toFixed(1) : null;
+      case 'tmdb':
+        // TMDb: 0-10 scale
+        return value != null ? value.toFixed(0) + '%' : score != null ? score.toFixed(0) + '%' : null;
+      case 'tomatoes':
+      case 'popcorn':
+      case 'metacritic':
+      case 'metacriticuser':
+        // Percentage-based
+        return score != null ? score.toFixed(0) + '%' : value != null ? value.toFixed(0) + '%' : null;
+      case 'letterboxd':
+        // Letterboxd: 0-5 scale (value), score is 0-100
+        return value != null ? value.toFixed(1) : score != null ? (score / 20).toFixed(1) : null;
+      case 'trakt':
+        // Trakt: percentage
+        return score != null ? score.toFixed(0) + '%' : null;
+      case 'rogerebert':
+        // Roger Ebert: 0-4 scale (value), score is 0-100
+        return value != null ? value.toFixed(1) + '/4' : score != null ? score.toFixed(0) + '%' : null;
+      case 'myanimelist':
+        // MAL: 0-10 scale
+        return value != null ? value.toFixed(1) : score != null ? (score / 10).toFixed(1) : null;
+      case 'anilist':
+        // AniList: percentage
+        return score != null ? score.toFixed(0) + '%' : null;
+      default:
+        return score != null ? score.toFixed(0) + '%' : value != null ? String(value) : null;
+    }
+  },
+  /**
+   * Get display info for a source.
+   */
+  getSourceInfo: function (source) {
+    return this.sources[source] || {
+      name: source,
+      icon: source,
+      color: '#666',
+      textColor: '#fff'
+    };
+  },
+  /**
+   * Build an inline ratings HTML string for the selected sources.
+   * Used in media bar and details screen.
+   * @param {Array} ratings - Array of rating objects from MDBList
+   * @param {string} mode - 'compact' for media bar, 'full' for details
+   * @returns {string} HTML string
+   */
+  buildRatingsHtml: function (ratings, mode) {
+    if (!ratings || ratings.length === 0) return '';
+    var selectedSources = this.getSelectedSources();
+    var html = '';
+    for (var i = 0; i < selectedSources.length; i++) {
+      var source = selectedSources[i];
+      // Find this source in the ratings
+      var rating = null;
+      for (var j = 0; j < ratings.length; j++) {
+        if (ratings[j].source && ratings[j].source.toLowerCase() === source) {
+          rating = ratings[j];
+          break;
+        }
+      }
+      if (!rating) continue;
+      var formatted = this.formatRating(rating);
+      if (!formatted) continue;
+      var info = this.getSourceInfo(source);
+      if (mode === 'compact') {
+        html += '<span class="moonfin-mdblist-rating-compact">' + '<span class="moonfin-mdblist-badge" style="background:' + info.color + ';color:' + info.textColor + '">' + info.icon + '</span>' + '<span class="moonfin-mdblist-value">' + formatted + '</span>' + '</span>';
+      } else {
+        html += '<div class="moonfin-mdblist-rating-full">' + '<span class="moonfin-mdblist-badge-lg" style="background:' + info.color + ';color:' + info.textColor + '">' + info.icon + '</span>' + '<div class="moonfin-mdblist-rating-info">' + '<span class="moonfin-mdblist-rating-value">' + formatted + '</span>' + '<span class="moonfin-mdblist-rating-name">' + info.name + '</span>' + '</div>' + '</div>';
+      }
+    }
+    return html;
+  },
+  /**
+   * Build a simple text string of ratings for inline use.
+   * @param {Array} ratings - Array of rating objects from MDBList
+   * @returns {string} Text like "IMDb 7.5 • 🍅 85% • MC 72%"
+   */
+  buildRatingsText: function (ratings) {
+    if (!ratings || ratings.length === 0) return '';
+    var selectedSources = this.getSelectedSources();
+    var parts = [];
+    for (var i = 0; i < selectedSources.length; i++) {
+      var source = selectedSources[i];
+      var rating = null;
+      for (var j = 0; j < ratings.length; j++) {
+        if (ratings[j].source && ratings[j].source.toLowerCase() === source) {
+          rating = ratings[j];
+          break;
+        }
+      }
+      if (!rating) continue;
+      var formatted = this.formatRating(rating);
+      if (!formatted) continue;
+      var info = this.getSourceInfo(source);
+      parts.push(info.icon + ' ' + formatted);
+    }
+    return parts.join('  \u2022  ');
   }
 };
 
@@ -1653,7 +1957,7 @@ const MediaBar = {
       runtimeEl.textContent = '';
     }
 
-    // Build ratings line
+    // Build ratings line - start with Jellyfin's built-in ratings
     var ratingParts = [];
     if (item.OfficialRating) {
       ratingParts.push(item.OfficialRating);
@@ -1665,6 +1969,21 @@ const MediaBar = {
       ratingParts.push('🍅 ' + item.CriticRating + '%');
     }
     ratingsEl.textContent = ratingParts.join('  •  ');
+
+    // Fetch and show MDBList ratings if enabled
+    if (MdbList.isEnabled()) {
+      var currentIdx = this.currentIndex;
+      MdbList.fetchRatings(item).then(function (mdbRatings) {
+        // Only update if still on the same slide
+        if (MediaBar.currentIndex !== currentIdx) return;
+        if (mdbRatings && mdbRatings.length > 0) {
+          var mdbHtml = MdbList.buildRatingsHtml(mdbRatings, 'compact');
+          if (mdbHtml) {
+            ratingsEl.innerHTML = mdbHtml;
+          }
+        }
+      });
+    }
     if (item.Genres && item.Genres.length > 0) {
       genresEl.textContent = item.Genres.slice(0, 3).join(' • ');
     } else {
@@ -1777,24 +2096,83 @@ const MediaBar = {
     }
   },
   setupEventListeners() {
-    var _this$container$query, _this$container$query2, _this$container$query3, _this$container$query4;
-    (_this$container$query = this.container.querySelector('.moonfin-mediabar-prev')) === null || _this$container$query === void 0 || _this$container$query.addEventListener('click', () => {
+    var _this$container$query, _this$container$query2, _this$container$query3;
+    (_this$container$query = this.container.querySelector('.moonfin-mediabar-prev')) === null || _this$container$query === void 0 || _this$container$query.addEventListener('click', e => {
+      e.stopPropagation();
       this.prevSlide();
     });
-    (_this$container$query2 = this.container.querySelector('.moonfin-mediabar-next')) === null || _this$container$query2 === void 0 || _this$container$query2.addEventListener('click', () => {
+    (_this$container$query2 = this.container.querySelector('.moonfin-mediabar-next')) === null || _this$container$query2 === void 0 || _this$container$query2.addEventListener('click', e => {
+      e.stopPropagation();
       this.nextSlide();
     });
     (_this$container$query3 = this.container.querySelector('.moonfin-mediabar-dots')) === null || _this$container$query3 === void 0 || _this$container$query3.addEventListener('click', e => {
+      e.stopPropagation();
       const dot = e.target.closest('.moonfin-mediabar-dot');
       if (dot) {
         this.goToSlide(parseInt(dot.dataset.index, 10));
       }
     });
-    (_this$container$query4 = this.container.querySelector('.moonfin-mediabar-content')) === null || _this$container$query4 === void 0 || _this$container$query4.addEventListener('click', () => {
+
+    // Make the entire media bar clickable - navigate to the current item
+    this.container.addEventListener('click', e => {
+      // Don't navigate if clicking nav buttons, dots, or playstate
+      if (e.target.closest('.moonfin-mediabar-nav-btn, .moonfin-mediabar-dots, .moonfin-mediabar-playstate')) {
+        return;
+      }
       const item = this.items[this.currentIndex];
       if (item) {
         API.navigateToItem(item.Id);
       }
+    });
+
+    // Touch swipe support for mobile
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchMoved = false;
+    var self = this;
+    this.container.addEventListener('touchstart', function (e) {
+      var touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchMoved = false;
+    }, {
+      passive: true
+    });
+    this.container.addEventListener('touchmove', function (e) {
+      if (!touchStartX) return;
+      var dx = Math.abs(e.touches[0].clientX - touchStartX);
+      var dy = Math.abs(e.touches[0].clientY - touchStartY);
+      // Only count as swipe if horizontal movement > vertical
+      if (dx > 10 || dy > 10) {
+        touchMoved = true;
+      }
+      // Prevent vertical scroll when swiping horizontally on the media bar
+      if (dx > dy && dx > 10) {
+        e.preventDefault();
+      }
+    }, {
+      passive: false
+    });
+    this.container.addEventListener('touchend', function (e) {
+      if (!touchMoved) {
+        // It was a tap, not a swipe - let the click handler deal with it
+        touchStartX = 0;
+        return;
+      }
+      var touch = e.changedTouches[0];
+      var dx = touch.clientX - touchStartX;
+      var minSwipe = 50;
+      if (Math.abs(dx) >= minSwipe) {
+        if (dx < 0) {
+          self.nextSlide();
+        } else {
+          self.prevSlide();
+        }
+      }
+      touchStartX = 0;
+      touchMoved = false;
+    }, {
+      passive: true
     });
     this.container.addEventListener('keydown', e => {
       switch (e.key) {
@@ -2059,8 +2437,52 @@ var Settings = {
     // Jellyseerr (conditionally shown)
     var jellyseerrContent = '<div class="moonfin-jellyseerr-status-group">' + '<div class="moonfin-jellyseerr-sso-status">' + '<span class="moonfin-jellyseerr-sso-indicator"></span>' + '<span class="moonfin-jellyseerr-sso-text">Checking...</span>' + '</div>' + '</div>' + '<div class="moonfin-jellyseerr-login-group" style="display:none">' + '<p class="moonfin-toggle-desc" style="margin:0 0 12px 0">Enter your Jellyfin credentials to sign in to Jellyseerr. Your session is stored on the server so all devices stay signed in.</p>' + '<div class="moonfin-jellyseerr-login-error" style="display:none"></div>' + '<div style="margin-bottom:8px">' + '<label class="moonfin-input-label">Username</label>' + '<input type="text" id="jellyseerr-settings-username" autocomplete="username" class="moonfin-panel-input">' + '</div>' + '<div style="margin-bottom:12px">' + '<label class="moonfin-input-label">Password</label>' + '<input type="password" id="jellyseerr-settings-password" autocomplete="current-password" class="moonfin-panel-input">' + '</div>' + '<button class="moonfin-jellyseerr-settings-login-btn moonfin-panel-btn moonfin-panel-btn-primary">Sign In</button>' + '</div>' + '<div class="moonfin-jellyseerr-signedIn-group" style="display:none">' + '<button class="moonfin-jellyseerr-settings-logout-btn moonfin-panel-btn moonfin-panel-btn-danger">Sign Out of Jellyseerr</button>' + '</div>';
 
+    // MDBList Section
+    var mdblistSources = [{
+      key: 'imdb',
+      label: 'IMDb'
+    }, {
+      key: 'tmdb',
+      label: 'TMDb'
+    }, {
+      key: 'trakt',
+      label: 'Trakt'
+    }, {
+      key: 'tomatoes',
+      label: 'Rotten Tomatoes (Critics)'
+    }, {
+      key: 'popcorn',
+      label: 'Rotten Tomatoes (Audience)'
+    }, {
+      key: 'metacritic',
+      label: 'Metacritic'
+    }, {
+      key: 'metacriticuser',
+      label: 'Metacritic User'
+    }, {
+      key: 'letterboxd',
+      label: 'Letterboxd'
+    }, {
+      key: 'rogerebert',
+      label: 'Roger Ebert'
+    }, {
+      key: 'myanimelist',
+      label: 'MyAnimeList'
+    }, {
+      key: 'anilist',
+      label: 'AniList'
+    }];
+    var selectedSources = settings.mdblistRatingSources || ['imdb', 'tmdb', 'tomatoes', 'metacritic'];
+    var sourcesCheckboxes = '';
+    for (var si = 0; si < mdblistSources.length; si++) {
+      var src = mdblistSources[si];
+      var isChecked = selectedSources.indexOf(src.key) !== -1;
+      sourcesCheckboxes += '<label class="moonfin-mdblist-source-label">' + '<input type="checkbox" class="moonfin-mdblist-source-cb" data-source="' + src.key + '"' + (isChecked ? ' checked' : '') + '>' + '<span>' + src.label + '</span>' + '</label>';
+    }
+    var mdblistContent = this.createToggleCard('mdblistEnabled', 'Enable MDBList Ratings', 'Show ratings from MDBList (IMDb, Rotten Tomatoes, Metacritic, etc.) on media bar and item details', settings.mdblistEnabled) + '<div class="moonfin-mdblist-config" style="' + (settings.mdblistEnabled ? '' : 'display:none') + '">' + '<div style="margin-bottom:12px">' + '<label class="moonfin-input-label">MDBList API Key</label>' + '<input type="password" id="moonfin-mdblistApiKey" class="moonfin-panel-input" placeholder="Enter your mdblist.com API key" value="' + (settings.mdblistApiKey || '') + '">' + '<div class="moonfin-toggle-desc" style="margin-top:4px">Get your free API key at <a href="https://mdblist.com/preferences/" target="_blank" rel="noopener" style="color:#00a4dc">mdblist.com/preferences</a></div>' + '</div>' + '<div style="margin-bottom:8px">' + '<label class="moonfin-input-label">Rating Sources to Display</label>' + '<div class="moonfin-mdblist-sources">' + sourcesCheckboxes + '</div>' + '</div>' + '</div>';
+
     // --- Assemble the panel ---
-    this.dialog.innerHTML = '<div class="moonfin-settings-overlay"></div>' + '<div class="moonfin-settings-panel">' + '<div class="moonfin-settings-header">' + '<div class="moonfin-settings-header-left">' + '<h2>Moonfin</h2>' + '<span class="moonfin-settings-subtitle">Settings</span>' + '</div>' + '<button class="moonfin-settings-close" title="Close">' + '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' + '</button>' + '</div>' + '<div class="moonfin-settings-content">' + this.createSection('', 'Moonfin UI', uiContent, true) + this.createSection('', 'Media Bar', mediaBarContent) + this.createSection('', 'Overlay Appearance', overlayContent) + this.createSection('', 'Toolbar Buttons', toolbarContent) + this.createSection('', 'Display', displayContent) + '<div class="moonfin-settings-jellyseerr-wrapper" style="display:none">' + this.createSection('', 'Jellyseerr', jellyseerrContent) + '</div>' + '</div>' + '<div class="moonfin-settings-footer">' + '<div class="moonfin-sync-status" id="moonfinSyncStatus">' + '<span class="moonfin-sync-indicator"></span>' + '<span class="moonfin-sync-text">Checking sync...</span>' + '</div>' + '<div class="moonfin-settings-footer-buttons">' + '<button class="moonfin-panel-btn moonfin-panel-btn-ghost moonfin-settings-reset">Reset</button>' + '<button class="moonfin-panel-btn moonfin-panel-btn-ghost moonfin-settings-sync">Sync</button>' + '<button class="moonfin-panel-btn moonfin-panel-btn-close moonfin-settings-close-btn">Close</button>' + '</div>' + '</div>' + '</div>';
+    this.dialog.innerHTML = '<div class="moonfin-settings-overlay"></div>' + '<div class="moonfin-settings-panel">' + '<div class="moonfin-settings-header">' + '<div class="moonfin-settings-header-left">' + '<h2>Moonfin</h2>' + '<span class="moonfin-settings-subtitle">Settings</span>' + '</div>' + '<button class="moonfin-settings-close" title="Close">' + '<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' + '</button>' + '</div>' + '<div class="moonfin-settings-content">' + this.createSection('', 'Moonfin UI', uiContent, true) + this.createSection('', 'Media Bar', mediaBarContent) + this.createSection('', 'Overlay Appearance', overlayContent) + this.createSection('', 'Toolbar Buttons', toolbarContent) + this.createSection('', 'Display', displayContent) + this.createSection('', 'MDBList Ratings', mdblistContent) + '<div class="moonfin-settings-jellyseerr-wrapper" style="display:none">' + this.createSection('', 'Jellyseerr', jellyseerrContent) + '</div>' + '</div>' + '<div class="moonfin-settings-footer">' + '<div class="moonfin-sync-status" id="moonfinSyncStatus">' + '<span class="moonfin-sync-indicator"></span>' + '<span class="moonfin-sync-text">Checking sync...</span>' + '</div>' + '<div class="moonfin-settings-footer-buttons">' + '<button class="moonfin-panel-btn moonfin-panel-btn-ghost moonfin-settings-reset">Reset</button>' + '<button class="moonfin-panel-btn moonfin-panel-btn-ghost moonfin-settings-sync">Sync</button>' + '<button class="moonfin-panel-btn moonfin-panel-btn-close moonfin-settings-close-btn">Close</button>' + '</div>' + '</div>' + '</div>';
     document.body.appendChild(this.dialog);
     this.setupEventListeners();
     this.updateSyncStatus();
@@ -2184,12 +2606,20 @@ var Settings = {
     });
 
     // --- Immediate save on toggle change ---
-    var checkboxes = this.dialog.querySelectorAll('input[type="checkbox"]');
+    var checkboxes = this.dialog.querySelectorAll('input[type="checkbox"][name]');
     for (var i = 0; i < checkboxes.length; i++) {
       (function (cb) {
         cb.addEventListener('change', function () {
           self.saveSetting(cb.name, cb.checked);
           self.showToast(cb.checked ? 'Enabled' : 'Disabled');
+
+          // Toggle MDBList config visibility
+          if (cb.name === 'mdblistEnabled') {
+            var configDiv = self.dialog.querySelector('.moonfin-mdblist-config');
+            if (configDiv) {
+              configDiv.style.display = cb.checked ? '' : 'none';
+            }
+          }
         });
       })(checkboxes[i]);
     }
@@ -2241,6 +2671,34 @@ var Settings = {
         self.hide();
       }
     });
+
+    // MDBList API key - save on blur
+    var mdblistApiKeyInput = this.dialog.querySelector('#moonfin-mdblistApiKey');
+    if (mdblistApiKeyInput) {
+      mdblistApiKeyInput.addEventListener('change', function () {
+        self.saveSetting('mdblistApiKey', mdblistApiKeyInput.value.trim());
+        self.showToast('API key saved');
+      });
+    }
+
+    // MDBList source checkboxes
+    var sourceCheckboxes = this.dialog.querySelectorAll('.moonfin-mdblist-source-cb');
+    for (var sci = 0; sci < sourceCheckboxes.length; sci++) {
+      (function (cb) {
+        cb.addEventListener('change', function () {
+          // Collect all checked sources
+          var checked = [];
+          var allCbs = self.dialog.querySelectorAll('.moonfin-mdblist-source-cb');
+          for (var x = 0; x < allCbs.length; x++) {
+            if (allCbs[x].checked) {
+              checked.push(allCbs[x].getAttribute('data-source'));
+            }
+          }
+          self.saveSetting('mdblistRatingSources', checked);
+          self.showToast('Rating sources updated');
+        });
+      })(sourceCheckboxes[sci]);
+    }
 
     // Jellyseerr SSO event listeners
     var loginBtn = this.dialog.querySelector('.moonfin-jellyseerr-settings-login-btn');
@@ -2574,18 +3032,18 @@ const Jellyseerr = {
     this.setupEventListeners();
   },
   setupEventListeners() {
-    var _this$container$query5, _this$container$query6, _this$container$query7, _this$container$query8, _this$iframe, _this$iframe2;
+    var _this$container$query4, _this$container$query5, _this$container$query6, _this$container$query7, _this$iframe, _this$iframe2;
     var self = this;
-    (_this$container$query5 = this.container.querySelector('.moonfin-jellyseerr-close')) === null || _this$container$query5 === void 0 || _this$container$query5.addEventListener('click', function () {
+    (_this$container$query4 = this.container.querySelector('.moonfin-jellyseerr-close')) === null || _this$container$query4 === void 0 || _this$container$query4.addEventListener('click', function () {
       self.close();
     });
-    (_this$container$query6 = this.container.querySelector('.moonfin-jellyseerr-refresh')) === null || _this$container$query6 === void 0 || _this$container$query6.addEventListener('click', function () {
+    (_this$container$query5 = this.container.querySelector('.moonfin-jellyseerr-refresh')) === null || _this$container$query5 === void 0 || _this$container$query5.addEventListener('click', function () {
       self.refresh();
     });
-    (_this$container$query7 = this.container.querySelector('.moonfin-jellyseerr-external')) === null || _this$container$query7 === void 0 || _this$container$query7.addEventListener('click', function () {
+    (_this$container$query6 = this.container.querySelector('.moonfin-jellyseerr-external')) === null || _this$container$query6 === void 0 || _this$container$query6.addEventListener('click', function () {
       window.open(self.config.url, '_blank');
     });
-    (_this$container$query8 = this.container.querySelector('.moonfin-jellyseerr-signout')) === null || _this$container$query8 === void 0 || _this$container$query8.addEventListener('click', function () {
+    (_this$container$query7 = this.container.querySelector('.moonfin-jellyseerr-signout')) === null || _this$container$query7 === void 0 || _this$container$query7.addEventListener('click', function () {
       if (confirm('Sign out of Jellyseerr? You will need to sign in again to use it.')) {
         self.close();
         self.ssoLogout();
@@ -2819,6 +3277,15 @@ var Details = {
         var seasons = results[2];
         self.renderDetails(item, similar, cast, seasons);
 
+        // Fetch MDBList ratings asynchronously
+        if (MdbList.isEnabled()) {
+          MdbList.fetchRatings(item).then(function (ratings) {
+            if (ratings && ratings.length > 0 && self.currentItem && self.currentItem.Id === item.Id) {
+              self.renderMdbListRatings(ratings);
+            }
+          });
+        }
+
         // Focus first button
         setTimeout(function () {
           var firstBtn = panel.querySelector('.moonfin-btn');
@@ -2980,7 +3447,7 @@ var Details = {
       infoItems.push(badge);
     });
     var infoRowHtml = '<div class="moonfin-info-row">' + infoItems.join('') + '</div>';
-    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-close moonfin-focusable" title="Close">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' + '<div class="moonfin-details-main">' + '<div class="moonfin-poster-section">' + '<div class="moonfin-poster" style="' + (posterUrl ? "background-image: url('" + posterUrl + "')" : '') + '"></div>' + '</div>' + '<div class="moonfin-info-section">' + '<div class="moonfin-title-section">' + (logoUrl ? '<img class="moonfin-logo" src="' + logoUrl + '" alt="' + item.Name + '">' : '<h1 class="moonfin-title">' + item.Name + '</h1>') + '</div>' + infoRowHtml + (tagline ? '<p class="moonfin-tagline">"' + tagline + '"</p>' : '') + (item.Overview ? '<p class="moonfin-overview">' + item.Overview + '</p>' : '') + '<div class="moonfin-actions">' + '<button class="moonfin-btn moonfin-btn-primary moonfin-focusable" data-action="play">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>' + '<span>' + (hasResume ? 'Resume' : 'Play') + '</span>' + '</button>' + (item.Type === 'Series' ? '<button class="moonfin-btn moonfin-focusable" data-action="shuffle">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14.83 13.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13M14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41"/></svg>' + '<span>Shuffle</span>' + '</button>' : '') + '<button class="moonfin-btn moonfin-focusable ' + (isPlayed ? 'active' : '') + '" data-action="played">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>' + '<span>Watched</span>' + '</button>' + '<button class="moonfin-btn moonfin-focusable ' + (isFavorite ? 'active' : '') + '" data-action="favorite">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="' + (isFavorite ? 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' : 'M12.1 18.55l-.1.1-.11-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z') + '"/></svg>' + '<span>Favorite</span>' + '</button>' + '<button class="moonfin-btn moonfin-focusable" data-action="more">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' + '<span>More</span>' + '</button>' + '</div>' + '</div>' + '<div class="moonfin-metadata-section">' + metadataHtml + '</div>' + '</div>' + '<div class="moonfin-rows-section">' + seasonsHtml + (cast.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">Cast & Crew</h3>' + '<div class="moonfin-row-scroll">' + castHtml + '</div>' + '</div>' : '') + (similar.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">More Like This</h3>' + '<div class="moonfin-row-scroll">' + similarHtml + '</div>' + '</div>' : '') + '</div>' + '</div>';
+    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-close moonfin-focusable" title="Close">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' + '<div class="moonfin-details-main">' + '<div class="moonfin-poster-section">' + '<div class="moonfin-poster" style="' + (posterUrl ? "background-image: url('" + posterUrl + "')" : '') + '"></div>' + '</div>' + '<div class="moonfin-info-section">' + '<div class="moonfin-title-section">' + (logoUrl ? '<img class="moonfin-logo" src="' + logoUrl + '" alt="' + item.Name + '">' : '<h1 class="moonfin-title">' + item.Name + '</h1>') + '</div>' + infoRowHtml + '<div class="moonfin-mdblist-ratings-row" id="moonfin-details-mdblist"></div>' + (tagline ? '<p class="moonfin-tagline">"' + tagline + '"</p>' : '') + (item.Overview ? '<p class="moonfin-overview">' + item.Overview + '</p>' : '') + '<div class="moonfin-actions">' + '<button class="moonfin-btn moonfin-btn-primary moonfin-focusable" data-action="play">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>' + '<span>' + (hasResume ? 'Resume' : 'Play') + '</span>' + '</button>' + (item.Type === 'Series' ? '<button class="moonfin-btn moonfin-focusable" data-action="shuffle">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14.83 13.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13M14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41"/></svg>' + '<span>Shuffle</span>' + '</button>' : '') + '<button class="moonfin-btn moonfin-focusable ' + (isPlayed ? 'active' : '') + '" data-action="played">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>' + '<span>Watched</span>' + '</button>' + '<button class="moonfin-btn moonfin-focusable ' + (isFavorite ? 'active' : '') + '" data-action="favorite">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="' + (isFavorite ? 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' : 'M12.1 18.55l-.1.1-.11-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z') + '"/></svg>' + '<span>Favorite</span>' + '</button>' + '<button class="moonfin-btn moonfin-focusable" data-action="more">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' + '<span>More</span>' + '</button>' + '</div>' + '</div>' + '<div class="moonfin-metadata-section">' + metadataHtml + '</div>' + '</div>' + '<div class="moonfin-rows-section">' + seasonsHtml + (cast.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">Cast & Crew</h3>' + '<div class="moonfin-row-scroll">' + castHtml + '</div>' + '</div>' : '') + (similar.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">More Like This</h3>' + '<div class="moonfin-row-scroll">' + similarHtml + '</div>' + '</div>' : '') + '</div>' + '</div>';
     this.setupPanelListeners(panel, item);
   },
   /**
@@ -3117,6 +3584,18 @@ var Details = {
         this.hide();
         window.location.hash = '#/details?id=' + item.Id;
         break;
+    }
+  },
+  /**
+   * Render MDBList ratings into the details panel.
+   */
+  renderMdbListRatings: function (ratings) {
+    var container = this.container.querySelector('#moonfin-details-mdblist');
+    if (!container) return;
+    var html = MdbList.buildRatingsHtml(ratings, 'full');
+    if (html) {
+      container.innerHTML = html;
+      container.style.display = '';
     }
   },
   /**

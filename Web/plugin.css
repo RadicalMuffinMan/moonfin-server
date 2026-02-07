@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T08:00:49.929Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T08:55:22.054Z */
 
 /* === styles/navbar.css === */
 /**
@@ -494,6 +494,7 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     -webkit-box-orient: vertical;
     overflow: hidden;
     width: 100%;
+    min-height: calc(2 * 1.5em);
 }
 
 /* Logo container */
@@ -503,7 +504,9 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-height: 200px;
+    overflow: hidden;
+    /* Constrain logo to never exceed the info box height */
+    align-self: stretch;
 }
 
 .moonfin-mediabar-logo-container.hidden {
@@ -512,7 +515,7 @@ body.moonfin-mediabar-active .homeSectionsContainer {
 
 .moonfin-mediabar-logo {
     max-width: 100%;
-    max-height: 200px;
+    max-height: 100%;
     object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
@@ -681,14 +684,6 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     .moonfin-mediabar-genres {
         font-size: 12px;
     }
-
-    .moonfin-mediabar-logo-container {
-        max-height: 150px;
-    }
-
-    .moonfin-mediabar-logo {
-        max-height: 150px;
-    }
 }
 
 @media (max-width: 768px) {
@@ -729,6 +724,7 @@ body.moonfin-mediabar-active .homeSectionsContainer {
         line-clamp: 2;
         word-break: break-word;
         overflow-wrap: break-word;
+        min-height: calc(2 * 1.5em);
     }
 
     .moonfin-mediabar-genres {
@@ -751,6 +747,179 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     .moonfin-mediabar-nav-btn svg {
         width: 24px;
         height: 24px;
+    }
+}
+
+
+/* === styles/mdblist.css === */
+/* === MDBList Rating Styles === */
+
+/* ====== Compact mode (media bar) ====== */
+.moonfin-mdblist-rating-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+.moonfin-mdblist-rating-compact:last-child {
+    margin-right: 0;
+}
+
+.moonfin-mdblist-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    min-width: 18px;
+    text-align: center;
+}
+
+.moonfin-mdblist-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* ====== Full mode (details screen) ====== */
+.moonfin-mdblist-ratings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 10px 0;
+}
+
+.moonfin-mdblist-ratings-row:empty {
+    display: none;
+}
+
+.moonfin-mdblist-rating-full {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: background 0.2s;
+}
+
+.moonfin-mdblist-rating-full:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.moonfin-mdblist-badge-lg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    min-width: 24px;
+    text-align: center;
+}
+
+.moonfin-mdblist-rating-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.moonfin-mdblist-rating-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.moonfin-mdblist-rating-name {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.2;
+}
+
+/* ====== Settings UI ====== */
+.moonfin-mdblist-sources {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    margin-top: 8px;
+}
+
+.moonfin-mdblist-source-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 4px 0;
+}
+
+.moonfin-mdblist-source-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #00a4dc;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.moonfin-mdblist-source-label span {
+    user-select: none;
+}
+
+.moonfin-mdblist-config {
+    padding: 4px 0 0 0;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+    .moonfin-mdblist-rating-compact {
+        gap: 3px;
+        margin-right: 6px;
+    }
+
+    .moonfin-mdblist-badge {
+        font-size: 8px;
+        padding: 1px 3px;
+    }
+
+    .moonfin-mdblist-value {
+        font-size: 11px;
+    }
+
+    .moonfin-mdblist-ratings-row {
+        gap: 8px;
+    }
+
+    .moonfin-mdblist-rating-full {
+        padding: 4px 8px;
+        gap: 6px;
+    }
+
+    .moonfin-mdblist-badge-lg {
+        font-size: 9px;
+        padding: 2px 4px;
+    }
+
+    .moonfin-mdblist-rating-value {
+        font-size: 13px;
+    }
+
+    .moonfin-mdblist-rating-name {
+        font-size: 10px;
+    }
+
+    .moonfin-mdblist-sources {
+        grid-template-columns: 1fr;
     }
 }
 

@@ -13,8 +13,8 @@
         "changelog": "Bug fixes:\n- Fixed navbar width on desktop\n- Fixed media bar overlapping content\n- Fixed genres and favorites navigation\n- Replaced placeholder logo icon",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-10.10.0.zip",
-        "checksum": "970FF186D5F52547B971D9EAD265F333",
-        "timestamp": "2026-02-07T08:00:52",
+        "checksum": "4236AF086457435918C8A7ADDCDAD414",
+        "timestamp": "2026-02-07T08:52:16",
         "dependencies": [
           "5e87cc92-571a-4d8d-8d98-d2d4147f9f90"
         ]
