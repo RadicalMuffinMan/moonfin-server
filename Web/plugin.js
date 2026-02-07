@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T18:09:08.149Z
+// Moonfin Web Plugin - Built 2026-02-07T18:24:27.986Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -2238,7 +2238,11 @@ const MediaBar = {
   },
   isHomePage() {
     var hash = window.location.hash.toLowerCase();
-    return hash === '#/home' || hash.startsWith('#/home?') || hash === '#/home.html' || hash.startsWith('#/home.html?');
+    if (hash === '#/home' || hash === '#/home.html') return true;
+    if (hash.startsWith('#/home?') || hash.startsWith('#/home.html?')) {
+      return hash.indexOf('tab=') === -1;
+    }
+    return false;
   },
   show() {
     if (this.container) {
@@ -3850,7 +3854,12 @@ const Plugin = {
   initialized: false,
   isHomePage() {
     const hash = window.location.hash.toLowerCase();
-    return hash === '#/home' || hash.startsWith('#/home?') || hash === '#/home.html' || hash.startsWith('#/home.html?');
+    if (hash === '#/home' || hash === '#/home.html') return true;
+    if (hash.startsWith('#/home?') || hash.startsWith('#/home.html?')) {
+      // Exclude tab-based sub-pages (e.g. favorites, collections)
+      return hash.indexOf('tab=') === -1;
+    }
+    return false;
   },
   isAdminPage() {
     const path = window.location.pathname.toLowerCase();
