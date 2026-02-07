@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T15:12:36.935Z
+// Moonfin Web Plugin - Built 2026-02-07T17:08:04.503Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -2016,16 +2016,7 @@ const MediaBar = {
     setTimeout(() => {
       current.style.backgroundImage = `url('${url}')`;
       next.classList.remove('active');
-      this.applyKenBurns(current);
     }, 500);
-  },
-  applyKenBurns(element) {
-    element.classList.remove('ken-burns-1', 'ken-burns-2', 'ken-burns-3', 'ken-burns-4');
-
-    // Apply random Ken Burns variant
-    const variant = Math.floor(Math.random() * 4) + 1;
-    void element.offsetWidth; // Force reflow
-    element.classList.add(`ken-burns-${variant}`);
   },
   updateDots() {
     const dotsContainer = this.container.querySelector('.moonfin-mediabar-dots');
@@ -3338,7 +3329,7 @@ var Details = {
     });
   },
   /**
-   * Render the details panel - Android TV style
+   * Render the details panel - webOS Moonfin style
    */
   renderDetails: function (item, similar, cast, seasons) {
     var self = this;
@@ -3353,11 +3344,11 @@ var Details = {
     // Get poster
     var posterId = item.Id;
     var posterTag = item.ImageTags ? item.ImageTags.Primary : null;
-    var posterUrl = posterTag ? serverUrl + '/Items/' + posterId + '/Images/Primary?maxHeight=450&quality=90' : '';
+    var posterUrl = posterTag ? serverUrl + '/Items/' + posterId + '/Images/Primary?maxHeight=500&quality=90' : '';
 
     // Get logo (optional)
     var logoTag = item.ImageTags ? item.ImageTags.Logo : null;
-    var logoUrl = logoTag ? serverUrl + '/Items/' + item.Id + '/Images/Logo?maxWidth=350&quality=90' : null;
+    var logoUrl = logoTag ? serverUrl + '/Items/' + item.Id + '/Images/Logo?maxWidth=400&quality=90' : null;
 
     // Format runtime
     var runtime = item.RunTimeTicks ? this.formatRuntime(item.RunTimeTicks) : '';
@@ -3370,6 +3361,9 @@ var Details = {
 
     // Get community rating
     var communityRating = item.CommunityRating ? item.CommunityRating.toFixed(1) : '';
+
+    // Get critic rating
+    var criticRating = item.CriticRating;
 
     // Get genres
     var genres = (item.Genres || []).join(', ');
@@ -3399,63 +3393,96 @@ var Details = {
     // Media info badges
     var badges = this.getMediaBadges(item);
 
-    // Check if item is favorite
+    // Check states
     var isFavorite = item.UserData ? item.UserData.IsFavorite : false;
-
-    // Check if item is played
     var isPlayed = item.UserData ? item.UserData.Played : false;
-
-    // Resume position
     var resumePosition = item.UserData ? item.UserData.PlaybackPositionTicks || 0 : 0;
     var hasResume = resumePosition > 0;
-
-    // Season count for series
+    var isEpisode = item.Type === 'Episode';
+    var isSeries = item.Type === 'Series';
     var seasonCount = item.ChildCount || seasons.length || 0;
-
-    // Build cast HTML - circular photos like Android TV
-    var castHtml = cast.slice(0, 12).map(function (person) {
-      var personImg = person.PrimaryImageTag ? serverUrl + '/Items/' + person.Id + '/Images/Primary?maxHeight=150&quality=80' : '';
-      return '<div class="moonfin-cast-card moonfin-focusable" data-person-id="' + person.Id + '">' + '<div class="moonfin-cast-photo" style="' + (personImg ? "background-image: url('" + personImg + "')" : '') + '">' + (personImg ? '' : '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>') + '</div>' + '<span class="moonfin-cast-name">' + person.Name + '</span>' + '<span class="moonfin-cast-role">' + (person.Role || person.Type || '') + '</span>' + '</div>';
-    }).join('');
-
-    // Build similar items HTML
-    var similarHtml = similar.slice(0, 10).map(function (sim) {
-      var simPosterTag = sim.ImageTags ? sim.ImageTags.Primary : null;
-      var simPosterUrl = simPosterTag ? serverUrl + '/Items/' + sim.Id + '/Images/Primary?maxHeight=280&quality=80' : '';
-      return '<div class="moonfin-similar-card moonfin-focusable" data-item-id="' + sim.Id + '" data-type="' + sim.Type + '">' + '<div class="moonfin-similar-poster" style="' + (simPosterUrl ? "background-image: url('" + simPosterUrl + "')" : '') + '"></div>' + '<span class="moonfin-similar-title">' + sim.Name + '</span>' + '</div>';
-    }).join('');
-
-    // Build seasons HTML for series
-    var seasonsHtml = seasons.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">Seasons</h3>' + '<div class="moonfin-row-scroll">' + seasons.map(function (season) {
-      var seasonPosterTag = season.ImageTags ? season.ImageTags.Primary : null;
-      var seasonPoster = seasonPosterTag ? serverUrl + '/Items/' + season.Id + '/Images/Primary?maxHeight=240&quality=80' : '';
-      return '<div class="moonfin-season-card moonfin-focusable" data-item-id="' + season.Id + '" data-type="Season">' + '<div class="moonfin-season-poster" style="' + (seasonPoster ? "background-image: url('" + seasonPoster + "')" : '') + '"></div>' + '<span class="moonfin-season-name">' + season.Name + '</span>' + '</div>';
-    }).join('') + '</div>' + '</div>' : '';
-
-    // Build grouped metadata section
-    var metadataRows = [];
-    if (genres) metadataRows.push('<div class="moonfin-metadata-row"><span class="moonfin-metadata-label">Genres</span><span class="moonfin-metadata-value">' + genres + '</span></div>');
-    if (directors) metadataRows.push('<div class="moonfin-metadata-row"><span class="moonfin-metadata-label">Director</span><span class="moonfin-metadata-value">' + directors + '</span></div>');
-    if (writers) metadataRows.push('<div class="moonfin-metadata-row"><span class="moonfin-metadata-label">Writers</span><span class="moonfin-metadata-value">' + writers + '</span></div>');
-    if (studios) metadataRows.push('<div class="moonfin-metadata-row"><span class="moonfin-metadata-label">Studio</span><span class="moonfin-metadata-value">' + studios + '</span></div>');
-    if (runtime) metadataRows.push('<div class="moonfin-metadata-row"><span class="moonfin-metadata-label">Runtime</span><span class="moonfin-metadata-value">' + runtime + '</span></div>');
-    if (item.Type === 'Series' && seasonCount > 0) metadataRows.push('<div class="moonfin-metadata-row"><span class="moonfin-metadata-label">Seasons</span><span class="moonfin-metadata-value">' + seasonCount + '</span></div>');
-    var metadataHtml = metadataRows.length > 0 ? '<div class="moonfin-metadata-group">' + metadataRows.join('') + '</div>' : '';
 
     // Build info badges row
     var infoItems = [];
     if (year) infoItems.push('<span class="moonfin-info-item">' + year + '</span>');
-    if (rating) infoItems.push('<span class="moonfin-info-badge">' + rating + '</span>');
-    if (communityRating) infoItems.push('<span class="moonfin-info-item moonfin-rating">★ ' + communityRating + '</span>');
+    if (rating) infoItems.push('<span class="moonfin-info-pill">' + rating + '</span>');
+    if (communityRating) infoItems.push('<span class="moonfin-info-item moonfin-star-rating"><svg viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></svg> ' + communityRating + '</span>');
+    if (criticRating) infoItems.push('<span class="moonfin-info-item moonfin-critic-rating">' + criticRating + '%</span>');
     if (runtime && item.Type !== 'Series') infoItems.push('<span class="moonfin-info-item">' + runtime + '</span>');
-    if (item.Type === 'Series' && seasonCount > 0) {
+    if (isSeries && seasonCount > 0) {
       infoItems.push('<span class="moonfin-info-item">' + seasonCount + ' Season' + (seasonCount !== 1 ? 's' : '') + '</span>');
     }
     badges.forEach(function (badge) {
       infoItems.push(badge);
     });
-    var infoRowHtml = '<div class="moonfin-info-row">' + infoItems.join('') + '</div>';
-    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-close moonfin-focusable" title="Close">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' + '<div class="moonfin-details-main">' + '<div class="moonfin-poster-section">' + '<div class="moonfin-poster" style="' + (posterUrl ? "background-image: url('" + posterUrl + "')" : '') + '"></div>' + '</div>' + '<div class="moonfin-info-section">' + '<div class="moonfin-title-section">' + (logoUrl ? '<img class="moonfin-logo" src="' + logoUrl + '" alt="' + item.Name + '">' : '<h1 class="moonfin-title">' + item.Name + '</h1>') + '</div>' + infoRowHtml + '<div class="moonfin-mdblist-ratings-row" id="moonfin-details-mdblist"></div>' + (tagline ? '<p class="moonfin-tagline">"' + tagline + '"</p>' : '') + (item.Overview ? '<p class="moonfin-overview">' + item.Overview + '</p>' : '') + '<div class="moonfin-actions">' + '<button class="moonfin-btn moonfin-btn-primary moonfin-focusable" data-action="play">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>' + '<span>' + (hasResume ? 'Resume' : 'Play') + '</span>' + '</button>' + (item.Type === 'Series' ? '<button class="moonfin-btn moonfin-focusable" data-action="shuffle">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14.83 13.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13M14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41"/></svg>' + '<span>Shuffle</span>' + '</button>' : '') + '<button class="moonfin-btn moonfin-focusable ' + (isPlayed ? 'active' : '') + '" data-action="played">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>' + '<span>Watched</span>' + '</button>' + '<button class="moonfin-btn moonfin-focusable ' + (isFavorite ? 'active' : '') + '" data-action="favorite">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="' + (isFavorite ? 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' : 'M12.1 18.55l-.1.1-.11-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z') + '"/></svg>' + '<span>Favorite</span>' + '</button>' + '<button class="moonfin-btn moonfin-focusable" data-action="more">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' + '<span>More</span>' + '</button>' + '</div>' + '</div>' + '<div class="moonfin-metadata-section">' + metadataHtml + '</div>' + '</div>' + '<div class="moonfin-rows-section">' + seasonsHtml + (cast.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">Cast & Crew</h3>' + '<div class="moonfin-row-scroll">' + castHtml + '</div>' + '</div>' : '') + (similar.length > 0 ? '<div class="moonfin-row-section">' + '<h3 class="moonfin-row-title">More Like This</h3>' + '<div class="moonfin-row-scroll">' + similarHtml + '</div>' + '</div>' : '') + '</div>' + '</div>';
+    var infoRowHtml = infoItems.length > 0 ? '<div class="moonfin-info-row">' + infoItems.join('') + '</div>' : '';
+
+    // Episode header for episodes
+    var episodeHeader = '';
+    if (isEpisode) {
+      var epInfo = '';
+      if (item.ParentIndexNumber !== undefined && item.IndexNumber !== undefined) {
+        epInfo = 'S' + item.ParentIndexNumber + ' E' + item.IndexNumber;
+      }
+      episodeHeader = '<div class="moonfin-episode-header">' + (item.SeriesName ? '<span class="moonfin-series-name">' + item.SeriesName + '</span>' : '') + (epInfo ? '<span class="moonfin-episode-number">' + epInfo + '</span>' : '') + '</div>';
+    }
+
+    // Build action buttons - webOS style large icons
+    var actionBtns = [];
+    if (hasResume) {
+      actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable" data-action="play" tabindex="0">' + '<div class="moonfin-btn-circle moonfin-btn-primary">' + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">Resume</span>' + '</div>');
+    }
+    actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable" data-action="' + (hasResume ? 'restart' : 'play') + '" tabindex="0">' + '<div class="moonfin-btn-circle">' + (hasResume ? '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>') + '</div>' + '<span class="moonfin-btn-label">' + (hasResume ? 'Restart' : 'Play') + '</span>' + '</div>');
+    if (isSeries) {
+      actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable" data-action="shuffle" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M560-160v-80h104L537-367l57-57 126 126v-102h80v240H560Zm-344 0-56-56 504-504H560v-80h240v240h-80v-104L216-160Zm151-377L160-744l56-56 207 207-56 56Z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">Shuffle</span>' + '</div>');
+    }
+    actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable ' + (isPlayed ? 'active' : '') + '" data-action="played" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 7L9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">' + (isPlayed ? 'Watched' : 'Unwatched') + '</span>' + '</div>');
+    actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable ' + (isFavorite ? 'active' : '') + '" data-action="favorite" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="' + (isFavorite ? 'm480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z' : 'M480-120q-14 0-28.5-5T426-140q-43-38-97.5-82.5T232-308q-41.5-41.5-72-83T122-475q-8-32-11-60.5T108-596q0-86 57-147t147-61q52 0 99 22t69 62q22-40 69-62t99-22q90 0 147 61t57 147q0 32-3 60.5T837-475q-7 42-37.5 83.5T728-308q-42 42-96.5 86.5T534-140q-11 10-25.5 15t-28.5 5Zm0-80q41-37 88.5-75t83-68.5q35.5-30.5 61-58T746-456q9-27 11.5-49t2.5-43q0-53-34.5-91.5T636-678q-43 0-77.5 24T507-602h-54q-17-28-51.5-52T324-678q-55 0-89.5 38.5T200-548q0 21 2.5 43t11.5 49q9 27 34.5 54.5t61 58Q345-313 392.5-275T480-200Z') + '"/></svg>' + '</div>' + '<span class="moonfin-btn-label">' + (isFavorite ? 'Favorited' : 'Favorite') + '</span>' + '</div>');
+    if (isEpisode && item.SeriesId) {
+      actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable" data-action="series" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M320-120v-80l40-40H160q-33 0-56.5-23.5T80-320v-440q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v440q0 33-23.5 56.5T800-240H680l40 40v80H320Z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">Go to Series</span>' + '</div>');
+    }
+    actionBtns.push('<div class="moonfin-btn-wrapper moonfin-focusable" data-action="more" tabindex="0">' + '<div class="moonfin-btn-circle">' + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>' + '</div>' + '<span class="moonfin-btn-label">More</span>' + '</div>');
+
+    // Build metadata section
+    var metadataRows = [];
+    if (genres) metadataRows.push('<div class="moonfin-metadata-cell"><span class="moonfin-metadata-label">Genres</span><span class="moonfin-metadata-value">' + genres + '</span></div>');
+    if (directors) metadataRows.push('<div class="moonfin-metadata-cell"><span class="moonfin-metadata-label">Director</span><span class="moonfin-metadata-value">' + directors + '</span></div>');
+    if (writers) metadataRows.push('<div class="moonfin-metadata-cell"><span class="moonfin-metadata-label">Writers</span><span class="moonfin-metadata-value">' + writers + '</span></div>');
+    if (studios) metadataRows.push('<div class="moonfin-metadata-cell"><span class="moonfin-metadata-label">Studio</span><span class="moonfin-metadata-value">' + studios + '</span></div>');
+    if (runtime) metadataRows.push('<div class="moonfin-metadata-cell"><span class="moonfin-metadata-label">Runtime</span><span class="moonfin-metadata-value">' + runtime + '</span></div>');
+    if (isSeries && seasonCount > 0) metadataRows.push('<div class="moonfin-metadata-cell"><span class="moonfin-metadata-label">Seasons</span><span class="moonfin-metadata-value">' + seasonCount + '</span></div>');
+    var metadataHtml = metadataRows.length > 0 ? '<div class="moonfin-metadata-group">' + metadataRows.join('') + '</div>' : '';
+
+    // Build cast HTML - circular photos
+    var castHtml = cast.slice(0, 15).map(function (person) {
+      var personImg = person.PrimaryImageTag ? serverUrl + '/Items/' + person.Id + '/Images/Primary?maxHeight=180&quality=80' : '';
+      return '<div class="moonfin-cast-card moonfin-focusable" data-person-id="' + person.Id + '" tabindex="0">' + '<div class="moonfin-cast-photo">' + (personImg ? '<img src="' + personImg + '" alt="" loading="lazy">' : '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>') + '</div>' + '<span class="moonfin-cast-name">' + person.Name + '</span>' + '<span class="moonfin-cast-role">' + (person.Role || person.Type || '') + '</span>' + '</div>';
+    }).join('');
+
+    // Build similar items HTML
+    var similarHtml = similar.slice(0, 12).map(function (sim) {
+      var simPosterTag = sim.ImageTags ? sim.ImageTags.Primary : null;
+      var simPosterUrl = simPosterTag ? serverUrl + '/Items/' + sim.Id + '/Images/Primary?maxHeight=300&quality=80' : '';
+      return '<div class="moonfin-similar-card moonfin-focusable" data-item-id="' + sim.Id + '" data-type="' + sim.Type + '" tabindex="0">' + '<div class="moonfin-similar-poster">' + (simPosterUrl ? '<img src="' + simPosterUrl + '" alt="" loading="lazy">' : '') + '</div>' + '<span class="moonfin-similar-title">' + sim.Name + '</span>' + '</div>';
+    }).join('');
+
+    // Build seasons HTML
+    var seasonsHtml = seasons.length > 0 ? '<div class="moonfin-section">' + '<h3 class="moonfin-section-title">Seasons</h3>' + '<div class="moonfin-section-scroll">' + seasons.map(function (season) {
+      var seasonPosterTag = season.ImageTags ? season.ImageTags.Primary : null;
+      var seasonPoster = seasonPosterTag ? serverUrl + '/Items/' + season.Id + '/Images/Primary?maxHeight=280&quality=80' : '';
+      return '<div class="moonfin-season-card moonfin-focusable" data-item-id="' + season.Id + '" data-type="Season" tabindex="0">' + '<div class="moonfin-season-poster">' + (seasonPoster ? '<img src="' + seasonPoster + '" alt="" loading="lazy">' : '<span>' + season.Name + '</span>') + '</div>' + '<span class="moonfin-season-name">' + season.Name + '</span>' + '</div>';
+    }).join('') + '</div>' + '</div>' : '';
+
+    // Assemble the full layout
+    panel.innerHTML = '<div class="moonfin-details-backdrop" style="background-image: url(\'' + backdropUrl + '\')"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-close moonfin-focusable" title="Close" tabindex="0">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' +
+    // Header: info left, poster right
+    '<div class="moonfin-details-header">' + '<div class="moonfin-info-section">' + episodeHeader + '<div class="moonfin-title-section">' + (logoUrl ? '<img class="moonfin-logo" src="' + logoUrl + '" alt="' + item.Name + '">' : '<h1 class="moonfin-title">' + item.Name + '</h1>') + '</div>' + infoRowHtml + '<div class="moonfin-mdblist-ratings-row" id="moonfin-details-mdblist"></div>' + (tagline ? '<p class="moonfin-tagline">&ldquo;' + tagline + '&rdquo;</p>' : '') + (item.Overview ? '<p class="moonfin-overview">' + item.Overview + '</p>' : '') + '</div>' + '<div class="moonfin-poster-section">' + '<div class="moonfin-poster">' + (posterUrl ? '<img src="' + posterUrl + '" alt="" loading="lazy">' : '') + '</div>' + '</div>' + '</div>' +
+    // Action buttons
+    '<div class="moonfin-actions">' + actionBtns.join('') + '</div>' +
+    // Metadata
+    metadataHtml +
+    // Content sections
+    '<div class="moonfin-sections">' + seasonsHtml + (cast.length > 0 ? '<div class="moonfin-section">' + '<h3 class="moonfin-section-title">Cast & Crew</h3>' + '<div class="moonfin-section-scroll">' + castHtml + '</div>' + '</div>' : '') + (similar.length > 0 ? '<div class="moonfin-section">' + '<h3 class="moonfin-section-title">More Like This</h3>' + '<div class="moonfin-section-scroll">' + similarHtml + '</div>' + '</div>' : '') + '</div>' + '</div>';
     this.setupPanelListeners(panel, item);
   },
   /**
@@ -3562,6 +3589,18 @@ var Details = {
           window.location.hash = '#/details?id=' + item.Id + '&autoplay=true';
         }
         break;
+      case 'restart':
+        this.hide();
+        if (window.playbackManager) {
+          window.playbackManager.play({
+            items: [item],
+            startPositionTicks: 0,
+            serverId: api.serverId()
+          });
+        } else {
+          window.location.hash = '#/details?id=' + item.Id + '&autoplay=true';
+        }
+        break;
       case 'shuffle':
         this.hide();
         if (window.playbackManager) window.playbackManager.shuffle(item);else window.location.hash = '#/details?id=' + item.Id;
@@ -3571,8 +3610,12 @@ var Details = {
         (isFav ? api.unmarkFavoriteItem(userId, item.Id) : api.markFavoriteItem(userId, item.Id)).then(function () {
           if (!item.UserData) item.UserData = {};
           item.UserData.IsFavorite = !isFav;
-          var btn = self.container.querySelector('[data-action="favorite"]');
-          if (btn) btn.classList.toggle('active');
+          var wrapper = self.container.querySelector('[data-action="favorite"]');
+          if (wrapper) {
+            wrapper.classList.toggle('active');
+            var label = wrapper.querySelector('.moonfin-btn-label');
+            if (label) label.textContent = item.UserData.IsFavorite ? 'Favorited' : 'Favorite';
+          }
         }).catch(function (err) {
           console.error('[Moonfin] Details: Failed to toggle favorite', err);
         });
@@ -3582,11 +3625,19 @@ var Details = {
         (isPlayed ? api.markUnplayed(userId, item.Id) : api.markPlayed(userId, item.Id)).then(function () {
           if (!item.UserData) item.UserData = {};
           item.UserData.Played = !isPlayed;
-          var btn = self.container.querySelector('[data-action="played"]');
-          if (btn) btn.classList.toggle('active');
+          var wrapper = self.container.querySelector('[data-action="played"]');
+          if (wrapper) {
+            wrapper.classList.toggle('active');
+            var label = wrapper.querySelector('.moonfin-btn-label');
+            if (label) label.textContent = item.UserData.Played ? 'Watched' : 'Unwatched';
+          }
         }).catch(function (err) {
           console.error('[Moonfin] Details: Failed to toggle played', err);
         });
+        break;
+      case 'series':
+        this.hide();
+        window.location.hash = '#/details?id=' + item.SeriesId;
         break;
       case 'more':
         this.hide();

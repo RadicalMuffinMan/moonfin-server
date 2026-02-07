@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T15:12:36.936Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T17:08:04.504Z */
 
 /* === styles/navbar.css === */
 /**
@@ -632,22 +632,6 @@ body.moonfin-mediabar-active .homeSectionsContainer {
     display: none;
 }
 
-/* Ken Burns animations */
-.moonfin-mediabar-backdrop-img.ken-burns-1 {
-    animation: kenBurns1 10s ease-out forwards;
-}
-
-.moonfin-mediabar-backdrop-img.ken-burns-2 {
-    animation: kenBurns2 10s ease-out forwards;
-}
-
-.moonfin-mediabar-backdrop-img.ken-burns-3 {
-    animation: kenBurns3 10s ease-out forwards;
-}
-
-.moonfin-mediabar-backdrop-img.ken-burns-4 {
-    animation: kenBurns4 10s ease-out forwards;
-}
 
 /* Responsive */
 @media (max-width: 1024px) {
@@ -1808,45 +1792,8 @@ body.moonfin-navbar-bottom .moonfin-jellyseerr-container {
 /* === styles/animations.css === */
 /**
  * Moonfin Animation Styles
- * Ken Burns effects and seasonal animations
+ * Seasonal animations
  */
-
-/* Ken Burns animations for backdrops */
-@keyframes kenBurns1 {
-    0% {
-        transform: scale(1) translate(0, 0);
-    }
-    100% {
-        transform: scale(1.1) translate(-1%, -1%);
-    }
-}
-
-@keyframes kenBurns2 {
-    0% {
-        transform: scale(1.1) translate(-1%, 0);
-    }
-    100% {
-        transform: scale(1) translate(0, 0);
-    }
-}
-
-@keyframes kenBurns3 {
-    0% {
-        transform: scale(1) translate(0, 0);
-    }
-    100% {
-        transform: scale(1.1) translate(1%, -1%);
-    }
-}
-
-@keyframes kenBurns4 {
-    0% {
-        transform: scale(1.05) translate(0.5%, 0);
-    }
-    100% {
-        transform: scale(1) translate(-0.5%, -0.5%);
-    }
-}
 
 /* Seasonal effects container */
 .moonfin-seasonal-effect {
@@ -2375,7 +2322,7 @@ body.moonfin-tv-mode {
 
 /* === styles/details.css === */
 /**
- * Moonfin Details Panel - Android TV Style
+ * Moonfin Details Panel - webOS Moonfin Style
  */
 
 /* Overlay */
@@ -2403,7 +2350,7 @@ body.moonfin-tv-mode {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #101010;
+    background: #0a0a0a;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -2414,10 +2361,11 @@ body.moonfin-tv-mode {
     top: 0;
     left: 0;
     right: 0;
-    height: 65vh;
+    height: 70vh;
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
+    opacity: 0.6;
 }
 
 /* Gradient overlay */
@@ -2426,26 +2374,28 @@ body.moonfin-tv-mode {
     top: 0;
     left: 0;
     right: 0;
-    height: 65vh;
+    height: 70vh;
     background: linear-gradient(
         to bottom,
-        rgba(16, 16, 16, 0.3) 0%,
-        rgba(16, 16, 16, 0.6) 40%,
-        rgba(16, 16, 16, 0.9) 70%,
-        #101010 100%
+        rgba(10, 10, 10, 0.2) 0%,
+        rgba(10, 10, 10, 0.5) 35%,
+        rgba(10, 10, 10, 0.85) 65%,
+        #0a0a0a 100%
     );
 }
 
 /* Close button */
 .moonfin-details-close {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 24px;
+    right: 24px;
     z-index: 10001;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border: none;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -2462,7 +2412,7 @@ body.moonfin-tv-mode {
 
 .moonfin-details-close:hover,
 .moonfin-details-close:focus {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     transform: scale(1.1);
     outline: none;
 }
@@ -2471,60 +2421,71 @@ body.moonfin-tv-mode {
 .moonfin-details-content {
     position: relative;
     z-index: 1;
-    padding: 180px 60px 60px;
+    padding: 200px 60px 60px;
     min-height: 100vh;
 }
 
-/* Main layout - poster, info, metadata */
-.moonfin-details-main {
+/* =============================
+   HEADER - Info Left, Poster Right
+   ============================= */
+.moonfin-details-header {
     display: flex;
-    gap: 40px;
-    margin-bottom: 50px;
+    gap: 48px;
+    margin-bottom: 40px;
+    align-items: flex-start;
 }
 
-/* Poster section */
-.moonfin-poster-section {
-    flex-shrink: 0;
-    width: 220px;
-}
-
-.moonfin-poster {
-    width: 220px;
-    height: 330px;
-    background-size: cover;
-    background-position: center;
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-}
-
-/* Info section */
+/* Info section - left side */
 .moonfin-info-section {
     flex: 1;
-    max-width: 700px;
     min-width: 0;
+    max-width: 70%;
 }
 
+/* Episode header */
+.moonfin-episode-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.moonfin-series-name {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.moonfin-episode-number {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 10px;
+    border-radius: 4px;
+}
+
+/* Title */
 .moonfin-title-section {
     margin-bottom: 16px;
 }
 
 .moonfin-logo {
-    max-width: 350px;
-    max-height: 100px;
+    max-width: 400px;
+    max-height: 120px;
     object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
 }
 
 .moonfin-title {
-    font-size: 42px;
+    font-size: 48px;
     font-weight: 700;
     color: #fff;
     margin: 0;
     line-height: 1.1;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 
-/* Info row - badges and metadata */
+/* Info row - year, rating, runtime, badges */
 .moonfin-info-row {
     display: flex;
     flex-wrap: wrap;
@@ -2536,24 +2497,39 @@ body.moonfin-tv-mode {
 .moonfin-info-item {
     color: rgba(255, 255, 255, 0.8);
     font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.moonfin-info-badge {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    padding: 3px 10px;
+.moonfin-info-pill {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 2px 10px;
     border-radius: 4px;
     font-size: 13px;
     font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.moonfin-rating {
+.moonfin-star-rating {
     color: #ffc107;
+}
+
+.moonfin-star-rating svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.moonfin-critic-rating {
+    color: #ff6b6b;
 }
 
 /* Media badges */
 .moonfin-badge {
-    padding: 3px 8px;
+    padding: 2px 8px;
     border-radius: 4px;
     font-size: 11px;
     font-weight: 700;
@@ -2601,199 +2577,289 @@ body.moonfin-tv-mode {
 /* Tagline */
 .moonfin-tagline {
     font-style: italic;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 17px;
     margin: 0 0 16px 0;
+    letter-spacing: 0.3px;
 }
 
 /* Overview */
 .moonfin-overview {
     font-size: 15px;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.85);
-    margin: 0 0 24px 0;
-    max-height: 120px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    max-height: 130px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
 }
 
-/* Action buttons */
+/* Poster section - right side */
+.moonfin-poster-section {
+    flex-shrink: 0;
+    width: 260px;
+}
+
+.moonfin-poster {
+    width: 260px;
+    height: 390px;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.moonfin-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* =============================
+   ACTION BUTTONS - Large Icons
+   ============================= */
 .moonfin-actions {
     display: flex;
+    gap: 24px;
+    margin-bottom: 48px;
     flex-wrap: wrap;
-    gap: 12px;
 }
 
-.moonfin-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-}
-
-.moonfin-btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-.moonfin-btn:hover,
-.moonfin-btn:focus {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.5);
-}
-
-.moonfin-btn-primary {
-    background: #00a4dc;
-}
-
-.moonfin-btn-primary:hover,
-.moonfin-btn-primary:focus {
-    background: #0088c4;
-}
-
-.moonfin-btn.active {
-    background: #00a4dc;
-}
-
-.moonfin-btn.active svg {
-    color: #fff;
-}
-
-/* Metadata section */
-.moonfin-metadata-section {
-    flex-shrink: 0;
-    width: 280px;
-    padding-left: 40px;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.moonfin-metadata-group {
+.moonfin-btn-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.moonfin-metadata-row {
+.moonfin-btn-wrapper:hover {
+    transform: scale(1.08);
+}
+
+.moonfin-btn-wrapper:focus {
+    outline: none;
+    transform: scale(1.08);
+}
+
+.moonfin-btn-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.moonfin-btn-circle svg {
+    width: 32px;
+    height: 32px;
+    color: #fff;
+}
+
+.moonfin-btn-wrapper:hover .moonfin-btn-circle,
+.moonfin-btn-wrapper:focus .moonfin-btn-circle {
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 20px rgba(0, 164, 220, 0.3);
+    border-color: rgba(0, 164, 220, 0.5);
+}
+
+/* Primary button (Play/Resume) */
+.moonfin-btn-primary {
+    background: #00a4dc;
+    border-color: #00a4dc;
+}
+
+.moonfin-btn-wrapper:hover .moonfin-btn-primary,
+.moonfin-btn-wrapper:focus .moonfin-btn-primary {
+    background: #0bb8f0;
+    box-shadow: 0 4px 24px rgba(0, 164, 220, 0.5);
+    border-color: #0bb8f0;
+}
+
+/* Active state (Favorited, Watched) */
+.moonfin-btn-wrapper.active .moonfin-btn-circle {
+    background: rgba(0, 164, 220, 0.25);
+    border-color: rgba(0, 164, 220, 0.6);
+}
+
+.moonfin-btn-wrapper.active .moonfin-btn-circle svg {
+    color: #00a4dc;
+}
+
+/* Button label */
+.moonfin-btn-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.moonfin-btn-wrapper:hover .moonfin-btn-label,
+.moonfin-btn-wrapper:focus .moonfin-btn-label {
+    color: #fff;
+}
+
+.moonfin-btn-wrapper.active .moonfin-btn-label {
+    color: #00a4dc;
+}
+
+/* =============================
+   METADATA GROUP
+   ============================= */
+.moonfin-metadata-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 48px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.moonfin-metadata-cell {
+    flex: 1 1 180px;
+    padding: 16px 20px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
 .moonfin-metadata-label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+    font-weight: 600;
 }
 
 .moonfin-metadata-value {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.85);
     line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
-/* Row sections */
-.moonfin-rows-section {
-    margin-top: 40px;
+/* =============================
+   CONTENT SECTIONS
+   ============================= */
+.moonfin-sections {
+    margin-top: 0;
 }
 
-.moonfin-row-section {
-    margin-bottom: 40px;
+.moonfin-section {
+    margin-bottom: 48px;
 }
 
-.moonfin-row-title {
-    font-size: 20px;
+.moonfin-section-title {
+    font-size: 22px;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 16px 0;
+    margin: 0 0 20px 0;
+    letter-spacing: 0.3px;
 }
 
-.moonfin-row-scroll {
+.moonfin-section-scroll {
     display: flex;
     gap: 16px;
     overflow-x: auto;
     padding-bottom: 16px;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
 }
 
-.moonfin-row-scroll::-webkit-scrollbar {
+.moonfin-section-scroll::-webkit-scrollbar {
     height: 4px;
 }
 
-.moonfin-row-scroll::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+.moonfin-section-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 2px;
 }
 
-.moonfin-row-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+.moonfin-section-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 2px;
 }
 
-/* Cast cards - circular photos */
+/* Cast cards - circular */
 .moonfin-cast-card {
     flex-shrink: 0;
-    width: 100px;
+    width: 110px;
     text-align: center;
     cursor: pointer;
+    scroll-snap-align: start;
     transition: transform 0.2s;
 }
 
 .moonfin-cast-card:hover,
 .moonfin-cast-card:focus {
-    transform: scale(1.05);
+    transform: scale(1.06);
     outline: none;
 }
 
 .moonfin-cast-photo {
-    width: 80px;
-    height: 80px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
-    margin: 0 auto 8px;
-    background-size: cover;
-    background-position: center;
-    background-color: #2a2a2a;
+    margin: 0 auto 10px;
+    background-color: #1a1a1a;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: box-shadow 0.2s;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.moonfin-cast-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .moonfin-cast-photo svg {
     width: 36px;
     height: 36px;
-    color: #666;
+    color: #555;
 }
 
+.moonfin-cast-card:hover .moonfin-cast-photo,
 .moonfin-cast-card:focus .moonfin-cast-photo {
-    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.7);
+    border-color: rgba(0, 164, 220, 0.6);
+    box-shadow: 0 0 0 3px rgba(0, 164, 220, 0.2);
 }
 
 .moonfin-cast-name {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-bottom: 2px;
 }
 
 .moonfin-cast-role {
     display: block;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.45);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2802,8 +2868,9 @@ body.moonfin-tv-mode {
 /* Similar cards */
 .moonfin-similar-card {
     flex-shrink: 0;
-    width: 130px;
+    width: 140px;
     cursor: pointer;
+    scroll-snap-align: start;
     transition: transform 0.2s;
 }
 
@@ -2814,24 +2881,33 @@ body.moonfin-tv-mode {
 }
 
 .moonfin-similar-poster {
-    width: 130px;
-    height: 195px;
-    background-size: cover;
-    background-position: center;
-    background-color: #2a2a2a;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    transition: box-shadow 0.2s;
+    width: 140px;
+    height: 210px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.moonfin-similar-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.moonfin-similar-card:hover .moonfin-similar-poster,
 .moonfin-similar-card:focus .moonfin-similar-poster {
-    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.7);
+    border-color: rgba(0, 164, 220, 0.6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .moonfin-similar-title {
     display: block;
     font-size: 13px;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.9);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2840,8 +2916,9 @@ body.moonfin-tv-mode {
 /* Season cards */
 .moonfin-season-card {
     flex-shrink: 0;
-    width: 120px;
+    width: 130px;
     cursor: pointer;
+    scroll-snap-align: start;
     transition: transform 0.2s;
 }
 
@@ -2852,30 +2929,46 @@ body.moonfin-tv-mode {
 }
 
 .moonfin-season-poster {
-    width: 120px;
-    height: 180px;
-    background-size: cover;
-    background-position: center;
-    background-color: #2a2a2a;
-    border-radius: 6px;
-    margin-bottom: 8px;
-    transition: box-shadow 0.2s;
+    width: 130px;
+    height: 195px;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.moonfin-season-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.moonfin-season-card:hover .moonfin-season-poster,
 .moonfin-season-card:focus .moonfin-season-poster {
-    box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.7);
+    border-color: rgba(0, 164, 220, 0.6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .moonfin-season-name {
     display: block;
     font-size: 13px;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.9);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Loading state */
+/* =============================
+   LOADING & ERROR STATES
+   ============================= */
 .moonfin-details-loading {
     position: absolute;
     top: 50%;
@@ -2885,14 +2978,14 @@ body.moonfin-tv-mode {
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 16px;
 }
 
 .moonfin-spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.08);
     border-top-color: #00a4dc;
     border-radius: 50%;
     animation: moonfin-spin 0.8s linear infinite;
@@ -2902,7 +2995,6 @@ body.moonfin-tv-mode {
     to { transform: rotate(360deg); }
 }
 
-/* Error state */
 .moonfin-details-error {
     position: absolute;
     top: 50%;
@@ -2912,410 +3004,560 @@ body.moonfin-tv-mode {
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 16px;
 }
 
-/* Responsive adjustments for smaller screens */
+/* =============================
+   MDBList Ratings Row
+   ============================= */
+.moonfin-mdblist-ratings-row {
+    margin-bottom: 12px;
+}
+
+.moonfin-mdblist-ratings-row:empty {
+    display: none;
+    margin: 0;
+}
+
+/* =============================
+   RESPONSIVE - Tablet (1200px)
+   ============================= */
 @media (max-width: 1200px) {
-    .moonfin-details-main {
-        flex-wrap: wrap;
+    .moonfin-details-content {
+        padding: 160px 40px 50px;
     }
-    
-    .moonfin-metadata-section {
-        width: 100%;
-        padding-left: 0;
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-top: 24px;
-        margin-top: 24px;
+
+    .moonfin-details-header {
+        gap: 32px;
     }
-    
-    .moonfin-metadata-group {
-        flex-direction: row;
-        flex-wrap: wrap;
+
+    .moonfin-poster-section {
+        width: 200px;
+    }
+
+    .moonfin-poster {
+        width: 200px;
+        height: 300px;
+    }
+
+    .moonfin-title {
+        font-size: 38px;
+    }
+
+    .moonfin-btn-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+    }
+
+    .moonfin-btn-circle svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .moonfin-actions {
         gap: 20px;
-    }
-    
-    .moonfin-metadata-row {
-        flex: 1 1 150px;
     }
 }
 
-/* Tablet layout */
+/* =============================
+   RESPONSIVE - Small Tablet (768px)
+   ============================= */
 @media (max-width: 768px) {
+    .moonfin-details-backdrop {
+        height: 55vh;
+    }
+
+    .moonfin-details-gradient {
+        height: 55vh;
+    }
+
     .moonfin-details-content {
         padding: 100px 24px 40px;
     }
-    
-    .moonfin-details-main {
-        flex-direction: column;
+
+    .moonfin-details-header {
+        flex-direction: column-reverse;
         align-items: center;
         text-align: center;
         gap: 24px;
     }
-    
-    .moonfin-poster-section {
-        width: auto;
-    }
-    
-    .moonfin-poster {
-        width: 180px;
-        height: 270px;
-    }
-    
+
     .moonfin-info-section {
         max-width: 100%;
     }
-    
-    .moonfin-title {
-        font-size: 28px;
+
+    .moonfin-poster-section {
+        width: 160px;
     }
-    
+
+    .moonfin-poster {
+        width: 160px;
+        height: 240px;
+    }
+
+    .moonfin-title {
+        font-size: 30px;
+    }
+
+    .moonfin-logo {
+        max-width: 280px;
+        max-height: 80px;
+    }
+
     .moonfin-info-row {
         justify-content: center;
     }
-    
-    .moonfin-tagline {
-        font-size: 14px;
+
+    .moonfin-mdblist-ratings-row {
+        display: flex;
+        justify-content: center;
     }
-    
+
+    .moonfin-tagline {
+        font-size: 15px;
+    }
+
     .moonfin-overview {
         font-size: 14px;
         text-align: left;
     }
-    
+
     .moonfin-actions {
         justify-content: center;
+        gap: 16px;
+        margin-bottom: 36px;
     }
-    
-    .moonfin-btn {
-        padding: 10px 18px;
-        font-size: 13px;
+
+    .moonfin-btn-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
     }
-    
-    .moonfin-metadata-section {
-        text-align: left;
+
+    .moonfin-btn-circle svg {
+        width: 26px;
+        height: 26px;
     }
-    
-    .moonfin-row-title {
-        font-size: 18px;
+
+    .moonfin-btn-label {
+        font-size: 12px;
+    }
+
+    .moonfin-metadata-group {
+        margin-bottom: 36px;
+    }
+
+    .moonfin-metadata-cell {
+        padding: 12px 16px;
+    }
+
+    .moonfin-section {
+        margin-bottom: 36px;
+    }
+
+    .moonfin-section-title {
+        font-size: 19px;
+        margin-bottom: 16px;
+    }
+
+    .moonfin-episode-header {
+        justify-content: center;
     }
 }
 
-/* Mobile layout */
+/* =============================
+   RESPONSIVE - Mobile (480px)
+   ============================= */
 @media (max-width: 480px) {
     .moonfin-details-backdrop {
-        height: 50vh;
+        height: 45vh;
     }
-    
+
     .moonfin-details-gradient {
-        height: 50vh;
+        height: 45vh;
     }
-    
+
     .moonfin-details-content {
-        padding: 60px 16px 30px;
+        padding: 70px 16px 30px;
     }
-    
+
     .moonfin-details-close {
-        top: 12px;
-        right: 12px;
+        top: 14px;
+        right: 14px;
         width: 40px;
         height: 40px;
     }
-    
+
     .moonfin-details-close svg {
         width: 20px;
         height: 20px;
     }
-    
-    .moonfin-details-main {
-        gap: 20px;
+
+    .moonfin-poster-section {
+        width: 120px;
     }
-    
+
     .moonfin-poster {
-        width: 140px;
-        height: 210px;
+        width: 120px;
+        height: 180px;
+        border-radius: 8px;
     }
-    
-    .moonfin-title-section {
-        margin-bottom: 12px;
-    }
-    
-    .moonfin-logo {
-        max-width: 250px;
-        max-height: 70px;
-    }
-    
+
     .moonfin-title {
-        font-size: 22px;
+        font-size: 24px;
     }
-    
+
+    .moonfin-logo {
+        max-width: 200px;
+        max-height: 60px;
+    }
+
     .moonfin-info-row {
         gap: 8px;
         margin-bottom: 12px;
     }
-    
+
     .moonfin-info-item {
         font-size: 13px;
     }
-    
-    .moonfin-info-badge {
+
+    .moonfin-info-pill {
         font-size: 11px;
-        padding: 2px 8px;
+        padding: 1px 7px;
     }
-    
+
     .moonfin-badge {
         font-size: 10px;
-        padding: 2px 6px;
+        padding: 1px 6px;
     }
-    
+
     .moonfin-tagline {
         font-size: 13px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
     }
-    
+
     .moonfin-overview {
         font-size: 13px;
         line-height: 1.5;
-        margin-bottom: 20px;
         -webkit-line-clamp: 4;
     }
-    
+
     .moonfin-actions {
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-    
-    .moonfin-btn {
-        padding: 10px 14px;
-        font-size: 12px;
-        gap: 6px;
-        border-radius: 6px;
-    }
-    
-    .moonfin-btn svg {
-        width: 18px;
-        height: 18px;
-    }
-    
-    /* Hide button labels on very small screens, show icons only */
-    .moonfin-btn span {
-        display: none;
-    }
-    
-    .moonfin-btn-primary span {
-        display: inline; /* Keep Play/Resume visible */
-    }
-    
-    .moonfin-metadata-section {
-        padding-top: 20px;
-        margin-top: 20px;
-    }
-    
-    .moonfin-metadata-group {
         gap: 12px;
+        margin-bottom: 28px;
     }
-    
-    .moonfin-metadata-row {
-        flex: 1 1 120px;
+
+    .moonfin-btn-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
     }
-    
-    .moonfin-metadata-label {
+
+    .moonfin-btn-circle svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .moonfin-btn-label {
         font-size: 11px;
     }
-    
+
+    .moonfin-metadata-group {
+        margin-bottom: 28px;
+    }
+
+    .moonfin-metadata-cell {
+        flex: 1 1 140px;
+        padding: 10px 14px;
+    }
+
+    .moonfin-metadata-label {
+        font-size: 10px;
+    }
+
     .moonfin-metadata-value {
         font-size: 13px;
     }
-    
-    .moonfin-rows-section {
-        margin-top: 30px;
+
+    .moonfin-section {
+        margin-bottom: 28px;
     }
-    
-    .moonfin-row-section {
-        margin-bottom: 30px;
-    }
-    
-    .moonfin-row-title {
-        font-size: 16px;
+
+    .moonfin-section-title {
+        font-size: 17px;
         margin-bottom: 12px;
     }
-    
-    .moonfin-row-scroll {
+
+    .moonfin-section-scroll {
         gap: 12px;
         padding-bottom: 12px;
-        /* Allow horizontal scroll with momentum on mobile */
-        scroll-snap-type: x proximity;
-        -webkit-overflow-scrolling: touch;
     }
-    
+
     /* Cast cards mobile */
     .moonfin-cast-card {
-        width: 80px;
-        scroll-snap-align: start;
+        width: 85px;
     }
-    
+
     .moonfin-cast-photo {
-        width: 60px;
-        height: 60px;
+        width: 68px;
+        height: 68px;
     }
-    
+
     .moonfin-cast-photo svg {
         width: 28px;
         height: 28px;
     }
-    
+
     .moonfin-cast-name {
         font-size: 11px;
     }
-    
+
     .moonfin-cast-role {
         font-size: 10px;
     }
-    
+
     /* Similar cards mobile */
     .moonfin-similar-card {
-        width: 100px;
-        scroll-snap-align: start;
+        width: 105px;
     }
-    
+
     .moonfin-similar-poster {
-        width: 100px;
-        height: 150px;
+        width: 105px;
+        height: 157px;
     }
-    
+
     .moonfin-similar-title {
         font-size: 11px;
     }
-    
+
     /* Season cards mobile */
     .moonfin-season-card {
-        width: 90px;
-        scroll-snap-align: start;
+        width: 100px;
     }
-    
+
     .moonfin-season-poster {
-        width: 90px;
-        height: 135px;
+        width: 100px;
+        height: 150px;
     }
-    
+
     .moonfin-season-name {
         font-size: 11px;
     }
-    
-    /* Loading/error states mobile */
+
+    /* Episode */
+    .moonfin-series-name {
+        font-size: 14px;
+    }
+
+    .moonfin-episode-number {
+        font-size: 12px;
+    }
+
+    /* Loading/error */
     .moonfin-details-loading,
     .moonfin-details-error {
         font-size: 14px;
     }
-    
+
     .moonfin-spinner {
         width: 40px;
         height: 40px;
     }
 }
 
-/* Extra small screens (older phones) */
+/* =============================
+   RESPONSIVE - Small Mobile (360px)
+   ============================= */
 @media (max-width: 360px) {
     .moonfin-details-content {
-        padding: 50px 12px 24px;
+        padding: 55px 12px 24px;
     }
-    
+
+    .moonfin-poster-section {
+        width: 100px;
+    }
+
     .moonfin-poster {
-        width: 120px;
-        height: 180px;
+        width: 100px;
+        height: 150px;
     }
-    
+
     .moonfin-title {
         font-size: 20px;
     }
-    
+
     .moonfin-info-row {
         gap: 6px;
     }
-    
-    .moonfin-btn {
-        padding: 8px 12px;
+
+    .moonfin-actions {
+        gap: 8px;
     }
-    
+
+    .moonfin-btn-circle {
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+    }
+
+    .moonfin-btn-circle svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .moonfin-btn-label {
+        font-size: 10px;
+    }
+
     .moonfin-cast-card {
-        width: 70px;
+        width: 72px;
     }
-    
+
     .moonfin-cast-photo {
-        width: 50px;
-        height: 50px;
+        width: 56px;
+        height: 56px;
     }
-    
+
     .moonfin-similar-card {
+        width: 90px;
+    }
+
+    .moonfin-similar-poster {
+        width: 90px;
+        height: 135px;
+    }
+
+    .moonfin-season-card {
         width: 85px;
     }
-    
-    .moonfin-similar-poster {
+
+    .moonfin-season-poster {
         width: 85px;
         height: 127px;
     }
 }
 
-/* TV/10-foot UI adjustments */
+/* =============================
+   TV / 10-foot UI (1920px+)
+   ============================= */
 @media (min-width: 1920px) {
     .moonfin-details-content {
-        padding: 200px 80px 80px;
+        padding: 220px 100px 80px;
     }
-    
-    .moonfin-poster {
-        width: 280px;
-        height: 420px;
-    }
-    
+
     .moonfin-poster-section {
-        width: 280px;
+        width: 320px;
     }
-    
+
+    .moonfin-poster {
+        width: 320px;
+        height: 480px;
+    }
+
     .moonfin-title {
-        font-size: 52px;
+        font-size: 56px;
     }
-    
-    .moonfin-overview {
+
+    .moonfin-info-item {
         font-size: 17px;
     }
-    
-    .moonfin-btn {
-        padding: 14px 28px;
-        font-size: 16px;
+
+    .moonfin-overview {
+        font-size: 17px;
+        max-height: 160px;
+        -webkit-line-clamp: 6;
     }
-    
-    .moonfin-btn svg {
-        width: 24px;
-        height: 24px;
-    }
-    
-    .moonfin-cast-card {
-        width: 120px;
-    }
-    
-    .moonfin-cast-photo {
+
+    .moonfin-btn-circle {
         width: 100px;
         height: 100px;
+        border-radius: 20px;
     }
-    
+
+    .moonfin-btn-circle svg {
+        width: 44px;
+        height: 44px;
+    }
+
+    .moonfin-btn-label {
+        font-size: 15px;
+    }
+
+    .moonfin-actions {
+        gap: 32px;
+        margin-bottom: 56px;
+    }
+
+    .moonfin-metadata-cell {
+        padding: 20px 24px;
+    }
+
+    .moonfin-metadata-value {
+        font-size: 16px;
+    }
+
+    .moonfin-section-title {
+        font-size: 26px;
+        margin-bottom: 24px;
+    }
+
+    .moonfin-section-scroll {
+        gap: 20px;
+    }
+
+    .moonfin-cast-card {
+        width: 130px;
+    }
+
+    .moonfin-cast-photo {
+        width: 104px;
+        height: 104px;
+    }
+
+    .moonfin-cast-name {
+        font-size: 15px;
+    }
+
+    .moonfin-cast-role {
+        font-size: 13px;
+    }
+
     .moonfin-similar-card {
-        width: 160px;
+        width: 170px;
     }
-    
+
     .moonfin-similar-poster {
-        width: 160px;
-        height: 240px;
+        width: 170px;
+        height: 255px;
+    }
+
+    .moonfin-similar-title {
+        font-size: 15px;
+    }
+
+    .moonfin-season-card {
+        width: 150px;
+    }
+
+    .moonfin-season-poster {
+        width: 150px;
+        height: 225px;
+    }
+
+    .moonfin-season-name {
+        font-size: 15px;
     }
 }
 
-/* Focusable elements for TV navigation */
+/* =============================
+   FOCUSABLE / TV NAVIGATION
+   ============================= */
 .moonfin-focusable:focus {
     outline: none;
 }
 
-/* Focus ring color override */
 .moonfin-details-panel *:focus {
     outline: none;
 }
