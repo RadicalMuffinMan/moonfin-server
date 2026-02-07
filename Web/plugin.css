@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T21:53:02.698Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T22:22:33.478Z */
 
 /* === styles/navbar.css === */
 /**
@@ -3798,6 +3798,438 @@ body.moonfin-navbar-active .moonfin-details-back {
 
 .moonfin-details-panel *:focus {
     outline: none;
+}
+
+/* =============================
+   MORE OPTIONS MENU
+   ============================= */
+.moonfin-more-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10003;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: moonfin-fade-in 0.2s ease;
+}
+
+@keyframes moonfin-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.moonfin-more-menu {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    min-width: 320px;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+.moonfin-more-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.moonfin-more-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.moonfin-more-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    text-align: left;
+    width: 100%;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.moonfin-more-item:hover,
+.moonfin-more-item:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 164, 220, 0.5);
+    outline: none;
+}
+
+.moonfin-more-item-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moonfin-more-item-icon svg {
+    width: 24px;
+    height: 24px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.moonfin-more-item:hover .moonfin-more-item-icon svg,
+.moonfin-more-item:focus .moonfin-more-item-icon svg {
+    color: #00a4dc;
+}
+
+.moonfin-more-item-text {
+    flex: 1;
+    font-size: 16px;
+}
+
+/* Toast notification */
+.moonfin-toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(30, 30, 30, 0.95);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10010;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.moonfin-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Media Info popup */
+.moonfin-media-info-menu {
+    max-width: 560px;
+}
+
+.moonfin-media-info-content {
+    margin-bottom: 16px;
+}
+
+.moonfin-media-info-empty {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    padding: 16px 0;
+    margin: 0;
+}
+
+.moonfin-media-info-stream {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.moonfin-media-info-stream:last-child {
+    border-bottom: none;
+}
+
+.moonfin-media-info-stream-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #00a4dc;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.moonfin-media-info-row {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.6;
+}
+
+.moonfin-media-info-close {
+    margin-top: 8px;
+    justify-content: center;
+}
+
+/* =============================
+   SEASON DETAIL VIEW
+   ============================= */
+.moonfin-season-detail-header {
+    display: flex;
+    gap: 32px;
+    align-items: flex-end;
+    margin-bottom: 40px;
+}
+
+.moonfin-season-detail-poster {
+    flex-shrink: 0;
+    width: 180px;
+}
+
+.moonfin-season-detail-poster img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.moonfin-season-detail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 8px;
+}
+
+.moonfin-season-detail-series {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
+.moonfin-season-detail-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.15;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.moonfin-season-detail-count {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 4px;
+}
+
+/* Season episode list (vertical) */
+.moonfin-season-episodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.moonfin-season-ep {
+    display: flex;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.moonfin-season-ep:hover,
+.moonfin-season-ep:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 164, 220, 0.4);
+    outline: none;
+}
+
+.moonfin-season-ep-thumb {
+    position: relative;
+    width: 280px;
+    min-height: 160px;
+    flex-shrink: 0;
+    background: #111;
+    overflow: hidden;
+}
+
+.moonfin-season-ep-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.moonfin-season-ep-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a;
+}
+
+.moonfin-season-ep-thumb-placeholder svg {
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.15);
+}
+
+.moonfin-season-ep-body {
+    flex: 1;
+    padding: 16px 20px 16px 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.moonfin-season-ep-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.moonfin-season-ep-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.moonfin-season-ep-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.moonfin-season-ep-check {
+    width: 16px;
+    height: 16px;
+    color: #00a4dc;
+}
+
+.moonfin-season-ep-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.moonfin-season-ep-overview {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Season detail responsive - Tablet */
+@media (max-width: 768px) {
+    .moonfin-season-detail-header {
+        gap: 20px;
+    }
+
+    .moonfin-season-detail-poster {
+        width: 130px;
+    }
+
+    .moonfin-season-detail-title {
+        font-size: 28px;
+    }
+
+    .moonfin-season-ep-thumb {
+        width: 200px;
+        min-height: 120px;
+    }
+
+    .moonfin-season-ep-title {
+        font-size: 16px;
+    }
+
+    .moonfin-season-ep-overview {
+        -webkit-line-clamp: 2;
+    }
+}
+
+/* Season detail responsive - Mobile */
+@media (max-width: 480px) {
+    .moonfin-season-detail-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .moonfin-season-detail-poster {
+        width: 120px;
+    }
+
+    .moonfin-season-detail-title {
+        font-size: 24px;
+    }
+
+    .moonfin-season-detail-count {
+        font-size: 13px;
+    }
+
+    .moonfin-season-ep {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .moonfin-season-ep-thumb {
+        width: 100%;
+        min-height: 0;
+        height: 180px;
+    }
+
+    .moonfin-season-ep-body {
+        padding: 12px 16px;
+    }
+
+    .moonfin-season-ep-title {
+        font-size: 15px;
+    }
+
+    .moonfin-season-ep-overview {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+}
+
+/* Season detail responsive - Large screens */
+@media (min-width: 1400px) {
+    .moonfin-season-detail-poster {
+        width: 220px;
+    }
+
+    .moonfin-season-detail-title {
+        font-size: 42px;
+    }
+
+    .moonfin-season-ep-thumb {
+        width: 340px;
+        min-height: 190px;
+    }
+
+    .moonfin-season-ep-title {
+        font-size: 20px;
+    }
+
+    .moonfin-season-ep-overview {
+        font-size: 15px;
+    }
 }
 
 
