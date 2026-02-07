@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T20:24:29.180Z
+// Moonfin Web Plugin - Built 2026-02-07T20:51:52.204Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -3913,7 +3913,7 @@ var Details = {
         break;
       case 'series':
         this.hide();
-        API.navigateTo('/details?id=' + item.SeriesId);
+        Details.showDetails(item.SeriesId, 'Series');
         break;
       case 'more':
         this.hide();
@@ -4148,6 +4148,16 @@ const Plugin = {
       if (MediaBar.container) MediaBar.container.classList.add('hidden');
       document.querySelectorAll('.moonfin-seasonal-effect').forEach(el => el.style.display = 'none');
       document.body.classList.remove('moonfin-navbar-active');
+      return;
+    }
+
+    // Hide navbar and media bar during video playback
+    var hash = window.location.hash || '';
+    if (hash.includes('#/video')) {
+      if (Navbar.container) Navbar.container.classList.add('hidden');
+      if (MediaBar.container) MediaBar.container.classList.add('hidden');
+      document.body.classList.remove('moonfin-navbar-active');
+      document.body.classList.remove('moonfin-mediabar-active');
       return;
     }
 
