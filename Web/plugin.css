@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T17:08:04.504Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-07T18:09:08.150Z */
 
 /* === styles/navbar.css === */
 /**
@@ -2770,8 +2770,55 @@ body.moonfin-tv-mode {
     font-size: 22px;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 20px 0;
+    margin: 0;
     letter-spacing: 0.3px;
+}
+
+/* Section header with arrows */
+.moonfin-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.moonfin-section-arrows {
+    display: flex;
+    gap: 8px;
+}
+
+.moonfin-section-arrow {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    padding: 0;
+}
+
+.moonfin-section-arrow svg {
+    width: 20px;
+    height: 20px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.moonfin-section-arrow:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(0, 164, 220, 0.5);
+    transform: scale(1.1);
+}
+
+.moonfin-section-arrow:hover svg {
+    color: #fff;
+}
+
+.moonfin-section-arrow:active {
+    transform: scale(0.95);
 }
 
 .moonfin-section-scroll {
@@ -2800,7 +2847,7 @@ body.moonfin-tv-mode {
 /* Cast cards - circular */
 .moonfin-cast-card {
     flex-shrink: 0;
-    width: 110px;
+    width: 150px;
     text-align: center;
     cursor: pointer;
     scroll-snap-align: start;
@@ -2814,8 +2861,8 @@ body.moonfin-tv-mode {
 }
 
 .moonfin-cast-photo {
-    width: 88px;
-    height: 88px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     margin: 0 auto 10px;
     background-color: #1a1a1a;
@@ -2835,8 +2882,8 @@ body.moonfin-tv-mode {
 }
 
 .moonfin-cast-photo svg {
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
     color: #555;
 }
 
@@ -2848,7 +2895,7 @@ body.moonfin-tv-mode {
 
 .moonfin-cast-name {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
@@ -2858,7 +2905,7 @@ body.moonfin-tv-mode {
 
 .moonfin-cast-role {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.45);
     white-space: nowrap;
     overflow: hidden;
@@ -2868,7 +2915,7 @@ body.moonfin-tv-mode {
 /* Similar cards */
 .moonfin-similar-card {
     flex-shrink: 0;
-    width: 140px;
+    width: 180px;
     cursor: pointer;
     scroll-snap-align: start;
     transition: transform 0.2s;
@@ -2881,8 +2928,8 @@ body.moonfin-tv-mode {
 }
 
 .moonfin-similar-poster {
-    width: 140px;
-    height: 210px;
+    width: 180px;
+    height: 270px;
     background-color: #1a1a1a;
     border-radius: 8px;
     overflow: hidden;
@@ -2916,7 +2963,7 @@ body.moonfin-tv-mode {
 /* Season cards */
 .moonfin-season-card {
     flex-shrink: 0;
-    width: 130px;
+    width: 160px;
     cursor: pointer;
     scroll-snap-align: start;
     transition: transform 0.2s;
@@ -2929,8 +2976,8 @@ body.moonfin-tv-mode {
 }
 
 .moonfin-season-poster {
-    width: 130px;
-    height: 195px;
+    width: 160px;
+    height: 240px;
     background-color: #1a1a1a;
     border-radius: 8px;
     overflow: hidden;
@@ -2964,6 +3011,108 @@ body.moonfin-tv-mode {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Episode cards - landscape thumbnails */
+.moonfin-episode-card {
+    flex-shrink: 0;
+    width: 260px;
+    cursor: pointer;
+    scroll-snap-align: start;
+    transition: transform 0.2s;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid transparent;
+}
+
+.moonfin-episode-card:hover,
+.moonfin-episode-card:focus {
+    transform: scale(1.03);
+    outline: none;
+    border-color: rgba(0, 164, 220, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.moonfin-episode-card.moonfin-episode-current {
+    border-color: rgba(0, 164, 220, 0.6);
+    background: rgba(0, 164, 220, 0.1);
+}
+
+.moonfin-episode-thumb {
+    width: 100%;
+    height: 146px;
+    background-color: #1a1a1a;
+    overflow: hidden;
+    position: relative;
+}
+
+.moonfin-episode-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.moonfin-episode-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a;
+}
+
+.moonfin-episode-thumb-placeholder svg {
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.moonfin-episode-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.moonfin-episode-progress-bar {
+    height: 100%;
+    background: #00a4dc;
+    border-radius: 0 2px 2px 0;
+}
+
+.moonfin-episode-info {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.moonfin-episode-ep-number {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+}
+
+.moonfin-episode-ep-title {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.moonfin-episode-ep-runtime {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
 }
 
 /* =============================
@@ -3159,6 +3308,9 @@ body.moonfin-tv-mode {
 
     .moonfin-section-title {
         font-size: 19px;
+    }
+    
+    .moonfin-section-header {
         margin-bottom: 16px;
     }
 
@@ -3287,7 +3439,20 @@ body.moonfin-tv-mode {
 
     .moonfin-section-title {
         font-size: 17px;
+    }
+    
+    .moonfin-section-header {
         margin-bottom: 12px;
+    }
+
+    .moonfin-section-arrow {
+        width: 30px;
+        height: 30px;
+    }
+
+    .moonfin-section-arrow svg {
+        width: 16px;
+        height: 16px;
     }
 
     .moonfin-section-scroll {
@@ -3297,21 +3462,21 @@ body.moonfin-tv-mode {
 
     /* Cast cards mobile */
     .moonfin-cast-card {
-        width: 85px;
+        width: 110px;
     }
 
     .moonfin-cast-photo {
-        width: 68px;
-        height: 68px;
+        width: 88px;
+        height: 88px;
     }
 
     .moonfin-cast-photo svg {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
     }
 
     .moonfin-cast-name {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .moonfin-cast-role {
@@ -3320,12 +3485,12 @@ body.moonfin-tv-mode {
 
     /* Similar cards mobile */
     .moonfin-similar-card {
-        width: 105px;
+        width: 130px;
     }
 
     .moonfin-similar-poster {
-        width: 105px;
-        height: 157px;
+        width: 130px;
+        height: 195px;
     }
 
     .moonfin-similar-title {
@@ -3334,12 +3499,12 @@ body.moonfin-tv-mode {
 
     /* Season cards mobile */
     .moonfin-season-card {
-        width: 100px;
+        width: 120px;
     }
 
     .moonfin-season-poster {
-        width: 100px;
-        height: 150px;
+        width: 120px;
+        height: 180px;
     }
 
     .moonfin-season-name {
@@ -3353,6 +3518,28 @@ body.moonfin-tv-mode {
 
     .moonfin-episode-number {
         font-size: 12px;
+    }
+
+    /* Episode cards mobile */
+    .moonfin-episode-card {
+        width: 200px;
+    }
+
+    .moonfin-episode-thumb {
+        height: 112px;
+    }
+
+    .moonfin-episode-ep-title {
+        font-size: 12px;
+    }
+
+    .moonfin-episode-ep-number {
+        font-size: 11px;
+    }
+
+    .moonfin-episode-info {
+        padding: 8px 10px;
+        gap: 6px;
     }
 
     /* Loading/error */
@@ -3412,30 +3599,38 @@ body.moonfin-tv-mode {
     }
 
     .moonfin-cast-card {
-        width: 72px;
+        width: 90px;
     }
 
     .moonfin-cast-photo {
-        width: 56px;
-        height: 56px;
+        width: 72px;
+        height: 72px;
     }
 
     .moonfin-similar-card {
-        width: 90px;
+        width: 110px;
     }
 
     .moonfin-similar-poster {
-        width: 90px;
-        height: 135px;
+        width: 110px;
+        height: 165px;
     }
 
     .moonfin-season-card {
-        width: 85px;
+        width: 100px;
     }
 
     .moonfin-season-poster {
-        width: 85px;
-        height: 127px;
+        width: 100px;
+        height: 150px;
+    }
+
+    .moonfin-episode-card {
+        width: 180px;
+    }
+
+    .moonfin-episode-thumb {
+        height: 101px;
     }
 }
 
@@ -3500,7 +3695,20 @@ body.moonfin-tv-mode {
 
     .moonfin-section-title {
         font-size: 26px;
+    }
+
+    .moonfin-section-header {
         margin-bottom: 24px;
+    }
+
+    .moonfin-section-arrow {
+        width: 44px;
+        height: 44px;
+    }
+
+    .moonfin-section-arrow svg {
+        width: 24px;
+        height: 24px;
     }
 
     .moonfin-section-scroll {
@@ -3508,29 +3716,29 @@ body.moonfin-tv-mode {
     }
 
     .moonfin-cast-card {
-        width: 130px;
+        width: 160px;
     }
 
     .moonfin-cast-photo {
-        width: 104px;
-        height: 104px;
+        width: 130px;
+        height: 130px;
     }
 
     .moonfin-cast-name {
-        font-size: 15px;
+        font-size: 16px;
     }
 
     .moonfin-cast-role {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .moonfin-similar-card {
-        width: 170px;
+        width: 200px;
     }
 
     .moonfin-similar-poster {
-        width: 170px;
-        height: 255px;
+        width: 200px;
+        height: 300px;
     }
 
     .moonfin-similar-title {
@@ -3538,16 +3746,36 @@ body.moonfin-tv-mode {
     }
 
     .moonfin-season-card {
-        width: 150px;
+        width: 180px;
     }
 
     .moonfin-season-poster {
-        width: 150px;
-        height: 225px;
+        width: 180px;
+        height: 270px;
     }
 
     .moonfin-season-name {
         font-size: 15px;
+    }
+
+    .moonfin-episode-card {
+        width: 320px;
+    }
+
+    .moonfin-episode-thumb {
+        height: 180px;
+    }
+
+    .moonfin-episode-ep-title {
+        font-size: 16px;
+    }
+
+    .moonfin-episode-ep-number {
+        font-size: 15px;
+    }
+
+    .moonfin-episode-info {
+        padding: 12px 16px;
     }
 }
 
