@@ -24,34 +24,24 @@ public class MoonfinController : ControllerBase
 
     /// <summary>
     /// Ping endpoint to check if Moonfin plugin is installed.
-    /// This can be called without authentication.
     /// </summary>
     /// <returns>Plugin status information.</returns>
     [HttpGet("Ping")]
-    [AllowAnonymous]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<MoonfinPingResponse> Ping()
     {
         var config = MoonfinPlugin.Instance?.Configuration;
-        
-        if (config?.AllowAnonymousPing != true)
-        {
-            return Ok(new MoonfinPingResponse
-            {
-                Installed = true,
-                Version = MoonfinPlugin.Instance?.Version.ToString() ?? "1.0.0.0"
-            });
-        }
 
         return Ok(new MoonfinPingResponse
         {
             Installed = true,
             Version = MoonfinPlugin.Instance?.Version.ToString() ?? "1.0.0.0",
-            SettingsSyncEnabled = config.EnableSettingsSync,
+            SettingsSyncEnabled = config?.EnableSettingsSync ?? false,
             ServerName = "Jellyfin",
-            JellyseerrEnabled = config.JellyseerrEnabled,
-            JellyseerrUrl = config.JellyseerrEnabled
-                ? (!string.IsNullOrEmpty(config.JellyseerrUrl) ? config.JellyseerrUrl : config.JellyseerrInternalUrl)
+            JellyseerrEnabled = config?.JellyseerrEnabled ?? false,
+            JellyseerrUrl = (config?.JellyseerrEnabled == true)
+                ? config.JellyseerrUrl
                 : null
         });
     }
@@ -291,7 +281,7 @@ public class MoonfinController : ControllerBase
         return Ok(new JellyseerrConfigResponse
         {
             Enabled = config?.JellyseerrEnabled ?? false,
-            Url = !string.IsNullOrEmpty(config?.JellyseerrUrl) ? config.JellyseerrUrl : config?.JellyseerrInternalUrl,
+            Url = config?.JellyseerrUrl,
             UserEnabled = userSettings?.JellyseerrEnabled ?? true
         });
     }

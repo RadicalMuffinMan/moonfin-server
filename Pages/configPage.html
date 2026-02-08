@@ -24,15 +24,6 @@
                                 Allow Moonfin clients to sync their settings across devices via this server.
                             </div>
                         </div>
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="AllowAnonymousPing" is="emby-checkbox" />
-                                <span>Allow Anonymous Ping</span>
-                            </label>
-                            <div class="fieldDescription">
-                                Allow unauthenticated clients to check if the Moonfin plugin is installed.
-                            </div>
-                        </div>
                     </div>
 
                     <div class="verticalSection">
@@ -51,15 +42,6 @@
                             <input type="url" id="JellyseerrUrl" is="emby-input" placeholder="https://jellyseerr.example.com" />
                             <div class="fieldDescription">
                                 The URL of your Jellyseerr instance. If you only have one URL (e.g. a local IP), enter it here.
-                            </div>
-                        </div>
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="JellyseerrInternalUrl">Jellyseerr Internal URL (optional)</label>
-                            <input type="url" id="JellyseerrInternalUrl" is="emby-input" placeholder="http://192.168.1.x:5055" />
-                            <div class="fieldDescription">
-                                Only needed if your Jellyseerr is on a private network with a different internal address.
-                                When set, the server uses this URL for proxying while clients see the public URL above.
-                                Leave blank if you only have one URL — just use the field above.
                             </div>
                         </div>
                         <div style="background-color: rgba(0, 164, 220, 0.1); border-left: 4px solid #00a4dc; border-radius: 4px; padding: 1em 1.5em; margin: 1em 0;">
@@ -106,10 +88,8 @@
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(MoonfinConfig.pluginUniqueId).then(function(config) {
                     document.querySelector('#EnableSettingsSync').checked = config.EnableSettingsSync;
-                    document.querySelector('#AllowAnonymousPing').checked = config.AllowAnonymousPing;
                     document.querySelector('#JellyseerrEnabled').checked = config.JellyseerrEnabled;
                     document.querySelector('#JellyseerrUrl').value = config.JellyseerrUrl || '';
-                    document.querySelector('#JellyseerrInternalUrl').value = config.JellyseerrInternalUrl || '';
                     Dashboard.hideLoadingMsg();
                 });
 
@@ -119,10 +99,8 @@
                         Dashboard.showLoadingMsg();
                         ApiClient.getPluginConfiguration(MoonfinConfig.pluginUniqueId).then(function(config) {
                             config.EnableSettingsSync = document.querySelector('#EnableSettingsSync').checked;
-                            config.AllowAnonymousPing = document.querySelector('#AllowAnonymousPing').checked;
                             config.JellyseerrEnabled = document.querySelector('#JellyseerrEnabled').checked;
                             config.JellyseerrUrl = document.querySelector('#JellyseerrUrl').value || null;
-                            config.JellyseerrInternalUrl = document.querySelector('#JellyseerrInternalUrl').value || null;
                             ApiClient.updatePluginConfiguration(MoonfinConfig.pluginUniqueId, config).then(function(result) {
                                 Dashboard.processPluginConfigurationUpdateResult(result);
                             });

@@ -56,7 +56,6 @@ Configure in Jellyfin Dashboard → Plugins → Moonfin:
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `EnableSettingsSync` | `true` | Enable cross-client settings synchronization |
-| `AllowAnonymousPing` | `true` | Allow unauthenticated `/Moonfin/Ping` requests |
 | `JellyseerrEnabled` | `false` | Enable Jellyseerr integration in Moonfin clients |
 | `JellyseerrUrl` | `null` | Jellyseerr server URL (e.g., `https://jellyseerr.example.com`) |
 
