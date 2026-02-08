@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-08T01:10:45.268Z
+// Moonfin Web Plugin - Built 2026-02-08T01:46:14.959Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -212,7 +212,7 @@ const Storage = {
   defaults: {
     // UI Feature Toggles
     navbarEnabled: false,
-    detailsPageEnabled: true,
+    detailsPageEnabled: false,
     // Media Bar Settings
     mediaBarEnabled: false,
     mediaBarContentType: 'both',
@@ -3058,6 +3058,12 @@ var Details = {
   setupItemInterception: function () {
     var self = this;
 
+    // Check if details page is enabled in settings
+    if (!Storage.get('detailsPageEnabled')) {
+      console.log('[Moonfin] Details: Custom details page disabled by setting');
+      return;
+    }
+
     // Use event delegation on document - intercept BEFORE Jellyfin handlers
     document.addEventListener('click', function (e) {
       // Find the card element
@@ -3815,78 +3821,138 @@ var Details = {
 
     // Remove existing menu if any
     this.closeMoreMenu();
+
+    // Fetch current user to check permissions before building menu
+    API.getCurrentUser().then(function (user) {
+      self._buildMoreMenu(item, user);
+    }).catch(function () {
+      // Fallback: build with no user (only safe items shown)
+      self._buildMoreMenu(item, null);
+    });
+  },
+  _buildMoreMenu: function (item, user) {
+    var self = this;
+    var policy = user && user.Policy || {};
+    var isAdmin = policy.IsAdministrator || false;
     var overlay = document.createElement('div');
     overlay.className = 'moonfin-more-overlay';
     var menuItems = [];
-    menuItems.push({
-      id: 'addtoplaylist',
-      name: 'Add to Playlist',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-120v-80h280v80H480Zm0-160v-80h280v80H480Zm0-160v-80h280v80H480ZM200-360v-240h80v240h-80Zm120-120v-120h80v120h-80Z"/></svg>'
-    });
 
-    // Instant Mix (for music-type items)
-    if (item.Type === 'MusicAlbum' || item.Type === 'MusicArtist' || item.Type === 'Audio' || item.Type === 'Playlist') {
+    // Add to Playlist — available for media items (has MediaType or IsFolder)
+    if (item.MediaType || item.IsFolder) {
+      menuItems.push({
+        id: 'addtoplaylist',
+        name: 'Add to Playlist',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-120v-80h280v80H480Zm0-160v-80h280v80H480Zm0-160v-80h280v80H480ZM200-360v-240h80v240h-80Zm120-120v-120h80v120h-80Z"/></svg>'
+      });
+    }
+
+    // Add to Collection — admin or user with EnableCollectionManagement, and item supports it
+    var collectionInvalidTypes = ['Genre', 'MusicGenre', 'Studio', 'UserView', 'CollectionFolder', 'Audio', 'Program', 'Timer', 'SeriesTimer'];
+    if ((isAdmin || policy.EnableCollectionManagement) && !item.CollectionType && collectionInvalidTypes.indexOf(item.Type) === -1) {
+      menuItems.push({
+        id: 'addtocollection',
+        name: 'Add to Collection',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M260-160q-91 0-155.5-63T40-377q0-78 47-139t121-71q17-91 90-147t163-56q100 0 172.5 69T707-554q71 5 122 57t51 127q0 75-52.5 127.5T700-190H260Zm0-80h440q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-80q0-66-47-113t-113-47q-57 0-100 34t-56 89l-8 33h-42q-58 2-98 42.5T136-377q0 58 41 97.5t83 39.5Zm220-160Z"/></svg>'
+      });
+    }
+
+    // Instant Mix — only for music-type items
+    if (item.MediaType === 'Audio' || item.Type === 'MusicAlbum' || item.Type === 'MusicArtist' || item.Type === 'MusicGenre') {
       menuItems.push({
         id: 'instantmix',
         name: 'Instant Mix',
         icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47Z"/></svg>'
       });
     }
-    menuItems.push({
-      id: 'mediainfo',
-      name: 'Media Info',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>'
-    });
 
-    // Download (for playable items)
-    if (item.Type === 'Movie' || item.Type === 'Episode' || item.Type === 'Audio') {
+    // Media Info — only if MediaSources exist
+    if (item.MediaSources) {
+      menuItems.push({
+        id: 'mediainfo',
+        name: 'Media Info',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>'
+      });
+    }
+
+    // Download — requires EnableContentDownloading permission and CanDownload on item
+    if (policy.EnableContentDownloading && item.CanDownload) {
       menuItems.push({
         id: 'download',
         name: 'Download',
         icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg>'
       });
     }
-    menuItems.push({
-      id: 'refresh',
-      name: 'Refresh Metadata',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>'
-    });
 
-    // Admin options: Edit Metadata, Edit Images, Edit Subtitles, Identify
-    menuItems.push({
-      id: 'editmetadata',
-      name: 'Edit Metadata',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>'
-    });
-    menuItems.push({
-      id: 'editimages',
-      name: 'Edit Images',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/></svg>'
-    });
-    if (item.Type === 'Movie' || item.Type === 'Episode') {
+    // Delete — only if server says CanDelete is true
+    if (item.CanDelete) {
+      menuItems.push({
+        id: 'delete',
+        name: 'Delete',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>',
+        className: 'moonfin-more-item-danger'
+      });
+    }
+
+    // --- Divider before admin/edit options ---
+    var hasAdminItems = false;
+
+    // Edit Metadata — admin only
+    if (isAdmin && item.Type !== 'Program' && item.Type !== 'Timer' && item.Type !== 'SeriesTimer') {
+      hasAdminItems = true;
+      menuItems.push({
+        id: 'editmetadata',
+        name: 'Edit Metadata',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>'
+      });
+    }
+
+    // Edit Images — admin only
+    if (isAdmin && item.Type !== 'Timer' && item.Type !== 'SeriesTimer') {
+      hasAdminItems = true;
+      menuItems.push({
+        id: 'editimages',
+        name: 'Edit Images',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/></svg>'
+      });
+    }
+
+    // Edit Subtitles — admin or EnableSubtitleManagement, and Video media type
+    if ((isAdmin || policy.EnableSubtitleManagement) && item.MediaType === 'Video') {
+      hasAdminItems = true;
       menuItems.push({
         id: 'editsubtitles',
         name: 'Edit Subtitles',
         icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-160q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h560q33 0 56.5 23.5T840-720v480q0 33-23.5 56.5T760-160H200Zm0-80h560v-480H200v480Zm80-120h120v-80H280v80Zm200 0h200v-80H480v80ZM280-480h200v-80H280v80Zm280 0h120v-80H560v80Z"/></svg>'
       });
     }
-    menuItems.push({
-      id: 'identify',
-      name: 'Identify',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>'
-    });
+
+    // Identify — admin only, specific item types
+    var identifyTypes = ['Movie', 'Trailer', 'Series', 'BoxSet', 'Person', 'Book', 'MusicAlbum', 'MusicArtist', 'MusicVideo'];
+    if (isAdmin && identifyTypes.indexOf(item.Type) !== -1) {
+      hasAdminItems = true;
+      menuItems.push({
+        id: 'identify',
+        name: 'Identify',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>'
+      });
+    }
+
+    // Refresh Metadata — admin only
+    if (isAdmin) {
+      hasAdminItems = true;
+      menuItems.push({
+        id: 'refresh',
+        name: 'Refresh Metadata',
+        icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>'
+      });
+    }
+
+    // Open in Jellyfin — always available
     menuItems.push({
       id: 'opennative',
       name: 'Open in Jellyfin',
       icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/></svg>'
-    });
-
-    // Delete (admin, with confirmation)
-    menuItems.push({
-      id: 'delete',
-      name: 'Delete',
-      icon: '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>',
-      className: 'moonfin-more-item-danger'
     });
     var menuHtml = '<div class="moonfin-more-menu">' + '<h3 class="moonfin-more-title">' + (item.Name || 'Options') + '</h3>' + '<div class="moonfin-more-items">';
     for (var i = 0; i < menuItems.length; i++) {
@@ -3945,6 +4011,9 @@ var Details = {
     switch (actionId) {
       case 'addtoplaylist':
         this.showPlaylistPicker(item);
+        break;
+      case 'addtocollection':
+        this.showCollectionPicker(item);
         break;
       case 'mediainfo':
         this.showMediaInfo(item);
@@ -4146,6 +4215,76 @@ var Details = {
     }).catch(function (err) {
       console.error('[Moonfin] Details: Failed to fetch playlists', err);
       self.showToast('Failed to load playlists');
+    });
+  },
+  showCollectionPicker: function (item) {
+    var self = this;
+    var api = API.getApiClient();
+    var userId = api.getCurrentUserId();
+    var serverUrl = this.getServerUrl();
+    var headers = this.getAuthHeaders();
+
+    // Fetch user's collections
+    fetch(serverUrl + '/Users/' + userId + '/Items?IncludeItemTypes=BoxSet&Recursive=true&SortBy=SortName&SortOrder=Ascending', {
+      headers: headers
+    }).then(function (resp) {
+      return resp.json();
+    }).then(function (result) {
+      var collections = result.Items || [];
+      if (collections.length === 0) {
+        self.showToast('No collections found');
+        return;
+      }
+      var overlay = document.createElement('div');
+      overlay.className = 'moonfin-more-overlay';
+      var menuHtml = '<div class="moonfin-more-menu">' + '<h3 class="moonfin-more-title">Add to Collection</h3>' + '<div class="moonfin-more-items">';
+      for (var i = 0; i < collections.length; i++) {
+        menuHtml += '<button class="moonfin-more-item moonfin-focusable" data-collection-id="' + collections[i].Id + '" tabindex="0">' + '<span class="moonfin-more-item-icon"><svg viewBox="0 -960 960 960" fill="currentColor"><path d="M260-160q-91 0-155.5-63T40-377q0-78 47-139t121-71q17-91 90-147t163-56q100 0 172.5 69T707-554q71 5 122 57t51 127q0 75-52.5 127.5T700-190H260Z"/></svg></span>' + '<span class="moonfin-more-item-text">' + collections[i].Name + '</span>' + '</button>';
+      }
+      menuHtml += '</div></div>';
+      overlay.innerHTML = menuHtml;
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+          if (overlay._escHandler) document.removeEventListener('keydown', overlay._escHandler, true);
+          overlay.remove();
+        }
+      });
+      overlay._escHandler = function (e) {
+        if (e.key === 'Escape' || e.keyCode === 27 || e.keyCode === 461 || e.keyCode === 10009) {
+          e.preventDefault();
+          e.stopPropagation();
+          document.removeEventListener('keydown', overlay._escHandler, true);
+          overlay.remove();
+        }
+      };
+      document.addEventListener('keydown', overlay._escHandler, true);
+      var collBtns = overlay.querySelectorAll('[data-collection-id]');
+      for (var j = 0; j < collBtns.length; j++) {
+        (function (btn) {
+          btn.addEventListener('click', function () {
+            var collectionId = btn.getAttribute('data-collection-id');
+            fetch(serverUrl + '/Collections/' + collectionId + '/Items?Ids=' + item.Id, {
+              method: 'POST',
+              headers: headers
+            }).then(function () {
+              self.showToast('Added to collection');
+            }).catch(function (err) {
+              console.error('[Moonfin] Details: Failed to add to collection', err);
+              self.showToast('Failed to add to collection');
+            });
+            if (overlay._escHandler) document.removeEventListener('keydown', overlay._escHandler, true);
+            overlay.remove();
+          });
+        })(collBtns[j]);
+      }
+      document.body.appendChild(overlay);
+      setTimeout(function () {
+        var first = overlay.querySelector('.moonfin-more-item');
+        if (first) first.focus();
+      }, 50);
+    }).catch(function (err) {
+      console.error('[Moonfin] Details: Failed to fetch collections', err);
+      self.showToast('Failed to load collections');
     });
   },
   showMediaInfo: function (item) {
