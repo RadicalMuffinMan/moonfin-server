@@ -358,7 +358,14 @@ public class JellyseerrProxyController : ControllerBase
 
     private void EnsureProxySession(Guid userId)
     {
-        if (Request.Cookies.ContainsKey("moonfin_proxy")) return;
+        // If a valid proxy session cookie already exists, skip
+        var existingCookie = Request.Cookies["moonfin_proxy"];
+        if (!string.IsNullOrEmpty(existingCookie)
+            && _proxySessions.TryGetValue(existingCookie, out var existing)
+            && existing.Expiry > DateTimeOffset.UtcNow)
+        {
+            return;
+        }
 
         // Clean expired sessions periodically
         var now = DateTimeOffset.UtcNow;
@@ -369,6 +376,12 @@ public class JellyseerrProxyController : ControllerBase
                 if (kvp.Value.Expiry < now)
                     _proxySessions.TryRemove(kvp.Key, out _);
             }
+        }
+
+        // Remove stale cookie from dictionary if present
+        if (!string.IsNullOrEmpty(existingCookie))
+        {
+            _proxySessions.TryRemove(existingCookie, out _);
         }
 
         var token = Guid.NewGuid().ToString("N");

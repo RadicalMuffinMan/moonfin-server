@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-08T00:34:01.048Z
+// Moonfin Web Plugin - Built 2026-02-08T01:10:45.268Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -377,9 +377,9 @@ const Storage = {
         const serverUrl = ((_window$ApiClient = window.ApiClient) === null || _window$ApiClient === void 0 || (_window$ApiClient$ser = _window$ApiClient.serverAddress) === null || _window$ApiClient$ser === void 0 ? void 0 : _window$ApiClient$ser.call(_window$ApiClient)) || '';
         const response = yield fetch(`${serverUrl}/Moonfin/Ping`, {
           method: 'GET',
-          headers: {
+          headers: _objectSpread({
             'Content-Type': 'application/json'
-          }
+          }, _this4.getAuthHeader())
         });
         if (response.ok) {
           const data = API.toCamelCase(yield response.json());
