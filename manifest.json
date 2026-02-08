@@ -6,15 +6,15 @@
     "description": "Moonfin brings a modern TV-style UI to Jellyfin web. Features include: custom navbar, media bar with featured content, Jellyseerr integration, and cross-device settings synchronization. Works with Android TV, Roku, Tizen, webOS, and Web clients.\n\nRequires File Transformation plugin for automatic UI injection.",
     "owner": "RadicalMuffinMan",
     "category": "General",
-    "imageUrl": "https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/master/assets/logo.png",
+    "imageUrl": "https://raw.githubusercontent.com/Moonfin-Client/Plugin/master/assets/logo.png",
     "versions": [
       {
         "version": "1.0.0.0",
-        "changelog": "Bug fixes:\n- Fixed navbar width on desktop\n- Fixed media bar overlapping content\n- Fixed genres and favorites navigation\n- Replaced placeholder logo icon",
+        "changelog": "Initial release with core features: navbar, media bar, custom details screens, IMDBList integration, Jellyseerr integration, and settings sync.\n Hope you like it!",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.0.0.0.zip",
-        "checksum": "8D5F1EEDC702BDB768D570E6415F3FEC",
-        "timestamp": "2026-02-08T17:30:15",
+        "sourceUrl": "https://github.com/Moonfin-Client/Plugin/releases/download/v1.0.0/Moonfin.Server-1.0.0.0.zip",
+        "checksum": "746C43ECF496BF4B6CA2E5F6C167B012",
+        "timestamp": "2026-02-08T19:33:12",
         "dependencies": [
           "5e87cc92-571a-4d8d-8d98-d2d4147f9f90"
         ]
