@@ -1,4 +1,4 @@
-/* Moonfin Web Plugin CSS - Built 2026-02-07T23:46:09.492Z */
+/* Moonfin Web Plugin CSS - Built 2026-02-08T00:07:07.948Z */
 
 /* === styles/navbar.css === */
 /**
@@ -2353,6 +2353,12 @@ body.moonfin-tv-mode {
     background: #0a0a0a;
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.moonfin-details-panel::-webkit-scrollbar {
+    display: none;
 }
 
 /* Backdrop */
@@ -2841,17 +2847,21 @@ body.moonfin-navbar-active .moonfin-details-back {
 }
 
 .moonfin-section-scroll::-webkit-scrollbar {
-    height: 4px;
+    height: 0;
+    display: none;
 }
 
 .moonfin-section-scroll::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 2px;
+    background: transparent;
 }
 
 .moonfin-section-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 2px;
+    background: transparent;
+}
+
+.moonfin-section-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 /* Cast cards - circular */
@@ -3834,6 +3844,12 @@ body.moonfin-navbar-active .moonfin-details-back {
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.moonfin-more-menu::-webkit-scrollbar {
+    display: none;
 }
 
 .moonfin-more-title {
@@ -4247,6 +4263,119 @@ body.moonfin-navbar-active .moonfin-details-back {
 
     .moonfin-season-ep-overview {
         font-size: 15px;
+    }
+}
+
+/* Person details */
+.moonfin-person-backdrop {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+}
+
+.moonfin-person-header {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 40px;
+}
+
+.moonfin-person-photo-wrapper {
+    flex-shrink: 0;
+    width: 220px;
+}
+
+.moonfin-person-photo {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.moonfin-person-photo-placeholder {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moonfin-person-photo-placeholder svg {
+    width: 64px;
+    height: 64px;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.moonfin-person-info {
+    flex: 1;
+    min-width: 0;
+    padding-top: 16px;
+}
+
+.moonfin-person-info .moonfin-title {
+    margin-bottom: 12px;
+}
+
+.moonfin-person-info .moonfin-overview {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.moonfin-person-info .moonfin-overview::-webkit-scrollbar {
+    display: none;
+}
+
+.moonfin-person-film-year {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 2px;
+}
+
+.moonfin-poster-placeholder {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moonfin-poster-placeholder svg {
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Person responsive */
+@media (max-width: 768px) {
+    .moonfin-person-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .moonfin-person-photo-wrapper {
+        width: 160px;
+    }
+
+    .moonfin-person-info .moonfin-overview {
+        max-height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .moonfin-person-photo-wrapper {
+        width: 130px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .moonfin-person-photo-wrapper {
+        width: 260px;
     }
 }
 

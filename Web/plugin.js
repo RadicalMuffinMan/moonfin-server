@@ -1,4 +1,4 @@
-// Moonfin Web Plugin - Built 2026-02-07T23:46:09.491Z
+// Moonfin Web Plugin - Built 2026-02-08T00:07:07.947Z
 // Transpiled for webOS 4+ (Chrome 53+) compatibility
 (function() {
 "use strict";
@@ -1493,9 +1493,9 @@ const Navbar = {
   handleNavigation(action, btn) {
     var _this0 = this;
     return _asyncToGenerator(function* () {
-      // Close details overlay on any navigation
+      // Close details overlay on any navigation (skip history.back, navigation handles it)
       if (Details.isVisible) {
-        Details.hide();
+        Details.hide(true);
       }
 
       // Close Jellyseerr iframe on any navigation except toggling jellyseerr itself
@@ -3181,18 +3181,33 @@ var Details = {
       console.error('[Moonfin] Details: No API client');
       return;
     }
+
+    // Only push history state when first opening (not when navigating within overlay)
+    var wasAlreadyVisible = this.isVisible;
     this.container.classList.add('visible');
     this.isVisible = true;
     document.body.classList.add('moonfin-details-visible');
-
-    // Push history state so mobile back button closes the overlay
-    history.pushState({
-      moonfinDetails: true
-    }, '');
+    if (!wasAlreadyVisible) {
+      history.pushState({
+        moonfinDetails: true
+      }, '');
+    }
     var panel = this.container.querySelector('.moonfin-details-panel');
     panel.innerHTML = '<div class="moonfin-details-loading"><div class="moonfin-spinner"></div><span>Loading...</span></div>';
     this.fetchItem(api, itemId).then(function (item) {
       self.currentItem = item;
+      if (item.Type === 'Person') {
+        var personItemsPromise = self.fetchPersonItems(api, itemId).catch(function () {
+          return [];
+        });
+        return personItemsPromise.then(function (personItems) {
+          self.renderPersonDetails(item, personItems);
+          setTimeout(function () {
+            var firstBtn = panel.querySelector('.moonfin-btn, .moonfin-btn-wrapper, .moonfin-focusable');
+            if (firstBtn) firstBtn.focus();
+          }, 100);
+        });
+      }
 
       // Fetch additional data in parallel
       var similarPromise = self.fetchSimilar(api, itemId).catch(function () {
@@ -3266,6 +3281,18 @@ var Details = {
     var serverUrl = api._serverAddress || api.serverAddress();
     var headers = this.getAuthHeaders();
     return fetch(serverUrl + '/Shows/' + seriesId + '/Episodes?UserId=' + userId + '&SeasonId=' + seasonId + '&Fields=Overview,PrimaryImageAspectRatio', {
+      headers: headers
+    }).then(function (resp) {
+      return resp.json();
+    }).then(function (result) {
+      return result.Items || [];
+    });
+  },
+  fetchPersonItems: function (api, personId) {
+    var userId = api.getCurrentUserId();
+    var serverUrl = api._serverAddress || api.serverAddress();
+    var headers = this.getAuthHeaders();
+    return fetch(serverUrl + '/Users/' + userId + '/Items?PersonIds=' + personId + '&Recursive=true&IncludeItemTypes=Movie,Series&SortBy=PremiereDate,SortName&SortOrder=Descending&Fields=PrimaryImageAspectRatio,Overview&Limit=50', {
       headers: headers
     }).then(function (resp) {
       return resp.json();
@@ -3522,8 +3549,7 @@ var Details = {
     for (var l = 0; l < personCards.length; l++) {
       (function (card) {
         card.addEventListener('click', function () {
-          self.hide();
-          window.location.hash = '#/details?id=' + card.getAttribute('data-person-id');
+          self.showDetails(card.getAttribute('data-person-id'), 'Person');
         });
       })(personCards[l]);
     }
@@ -3715,17 +3741,16 @@ var Details = {
     var headers = this.getAuthHeaders();
     switch (action) {
       case 'play':
-        this.hide();
-        // Resume from last position if available
+        this.hide(true);
         var resumeTicks = item.UserData && item.UserData.PlaybackPositionTicks ? item.UserData.PlaybackPositionTicks : 0;
         this.playItem(item.Id, resumeTicks);
         break;
       case 'restart':
-        this.hide();
+        this.hide(true);
         this.playItem(item.Id, 0);
         break;
       case 'shuffle':
-        this.hide();
+        this.hide(true);
         this.shuffleItem(item.Id);
         break;
       case 'favorite':
@@ -3769,7 +3794,6 @@ var Details = {
         });
         break;
       case 'series':
-        this.hide();
         Details.showDetails(item.SeriesId, 'Series');
         break;
       case 'more':
@@ -3944,7 +3968,7 @@ var Details = {
         });
         break;
       case 'instantmix':
-        this.hide();
+        this.hide(true);
         var instantMixUrl = serverUrl + '/Items/' + item.Id + '/InstantMix?UserId=' + api.getCurrentUserId() + '&Limit=50';
         fetch(instantMixUrl, {
           headers: headers
@@ -3969,23 +3993,23 @@ var Details = {
         document.body.removeChild(a);
         break;
       case 'editmetadata':
-        this.hide();
+        this.hide(true);
         API.navigateTo('/edititemmetadata?id=' + item.Id);
         break;
       case 'editimages':
-        this.hide();
+        this.hide(true);
         API.navigateTo('/edititemimages?id=' + item.Id);
         break;
       case 'editsubtitles':
-        this.hide();
+        this.hide(true);
         API.navigateTo('/edititemsubtitles?id=' + item.Id);
         break;
       case 'identify':
-        this.hide();
+        this.hide(true);
         API.navigateTo('/itemidentify?id=' + item.Id);
         break;
       case 'opennative':
-        this.hide();
+        this.hide(true);
         API.navigateTo('/details?id=' + item.Id);
         break;
       case 'delete':
@@ -4297,12 +4321,12 @@ var Details = {
           }
         }
         var playTarget = firstUnwatched || episodes[0];
-        self.hide();
+        self.hide(true);
         self.playItem(playTarget.Id, playTarget.UserData && playTarget.UserData.PlaybackPositionTicks ? playTarget.UserData.PlaybackPositionTicks : 0);
         break;
       case 'shuffle':
         if (episodes.length === 0) return;
-        self.hide();
+        self.hide(true);
         var ids = episodes.map(function (ep) {
           return ep.Id;
         });
@@ -4377,15 +4401,111 @@ var Details = {
         break;
     }
   },
-  hide: function (fromPopstate) {
+  renderPersonDetails: function (item, personItems) {
+    var self = this;
+    var panel = this.container.querySelector('.moonfin-details-panel');
+    var api = API.getApiClient();
+    var serverUrl = api._serverAddress;
+
+    // Person photo
+    var photoTag = item.ImageTags ? item.ImageTags.Primary : null;
+    var photoUrl = photoTag ? serverUrl + '/Items/' + item.Id + '/Images/Primary?maxHeight=500&quality=90' : '';
+
+    // Bio info
+    var birthDate = item.PremiereDate ? new Date(item.PremiereDate) : null;
+    var deathDate = item.EndDate ? new Date(item.EndDate) : null;
+    var birthPlace = item.ProductionLocations && item.ProductionLocations.length > 0 ? item.ProductionLocations[0] : '';
+    var infoItems = [];
+    if (birthDate) {
+      var birthStr = birthDate.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      if (deathDate) {
+        var deathStr = deathDate.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        });
+        infoItems.push('<span class="moonfin-info-item">' + birthStr + ' — ' + deathStr + '</span>');
+      } else {
+        var age = Math.floor((Date.now() - birthDate.getTime()) / 31557600000);
+        infoItems.push('<span class="moonfin-info-item">Born ' + birthStr + ' (age ' + age + ')</span>');
+      }
+    }
+    if (birthPlace) {
+      infoItems.push('<span class="moonfin-info-item">' + birthPlace + '</span>');
+    }
+    var infoRowHtml = infoItems.length > 0 ? '<div class="moonfin-info-row">' + infoItems.join('') + '</div>' : '';
+
+    // Split filmography into movies and series
+    var movies = [];
+    var series = [];
+    for (var i = 0; i < personItems.length; i++) {
+      if (personItems[i].Type === 'Movie') movies.push(personItems[i]);else if (personItems[i].Type === 'Series') series.push(personItems[i]);
+    }
+
+    // Build filmography cards
+    var buildFilmCards = function (items) {
+      return items.map(function (fi) {
+        var fiPosterTag = fi.ImageTags ? fi.ImageTags.Primary : null;
+        var fiPosterUrl = fiPosterTag ? serverUrl + '/Items/' + fi.Id + '/Images/Primary?maxHeight=400&quality=80' : '';
+        var fiYear = fi.ProductionYear || (fi.PremiereDate ? new Date(fi.PremiereDate).getFullYear() : '');
+        return '<div class="moonfin-similar-card moonfin-focusable" data-item-id="' + fi.Id + '" data-type="' + fi.Type + '" tabindex="0">' + '<div class="moonfin-similar-poster">' + (fiPosterUrl ? '<img src="' + fiPosterUrl + '" alt="" loading="lazy">' : '<div class="moonfin-poster-placeholder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/></svg></div>') + '</div>' + '<span class="moonfin-similar-title">' + fi.Name + '</span>' + (fiYear ? '<span class="moonfin-person-film-year">' + fiYear + '</span>' : '') + '</div>';
+      }).join('');
+    };
+    var moviesHtml = movies.length > 0 ? '<div class="moonfin-section">' + '<div class="moonfin-section-header">' + '<h3 class="moonfin-section-title">Movies (' + movies.length + ')</h3>' + '<div class="moonfin-section-arrows">' + '<button class="moonfin-section-arrow moonfin-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' + '<button class="moonfin-section-arrow moonfin-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' + '</div>' + '</div>' + '<div class="moonfin-section-scroll">' + buildFilmCards(movies) + '</div>' + '</div>' : '';
+    var seriesHtml = series.length > 0 ? '<div class="moonfin-section">' + '<div class="moonfin-section-header">' + '<h3 class="moonfin-section-title">Series (' + series.length + ')</h3>' + '<div class="moonfin-section-arrows">' + '<button class="moonfin-section-arrow moonfin-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' + '<button class="moonfin-section-arrow moonfin-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' + '</div>' + '</div>' + '<div class="moonfin-section-scroll">' + buildFilmCards(series) + '</div>' + '</div>' : '';
+    panel.innerHTML = '<div class="moonfin-details-backdrop moonfin-person-backdrop"></div>' + '<div class="moonfin-details-gradient"></div>' + '<button class="moonfin-details-back moonfin-focusable" title="Back" tabindex="0">' + '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>' + '</button>' + '<div class="moonfin-details-content">' + '<div class="moonfin-person-header">' + '<div class="moonfin-person-photo-wrapper">' + (photoUrl ? '<img class="moonfin-person-photo" src="' + photoUrl + '" alt="">' : '<div class="moonfin-person-photo moonfin-person-photo-placeholder"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg></div>') + '</div>' + '<div class="moonfin-person-info">' + '<h1 class="moonfin-title">' + item.Name + '</h1>' + infoRowHtml + (item.Overview ? '<p class="moonfin-overview">' + item.Overview + '</p>' : '') + '</div>' + '</div>' + '<div class="moonfin-sections">' + moviesHtml + seriesHtml + '</div>' + '</div>';
+    this.setupPersonPanelListeners(panel, item);
+  },
+  setupPersonPanelListeners: function (panel, item) {
+    var self = this;
+    var backBtn = panel.querySelector('.moonfin-details-back');
+    if (backBtn) backBtn.addEventListener('click', function () {
+      self.hide();
+    });
+
+    // Filmography cards
+    var filmCards = panel.querySelectorAll('.moonfin-similar-card');
+    for (var i = 0; i < filmCards.length; i++) {
+      (function (card) {
+        card.addEventListener('click', function () {
+          self.showDetails(card.getAttribute('data-item-id'), card.getAttribute('data-type'));
+        });
+      })(filmCards[i]);
+    }
+
+    // Scroll arrows
+    var arrowBtns = panel.querySelectorAll('.moonfin-section-arrow');
+    for (var m = 0; m < arrowBtns.length; m++) {
+      (function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var section = btn.closest('.moonfin-section');
+          if (!section) return;
+          var scrollContainer = section.querySelector('.moonfin-section-scroll');
+          if (!scrollContainer) return;
+          var scrollAmount = scrollContainer.clientWidth * 0.7;
+          var isLeft = btn.classList.contains('moonfin-arrow-left');
+          scrollContainer.scrollBy({
+            left: isLeft ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+          });
+        });
+      })(arrowBtns[m]);
+    }
+  },
+  hide: function (skipHistoryBack) {
     if (!this.isVisible) return;
     this.container.classList.remove('visible');
     this.isVisible = false;
     this.currentItem = null;
     document.body.classList.remove('moonfin-details-visible');
 
-    // Pop the history entry we pushed, unless we're already handling popstate
-    if (!fromPopstate) {
+    // Pop the history entry we pushed, unless caller will handle navigation
+    if (!skipHistoryBack) {
       try {
         history.back();
       } catch (e) {}
@@ -4582,9 +4702,9 @@ const Plugin = {
     });
   },
   onPageChange() {
-    // Close details overlay on any page navigation
+    // Close details overlay on any page navigation (skip history.back since page already navigated)
     if (Details.isVisible) {
-      Details.hide();
+      Details.hide(true);
     }
 
     // Close Jellyseerr iframe on any page navigation
@@ -4640,19 +4760,50 @@ const Plugin = {
 
     // Inject Moonfin link on preferences page
     if ((window.location.hash || '').toLowerCase().includes('mypreferencesmenu')) {
-      this.addUserPreferencesLink();
+      // Retry several times since page content loads async
+      var self = this;
+      var attempts = 0;
+      var tryInject = function () {
+        self.addUserPreferencesLink();
+        attempts++;
+        if (attempts < 5 && !document.querySelector('.moonfin-prefs-link')) {
+          setTimeout(tryInject, 300);
+        }
+      };
+      tryInject();
     }
   },
   addUserPreferencesLink() {
-    // Don't add if already present on the current page
-    var prefsPage = document.querySelector('#myPreferencesMenuPage:not(.hide)');
+    // Try multiple selectors for different Jellyfin versions
+    var prefsPage = document.querySelector('#myPreferencesMenuPage:not(.hide)') || document.querySelector('.myPreferencesMenuPage:not(.hide)') || document.querySelector('[data-page="mypreferencesmenu"]:not(.hide)');
+
+    // Fallback: look for the visible page container with preference items
+    if (!prefsPage) {
+      var pages = document.querySelectorAll('.page:not(.hide)');
+      for (var p = 0; p < pages.length; p++) {
+        if (pages[p].querySelector('.listItem-border, .listItem')) {
+          var hash = (window.location.hash || '').toLowerCase();
+          if (hash.includes('mypreferencesmenu')) {
+            prefsPage = pages[p];
+            break;
+          }
+        }
+      }
+    }
     if (!prefsPage) return;
     if (prefsPage.querySelector('.moonfin-prefs-link')) return;
 
-    // Find the last listItem-border to insert after
+    // Find menu items - try multiple selectors
     var menuItems = prefsPage.querySelectorAll('.listItem-border');
+    if (menuItems.length === 0) {
+      menuItems = prefsPage.querySelectorAll('.listItem');
+    }
     if (menuItems.length === 0) return;
     var insertAfter = menuItems[menuItems.length - 1];
+    // Walk up to the direct child container if needed
+    while (insertAfter.parentNode && insertAfter.parentNode !== prefsPage && !insertAfter.parentNode.querySelector('.listItem-border, .listItem')) {
+      insertAfter = insertAfter.parentNode;
+    }
     if (!insertAfter || !insertAfter.parentNode) return;
 
     // Match Jellyfin's native structure: LinkButton > div.listItem > icon + body
@@ -4676,12 +4827,11 @@ const Plugin = {
       if (throttleTimer) return;
       throttleTimer = setTimeout(function () {
         throttleTimer = null;
-        // Only inject if on the preferences page
         var hash = window.location.hash.toLowerCase();
         if (hash.includes('mypreferencesmenu')) {
           self.addUserPreferencesLink();
         }
-      }, 500);
+      }, 200);
     });
     this._domObserver.observe(document.body, {
       childList: true,
