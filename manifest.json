@@ -16,6 +16,15 @@
         "checksum": "8E21DFB895D26D8C74BCF6C82839ABD0",
         "timestamp": "2026-02-09T17:46:48",
         "dependencies": []
+      },
+      {
+        "version": "1.1.0.0",
+        "changelog": "Bug fixes:\n- Fixed navbar width on desktop\n- Fixed media bar overlapping content\n- Fixed genres and favorites navigation\n- Replaced placeholder logo icon",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.1.0.0.zip",
+        "checksum": "AD47529CCBC858587E8DDD0B46E6A3DE",
+        "timestamp": "2026-02-09T17:47:12",
+        "dependencies": []
       }
     ]
   }
