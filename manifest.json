@@ -1,7 +1,7 @@
 [
   {
     "guid": "8c5d0e91-4f2a-4b6d-9e3f-1a7c8d9e0f2b",
-    "name": "Moonfin",
+    "name": "Moonfin-Beta",
     "overview": "Custom UI and settings sync for Jellyfin",
     "description": "Moonfin brings a modern TV-style UI to Jellyfin web. Features include: custom navbar, media bar with featured content, Jellyseerr integration, and cross-device settings synchronization. Works with Android TV, Roku, Tizen, webOS, and Web clients.\n\nRequires File Transformation plugin for automatic UI injection.",
     "owner": "RadicalMuffinMan",
