@@ -9,12 +9,12 @@
     "imageUrl": "https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/master/assets/logo.png",
     "versions": [
       {
-        "version": "1.8.1.0",
+        "version": "1.8.2.0",
         "changelog": "Bug fixes:\n- Fixed navbar width on desktop\n- Fixed media bar overlapping content\n- Fixed genres and favorites navigation\n- Replaced placeholder logo icon",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.8.1.0.zip",
-        "checksum": "7B8C49B2D56C554818D402CD7D8DD583",
-        "timestamp": "2026-04-07T18:09:53",
+        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.8.2.0.zip",
+        "checksum": "A3E7F89AA32EE80B1DC9F1D177796033",
+        "timestamp": "2026-04-12T03:14:37",
         "dependencies": []
       }
     ]
