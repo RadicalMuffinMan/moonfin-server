@@ -13,8 +13,8 @@
         "changelog": "TESTING",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.1.0/Moonfin.Server-1.8.1.0.zip",
-        "checksum": "EE52363C2CF596EDC7F6AD5FAB2FB912",
-        "timestamp": "2026-04-13T21:46:18",
+        "checksum": "F4608A8087DD1F4267F351113AC2D64A",
+        "timestamp": "2026-04-17T17:48:50",
         "dependencies": []
       }
     ]
