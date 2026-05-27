@@ -9,11 +9,11 @@
     "imageUrl": "https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/master/assets/logo.png",
     "versions": [
       {
-        "version": "1.8.1.0",
+        "version": "1.8.2.0",
         "changelog": "TESTING",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/1.1.0/Moonfin.Server-1.8.1.0.zip",
-        "checksum": "F7FD03277D3819A609F884FB28D1DE34",
+        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/1.0.0/Moonfin.Server-1.8.2.0.zip",
+        "checksum": "2737383E73231045290B23C2224A3D98",
         "timestamp": "2026-04-17T20:42:28",
         "dependencies": []
       }
