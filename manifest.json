@@ -9,29 +9,20 @@
     "imageUrl": "https://raw.githubusercontent.com/RadicalMuffinMan/moonfin-server/master/assets/logo.png",
     "versions": [ 
       {
+        "version": "1.9.1.4",
+        "changelog": "TESTING",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.9.1.4.zip",
+        "checksum": "206EACAAA144F65C5BC2DC1A615A100E",
+        "timestamp": "2026-04-19T19:32:19",
+        "dependencies": []
+      },
+      {
         "version": "1.9.1.3",
         "changelog": "TESTING",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.9.1.3.zip",
         "checksum": "BE9B39F9AEF5E023F502C6A552DECEBB",
-        "timestamp": "2026-04-19T19:32:19",
-        "dependencies": []
-      },
-      {
-        "version": "1.9.1.2",
-        "changelog": "TESTING",
-        "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.9.1.2.zip",
-        "checksum": "3FEEB7D4D20E1371B55BD12C677B8E70",
-        "timestamp": "2026-04-19T19:32:19",
-        "dependencies": []
-      },
-      {
-        "version": "1.9.1.1",
-        "changelog": "TESTING",
-        "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/RadicalMuffinMan/moonfin-server/releases/download/v1.0.0/Moonfin.Server-1.9.1.1.zip",
-        "checksum": "8DE1DB392F052B5CF35B464B2B619671",
         "timestamp": "2026-04-19T19:32:19",
         "dependencies": []
       }
